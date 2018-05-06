@@ -86,7 +86,7 @@ where sgn(n) is the sign of n, the gradient of the normal.
 
 ---
 
-# Known dificiency
+# Known deficiency
 
 The circle will always appear ABOVE the graph, which sometimes causes weird "jumps". Example:
 
