@@ -32,7 +32,7 @@ Note: I made a sign adjustment in this case to ensure that the circle will alway
 
 ## Assumption
 
-The radius of curvature at any point on the parametric equation is greater than the circle rolling on it. If this condition is not met, then the circle may appear to be overlapped with the parametric equation. For example:
+The radius of curvature at any point on the parametric equation is greater than the radius of the circle rolling on it. If this condition is not met, then the circle may appear to be overlapped with the parametric equation. For example:
 
 <img src="overlap.svg" width="400px">
 
