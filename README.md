@@ -62,7 +62,7 @@ Since
 
 The coordinates of that point on the circumference can be found:
 
-<img src="http://latex.codecogs.com/svg.latex?\large&space;\large&space;E''&space;(X_{B'}&space;&plus;&space;r\cos(\angle&space;FBE&space;-&space;\frac{L_{AA'}}{r}),&space;Y_{B'}&space;&plus;&space;r\cos(\angle&space;FBE&space;-&space;\frac{L_{AA'}}{r}))" title="\large \large E'' (X_{B'} + r\cos(\angle FBE - \frac{L_{AA'}}{r}), Y_{B'} + r\cos(\angle FBE - \frac{L_{AA'}}{r}))" />
+<img src="http://latex.codecogs.com/svg.latex?\large&space;\large&space;\large&space;E''&space;(X_{B'}&space;&plus;&space;r\cos(\angle&space;FBE&space;-&space;\frac{L_{AA'}}{r}),&space;Y_{B'}&space;&plus;&space;r\sin(\angle&space;FBE&space;-&space;\frac{L_{AA'}}{r}))" title="\large \large \large E'' (X_{B'} + r\cos(\angle FBE - \frac{L_{AA'}}{r}), Y_{B'} + r\sin(\angle FBE - \frac{L_{AA'}}{r}))" />
 
 ### Position of the center of the circle
 
