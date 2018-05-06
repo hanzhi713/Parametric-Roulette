@@ -1,6 +1,8 @@
 # Parametric Roulette
 
-## Drawing of the locus of a point on a circle rolling on an arbitrary parametric function, implemented using Geogebra
+## Draw the locus of a point on a circle rolling on an arbitrary parametric function, implemented using Geogebra
+
+Note: Originally I planned to implement this using JavaScript as an extension and generalization to my "Flowers-curve" repository (which is about drawing the locus of a point on circle rolling along another circle). However, I was unable to find a JavaScript library that can evaluate the definite integral for the arc length function accurately and efficiently. Therefore, I made this prototype with Geogebra instead. If you found a suitable JS calculus library, please notify me. 
 
 ---
 
