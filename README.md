@@ -2,11 +2,11 @@
 
 ## Draw the locus of a point on a circle rolling on an arbitrary parametric function, implemented separately using Geogebra and JavaScript
 
-Note: Originally I planned to implement this using JavaScript as an extension and generalization to my "Flowers-curve" repository (which is about drawing the locus of a point on circle rolling along another circle). However, I was unable to find a JavaScript library that can evaluate the definite integral for the arc length function accurately and efficiently. Therefore, I made this prototype with Geogebra instead. 
+Note: Originally I planned to implement this using JavaScript as an extension and generalization to my "Flowers-curve" repository (which is about drawing the locus of a point on circle rolling along another circle). However, I was unable to find a JavaScript library that can evaluate the definite integral for the arc length function accurately and efficiently. Therefore, I firstly made te prototype with Geogebra. The geogebra file could be found in the [doc](https://github.com/hanzhi713/Parametric-Roulette/tree/master/doc) folder.
 
 Now, the JS drawer is successfully implemented as I found Nerdamer for symbolic differentiation and I used the trapezoidal rule for numerical integration. To use the online drawer, please visit https://hanzhi713.github.io/Parametric-Roulette/index.html
 
-Instructions and documentations are available in my [wiki](https://github.com/hanzhi713/Parametric-Roulette/wiki).
+The interface of my JavaScript drawer is adapted from my [Spirograph drawer](https://github.com/hanzhi713/Flowers-Curve). New inputs are annotated by tooltips.
 
 ---
 
@@ -92,8 +92,10 @@ where sgn(n) is the sign of n, the gradient of the normal.
 
 # Known deficiency
 
-The circle will always appear ABOVE the graph, which sometimes causes weird "jumps". Example:
+The circle will always appear ABOVE the graph, which may cause weird "jumps" at the point where the gradient is undefined. Example:
 
 <img src="http://latex.codecogs.com/svg.latex?\large&space;\large&space;\left\{&space;\begin{array}{lr}&space;x=&space;16\sin^3(t)&space;&&space;\\&space;y=&space;13\cos(t)&space;-&space;5\cos(2t)&space;-&space;2\cos(3t)&space;-&space;\cos(4t)&space;\end{array}&space;\right.&space;t\in(-\pi,\pi]" title="\large \large \left\{ \begin{array}{lr} x= 16\sin^3(t) & \\ y= 13\cos(t) - 5\cos(2t) - 2\cos(3t) - \cos(4t) \end{array} \right. t\in(-\pi,\pi]" />
 
 <img src="doc/heart.svg" width="600px">
+
+This problem could be resolved by manually adjusting the sign of delta X, which could be achieved in my JavaScript drawer (not available in Geogebra implementation though).

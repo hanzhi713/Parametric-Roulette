@@ -1,6 +1,8 @@
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip()
-});
+if (typeof (Math.sign) !== "function")
+    Math.sign = function(x){
+        return x === 0 ? 0 : x > 0 ? 1 : -1;
+    };
+
 var TwoPI = Math.PI * 2;
 
 var topCanvas = document.getElementById('canvas-top');
@@ -21,6 +23,8 @@ var drawingDelayParam = document.getElementById('delay');
 var skeletonCheck = document.getElementById('showSk');
 var functionCheck = document.getElementById('showFunc');
 var reverseDirectionCheck = document.getElementById('direction');
+
+var radiusMultipleParam = document.getElementById('radiusMultiple');
 
 var dotSizeMinParam = document.getElementById('dotSizeMin');
 var dotSizeMaxParam = document.getElementById('dotSizeMax');
@@ -74,6 +78,7 @@ window.onload = function (ev) {
             };
         })(i, effectors[i].onchange);
     }
+    $('[data-toggle="tooltip"]').tooltip();
 };
 
 function disableDrawing() {
@@ -228,6 +233,8 @@ function getConfigJSON() {
         drawingDelay: +drawingDelayParam.value,
         reverseDirection: reverseDirectionCheck.checked,
 
+        radiusMultiple : +radiusMultipleParam.value,
+
         dots: dots,
 
         dotSizeMin: +dotSizeMinParam.value,
@@ -280,6 +287,8 @@ function parseConfigJSON(json) {
         drawingDelayParam.value = obj.drawingDelay === undefined ? 2 : obj.drawingDelay;
         reverseDirectionCheck.checked = obj.reverseDirection === undefined ? false : obj.reverseDirection;
 
+        radiusMultipleParam.value = obj.radiusMultiple === undefined ? 10 : obj.radiusMultiple;
+
         dots = obj.dots;
 
         dotSizeMinParam.value = obj.dotSizeMin === undefined ? 1 : obj.dotSizeMin;
@@ -318,15 +327,14 @@ function parseConfigJSON(json) {
             cutPoints = obj.cutPoints;
             var g = document.getElementById('sign-adjust');
             g.innerHTML = '';
-            var counter = 0;
             for (var i = 0; i < cutPoints.length; i++) {
                 var e = document.createElement('button');
-                e.id = 'c' + counter;
+                e.id = 'c' + i;
                 e.type = 'button';
                 e.className = 'btn btn-secondary btn-sm';
                 e.innerHTML = cutPoints[i].toFixed(2) + (obj.cutPointSigns[i] === 1 ? '+' : '-');
-                g.appendChild(e);
-
+                e.title = 'Change the sign between ' + ((i - 1) < 0 ? +t1Param.value : cutPoints[i - 1].toFixed(3)) + ' and ' + cutPoints[i].toFixed(3);
+                e.setAttribute('data-toggle', 'tooltip');
                 e.onclick = function (ev) {
                     var ih = ev.target.innerHTML;
                     var sign = ih[ih.length - 1];
@@ -336,7 +344,7 @@ function parseConfigJSON(json) {
                         ev.target.innerHTML = ih.substring(0, ih.length - 1) + '+';
                     saveConfigToBrowser();
                 };
-                counter++;
+                g.appendChild(e);
             }
             var topCxt = topCanvas.getContext('2d');
             var bottomCxt = bottomCanvas.getContext('2d');
@@ -758,20 +766,23 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
             ev.target.innerHTML = ih.substring(0, ih.length - 1) + '+';
         saveConfigToBrowser();
     };
-    for (var i in cutPoints) {
+    for (var i = 0; i < cutPoints.length; i++) {
         var e = document.createElement('button');
         e.id = 'c' + i;
         e.type = 'button';
         e.className = 'btn btn-secondary btn-sm';
         e.innerHTML = cutPoints[i].toFixed(2) + '+';
-        g.appendChild(e);
+        e.setAttribute('data-toggle', 'tooltip');
+        e.title = 'Change the sign between ' + ((i - 1) < 0 ? t1 : cutPoints[i - 1].toFixed(3)) + ' and ' + cutPoints[i].toFixed(3);
         e.onclick = handler;
+        g.appendChild(e);
     }
+    $('[data-toggle="tooltip"]').tooltip();
     return locations;
 }
 
 function generateRadius() {
-    var multiple = +document.getElementById('radiusMultiple').value;
+    var multiple = +radiusMultipleParam.value;
     var exps = buildNecessaryExpressions(nerdamer(xParam.value), nerdamer(yParam.value));
     var t1 = +t1Param.value, t2 = +t2Param.value;
     var arcLength = integrate(exps[2], t1, t2, Math.round((t2 - t1) / (+drawingStepParam.value)) + 10);
