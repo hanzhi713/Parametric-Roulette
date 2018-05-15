@@ -1,8 +1,12 @@
 # Parametric Roulette
 
-## Draw the locus of a point on a circle rolling on an arbitrary parametric function, implemented using Geogebra
+## Draw the locus of a point on a circle rolling on an arbitrary parametric function, implemented separately using Geogebra and JavaScript
 
-Note: Originally I planned to implement this using JavaScript as an extension and generalization to my "Flowers-curve" repository (which is about drawing the locus of a point on circle rolling along another circle). However, I was unable to find a JavaScript library that can evaluate the definite integral for the arc length function accurately and efficiently. Therefore, I made this prototype with Geogebra instead. If you found a suitable JS calculus library, please notify me. 
+Note: Originally I planned to implement this using JavaScript as an extension and generalization to my "Flowers-curve" repository (which is about drawing the locus of a point on circle rolling along another circle). However, I was unable to find a JavaScript library that can evaluate the definite integral for the arc length function accurately and efficiently. Therefore, I made this prototype with Geogebra instead. 
+
+Now, the JS drawer is successfully implemented as I found Nerdamer for symbolic differentiation and I used the trapezoidal rule for numerical integration. To use the online drawer, please visit https://hanzhi713.github.io/Parametric-Roulette/index.html
+
+Instructions and documentations are available in my [wiki](https://github.com/hanzhi713/Parametric-Roulette/wiki).
 
 ---
 
@@ -10,7 +14,7 @@ Note: Originally I planned to implement this using JavaScript as an extension an
 
 <img src="http://latex.codecogs.com/svg.latex?\inline&space;\dpi{200}&space;\large&space;\left\{&space;\begin{array}{lr}&space;x=&space;t&space;&&space;\\&space;y=&space;\frac{t^2}{10}&space;\end{array}&space;\right.&space;-30\leq&space;t\leq&space;30" title="\large \left\{ \begin{array}{lr} x= t & \\ y= \frac{t^2}{10} \end{array} \right. -30\leq t\leq 30" />
 
-<img src="on-parabola.svg" width="600px">
+<img src="doc/on-parabola.svg" width="600px">
 
 ## Example 2: Rolling on the sine function
 
