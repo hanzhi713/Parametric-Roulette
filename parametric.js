@@ -676,7 +676,11 @@ function clearBottom() {
 
 function clearFunc() {
     var cxt = funcCanvas.getContext('2d');
-    funcCanvas.height = funcCanvas.height;
+    funcCanvas.height++;
+    funcCanvas.height--;
+    // cxt.setTransform(1, 0, 0, 1, 0, 0);
+    // cxt.clearRect(0, 0, funcCanvas.width, funcCanvas.height);
+    // cxt.setTransform(1, 0, 0, -1, 320, 320);
 }
 
 /**
