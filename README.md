@@ -16,13 +16,13 @@ Note: Originally I planned to implement this using JavaScript as an extension an
 
 <img src="http://latex.codecogs.com/svg.latex?\inline&space;\dpi{200}&space;\large&space;\left\{&space;\begin{array}{lr}&space;x=&space;t&space;&&space;\\&space;y=&space;5\sin(\frac{t}{5})&space;\end{array}&space;\right.&space;-30\leq&space;t\leq&space;30" title="\large \left\{ \begin{array}{lr} x= t & \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30" />
 
-<img src="on-sin(x).svg" width="600px">
+<img src="doc/on-sin(x).svg" width="600px">
 
 ## Example 3: Rolling along an ellipse
 
 <img src="http://latex.codecogs.com/svg.latex?\inline&space;\dpi{200}&space;\large&space;\left\{&space;\begin{array}{lr}&space;x=&space;10\cos(t)&space;&&space;\\&space;y=&space;6\sin(t)&space;\end{array}&space;\right.&space;-\pi<&space;t\leq&space;\pi" title="\large \left\{ \begin{array}{lr} x= 10\cos(t) & \\ y= 6\sin(t) \end{array} \right. -\pi< t\leq \pi" />
 
-<img src="on-ellipse.svg" width="600px">
+<img src="doc/on-ellipse.svg" width="600px">
 
 Note: I made a sign adjustment in this case to ensure that the circle will always appear outside the ellipse.
 
@@ -34,7 +34,7 @@ Note: I made a sign adjustment in this case to ensure that the circle will alway
 
 The radius of curvature at any point on the parametric equation is greater than the radius of the circle rolling on it. If this condition is not met, then the circle may appear to be overlapped with the parametric equation. For example:
 
-<img src="overlap.svg" width="400px">
+<img src="doc/overlap.svg" width="400px">
 
 ## Computation
 
@@ -42,7 +42,7 @@ Suppose there is a circle with radius r is rolling on the parametric equation de
 
 <img src="http://latex.codecogs.com/svg.latex?\inline&space;\large&space;\left\{&space;\begin{array}{lr}&space;x=&space;f(t)&space;&&space;\\&space;y=&space;g(t)&space;\end{array}&space;\right.&space;a\leq&space;t\leq&space;b" title="\large \left\{ \begin{array}{lr} x= f(t) & \\ y= g(t) \end{array} \right. a\leq t\leq b" />
 
-<img src="demo.svg" width="780px">
+<img src="doc/demo.svg" width="780px">
 
 ### Calculation of the radians (angle) rotated:
 
@@ -92,4 +92,4 @@ The circle will always appear ABOVE the graph, which sometimes causes weird "jum
 
 <img src="http://latex.codecogs.com/svg.latex?\large&space;\large&space;\left\{&space;\begin{array}{lr}&space;x=&space;16\sin^3(t)&space;&&space;\\&space;y=&space;13\cos(t)&space;-&space;5\cos(2t)&space;-&space;2\cos(3t)&space;-&space;\cos(4t)&space;\end{array}&space;\right.&space;t\in(-\pi,\pi]" title="\large \large \left\{ \begin{array}{lr} x= 16\sin^3(t) & \\ y= 13\cos(t) - 5\cos(2t) - 2\cos(3t) - \cos(4t) \end{array} \right. t\in(-\pi,\pi]" />
 
-<img src="heart.svg" width="600px">
+<img src="doc/heart.svg" width="600px">
