@@ -6,7 +6,7 @@ Note: Originally I planned to implement this using JavaScript as an extension an
 
 Now, the JS drawer is successfully implemented as I found Nerdamer for symbolic differentiation and I used the trapezoidal rule for numerical integration. To use the online drawer, please visit https://hanzhi713.github.io/Parametric-Roulette/index.html
 
-The interface of my JavaScript drawer is adapted from my [Spirograph drawer](https://github.com/hanzhi713/Flowers-Curve). New inputs are annotated by tooltips.
+The interface of my JavaScript drawer is adapted from my [Spirograph drawer](https://github.com/hanzhi713/Flowers-Curve). New inputs are annotated by tooltips. It works best on Chrome and Firefox. Not tested on other browsers.
 
 ---
 
