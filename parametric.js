@@ -530,8 +530,7 @@ function saveToGIF() {
     for (var i = 0, delay = 0, counter = 0, cut = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
         if (cut < cutPoints.length) {
             if ((locArray[i][5] - cutPoints[cut]) > 0.000001) {
-                cut++;
-                sign = getSign(document.getElementById('c' + cut));
+                sign = getSign(document.getElementById('c' + ++cut));
             }
         }
         currentJobs.push((function (i, delay, counter, sign) {
@@ -833,8 +832,7 @@ function draw(ruler, drawingInterval, callback) {
     for (var i = 0, delay = 0, counter = 0, cut = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
         if (cut < cutPoints.length) {
             if ((locArray[i][5] - cutPoints[cut]) > 0) {
-                cut++;
-                sign = getSign(document.getElementById('c' + cut));
+                sign = getSign(document.getElementById('c' + ++cut));
             }
         }
         currentJobs.push((function (i, delay, counter, sign) {
