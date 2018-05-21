@@ -90,8 +90,12 @@
                     <td><input type="color" id="dotColor" style="width: 60px;"/></td>
                 </tr>
                 <tr>
-                    <td><label for="dotDistance">Distance to center</label></td>
-                    <td><input type="number" id="dotDistance" style="width: 50px" value="80" step="1" max="800" min="1">
+                    <td>
+                        <label for="dotRatio" title="The proportion of the dot's distance to the center of the circle relative to the circle's radius" data-toggle="tooltip">
+                            Ratio of radius
+                        </label>
+                    </td>
+                    <td><input type="number" id="dotRatio" style="width: 50px" value="80" step="0.1" max="800" min="0">
                     </td>
                 </tr>
                 <tr>
@@ -131,14 +135,14 @@
                                                 <td><input id="dotSizeMin" style="width: 50px;" type="number" min="1"
                                                            max="10" value="1"></td>
                                                 <td><input id="dotSizeMax" style="width: 50px;" type="number" min="1"
-                                                           max="10" value="5"></td>
+                                                           max="10" value="3"></td>
                                             </tr>
                                             <tr>
-                                                <td>Dot Distance</td>
-                                                <td><input id="dotDistanceMin" style="width: 50px;" type="number"
-                                                           min="0" max="400" value="1"></td>
-                                                <td><input id="dotDistanceMax" style="width: 50px;" type="number"
-                                                           min="0" max="400" value="120"></td>
+                                                <td>Dot Distance Ratio</td>
+                                                <td><input id="dotRatioMin" style="width: 50px;" type="number"
+                                                           min="0" max="800" value="50" step="0.1"></td>
+                                                <td><input id="dotRatioMax" style="width: 50px;" type="number"
+                                                           min="0" max="800" value="100" step="0.1"></td>
                                             </tr>
                                             <tr>
                                                 <td>Dot Rotation</td>
@@ -197,9 +201,10 @@
                                     <td><input type="color" id="m-dotColor" style="width: 60px;"/></td>
                                 </tr>
                                 <tr>
-                                    <th><label for="m-dotDistance">Distance to center</label></th>
-                                    <td><input type="number" id="m-dotDistance" style="width: 60px" value="80" step="1"
-                                               max="800" min="1">
+                                    <th><label for="m-dotRatio">Proportion
+                                    </label></th>
+                                    <td><input type="number" id="m-dotRatio" style="width: 60px" value="80" step="0.1"
+                                               max="800" min="0">
                                     </td>
                                 </tr>
                                 <tr>
@@ -270,7 +275,7 @@
                         <label for="dy" title="Vertical translation of the graph" data-toggle="tooltip">dy: </label>
                         <input type="number" id="dy" style="width: 57px" value="0" step="1"/>
                         <label for="scale" title="Scaling factor of the graph, applied horizontally and vertically" data-toggle="tooltip">s: </label>
-                        <input type="number" id="scale" style="width: 56px" value="1" step="0.1" onchange="adjustDotDistanceCap(this)"/>
+                        <input type="number" id="scale" style="width: 56px" value="1" step="0.1" onchange="adjustDotRatioCap(this)"/>
                     </td>
                 </tr>
                 <tr>
@@ -316,7 +321,7 @@
                     </td>
                     <td>
                         <input type="number" id="circleRadius" style="width: 70px" value="10" step="0.01" max="600"
-                               min="0.01" onchange="adjustDotDistanceCap(this)">
+                               min="0.01" onchange="adjustDotRatioCap(this)">
                     </td>
                 </tr>
                 <tr>
@@ -557,7 +562,7 @@
         'Drawing: ': 'Drawing: '
     };
 </script>
-<script src="parametric.js?ver=5"></script>
+<script src="parametric.js?ver=6"></script>
 <div style="width: 300px; margin: auto auto">
     <span style="font-size:18px;">
         Developed by <a href="https://github.com/hanzhi713" target="_blank">Hanzhi Zhou</a>

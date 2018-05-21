@@ -28,14 +28,14 @@ var radiusMultipleParam = document.getElementById('radiusMultiple');
 
 var dotSizeMinParam = document.getElementById('dotSizeMin');
 var dotSizeMaxParam = document.getElementById('dotSizeMax');
-var dotDistanceMinParam = document.getElementById('dotDistanceMin');
-var dotDistanceMaxParam = document.getElementById('dotDistanceMax');
+var dotRatioMinParam = document.getElementById('dotRatioMin');
+var dotRatioMaxParam = document.getElementById('dotRatioMax');
 var dotRotMinParam = document.getElementById('dotRotMin');
 var dotRotMaxParam = document.getElementById('dotRotMax');
 
 var mDotSize = document.getElementById('m-dotSize');
 var mDotColor = document.getElementById('m-dotColor');
-var mDotDistance = document.getElementById('m-dotDistance');
+var mDotRatio = document.getElementById('m-dotRatio');
 var mDotRot = document.getElementById('m-dotRot');
 var mDotID = document.getElementById('m-dotID');
 
@@ -114,14 +114,14 @@ function removeDot(id) {
 function addDot() {
     var dotSize = +$('#dotSize').val();
     var dotColor = $('#dotColor').val();
-    var dotDist = +$('#dotDistance').val();
+    var dotRatio = +$('#dotRatio').val();
     var dotRot = +$('#dotRotOffset').val();
 
     // var dotDistCap = +innerCircleParam.value;
     // if (dotDist > dotDistCap)
     //     alert('Dot distance should be no greater than the inner circle radius');
     // else
-    addDotHelper((new Date()).valueOf().toString(), dotSize, dotColor, dotDist, dotRot, true);
+    addDotHelper((new Date()).valueOf().toString(), dotSize, dotColor, dotRatio, dotRot, true);
 }
 
 /**
@@ -136,19 +136,18 @@ function randInt(min, max) {
 
 function randomDot() {
     // var dotDistCap = +innerCircleParam.value;
-    var randDotDistMax = +dotDistanceMaxParam.value;
 
     var dotSize = randInt(+dotSizeMinParam.value, +dotSizeMaxParam.value);
     var dotColor = '#' + (Math.floor(Math.random() * 256 * 256 * 256)).toString(16);
-    var dotDist = randInt(+dotDistanceMinParam.value, randDotDistMax); //> dotDistCap ? dotDistCap : randDotDistMax);
+    var dotRatio = randInt(+dotRatioMinParam.value, +dotRatioMaxParam.value); //> dotDistCap ? dotDistCap : randDotDistMax);
     var dotRot = randInt(+dotRotMinParam.value, +dotRotMaxParam.value);
-    addDotHelper((new Date()).valueOf().toString(), dotSize, dotColor, dotDist, dotRot, true);
+    addDotHelper((new Date()).valueOf().toString(), dotSize, dotColor, dotRatio, dotRot, true);
 }
 
-function addDotHelper(currentTime, dotSize, dotColor, dotDist, dotRot, save) {
-    dots[currentTime] = new Dot(dotSize, dotColor, dotDist, dotRot);
+function addDotHelper(currentTime, dotSize, dotColor, dotRatio, dotRot, save) {
+    dots[currentTime] = new Dot(dotSize, dotColor, dotRatio, dotRot);
     $('#settings').append("<tr id=\"" + currentTime + "\">" +
-        "                    <td onclick='preModify(this)' data-toggle=\"modal\" data-target=\"#DotModalCenter\">Distance: " + dotDist + "&nbsp;&nbsp;Color:" +
+        "                    <td onclick='preModify(this)' data-toggle=\"modal\" data-target=\"#DotModalCenter\">Ratio: " + dotRatio + "&nbsp;&nbsp;Color:" +
         "                        <span style=\"width: 15px; height: 15px; background-color: " + dotColor + ";display: inline-block\"></span><br/>" +
         "                        Size: " + dotSize + "&nbsp;&nbsp;Rotation: " + dotRot + "°" +
         "                    </td>" +
@@ -167,7 +166,7 @@ function preModify(td) {
     var dot = dots[td.parentNode.id];
     mDotSize.value = dot.size;
     mDotColor.value = dot.color;
-    mDotDistance.value = dot.distance;
+    mDotRatio.value = dot.ratio;
     mDotRot.value = Math.round(dot.rotOffset / Math.PI * 180);
     mDotID.value = td.parentNode.id;
 }
@@ -176,15 +175,15 @@ function postModify() {
     var dot = dots[mDotID.value];
     var dotSize = +mDotSize.value;
     var dotColor = mDotColor.value;
-    var dotDist = +mDotDistance.value;
+    var dotRatio = +mDotRatio.value;
     var dotRot = +mDotRot.value;
     var tr = document.getElementById(mDotID.value);
-    tr.cells[0].innerHTML = "Distance: " + dotDist + "&nbsp;&nbsp;Color:" +
+    tr.cells[0].innerHTML = "Ratio: " + dotRatio + "&nbsp;&nbsp;Color:" +
         "                        <span style=\"width: 15px; height: 15px; background-color: " + dotColor + ";display: inline-block\"></span><br/>" +
         "                        Size: " + dotSize + "&nbsp;&nbsp;Rotation: " + dotRot + "°";
     dot.size = dotSize;
     dot.color = dotColor;
-    dot.distance = dotDist;
+    dot.ratio = dotRatio;
     dot.rotOffset = dotRot / 180 * Math.PI;
     saveConfigToBrowser();
 }
@@ -197,13 +196,13 @@ function stopDrawing() {
     currentJobs = [];
 }
 
-function adjustDotDistanceCap() {
-    var newCap = (+circleParam.value) * (+scaleParam.value);
-    // var oldCap = +dotDistanceMaxParam.max;
-    dotDistanceMaxParam.max = newCap;
-    var oldValue = +dotDistanceMaxParam.value;
-    if (oldValue > newCap)
-        dotDistanceMaxParam.value = newCap;
+function adjustDotRatioCap(e) {
+    // var newCap = (+circleParam.value) * (+scaleParam.value);
+    // // var oldCap = +dotRatioMaxParam.max;
+    // dotRatioMaxParam.max = newCap;
+    // var oldValue = +dotRatioMaxParam.value;
+    // if (oldValue > newCap)
+    //     dotRatioMaxParam.value = newCap;
 }
 
 function saveConfigToBrowser() {
@@ -239,8 +238,8 @@ function getConfigJSON() {
 
         dotSizeMin: +dotSizeMinParam.value,
         dotSizeMax: +dotSizeMaxParam.value,
-        dotDistanceMin: +dotDistanceMinParam.value,
-        dotDistanceMax: +dotDistanceMaxParam.value,
+        dotRatioMin: +dotRatioMinParam.value,
+        dotRatioMax: +dotRatioMaxParam.value,
         dotRotMin: +dotRotMinParam.value,
         dotRotMax: +dotRotMaxParam.value,
 
@@ -292,9 +291,9 @@ function parseConfigJSON(json) {
         dots = obj.dots;
 
         dotSizeMinParam.value = obj.dotSizeMin === undefined ? 1 : obj.dotSizeMin;
-        dotSizeMaxParam.value = obj.dotSizeMax === undefined ? 5 : obj.dotSizeMax;
-        dotDistanceMinParam.value = obj.dotDistanceMin === undefined ? 0 : obj.dotDistanceMin;
-        dotDistanceMaxParam.value = obj.dotDistanceMax === undefined ? 120 : obj.dotDistanceMax;
+        dotSizeMaxParam.value = obj.dotSizeMax === undefined ? 3 : obj.dotSizeMax;
+        dotRatioMinParam.value = obj.dotRatioMin === undefined ? 50 : obj.dotRatioMin;
+        dotRatioMaxParam.value = obj.dotRatioMax === undefined ? 100 : obj.dotRatioMax;
         dotRotMinParam.value = obj.dotRotMin === undefined ? 0 : obj.dotRotMin;
         dotRotMaxParam.value = obj.dotRotMax === undefined ? 360 : obj.dotRotMax;
 
@@ -319,7 +318,7 @@ function parseConfigJSON(json) {
             pngBgColorParam.disabled = true;
 
         for (var key in dots) {
-            addDotHelper(key, dots[key].size, dots[key].color, dots[key].distance, Math.round(180 * dots[key].rotOffset / Math.PI), false);
+            addDotHelper(key, dots[key].size, dots[key].color, dots[key].ratio, Math.round(180 * dots[key].rotOffset / Math.PI), false);
         }
 
         if (obj.locArray !== undefined) {
@@ -327,25 +326,8 @@ function parseConfigJSON(json) {
             cutPoints = obj.cutPoints;
             var g = document.getElementById('sign-adjust');
             g.innerHTML = '';
-            for (var i = 0; i < cutPoints.length; i++) {
-                var e = document.createElement('button');
-                e.id = 'c' + i;
-                e.type = 'button';
-                e.className = 'btn btn-secondary btn-sm';
-                e.innerHTML = cutPoints[i].toFixed(2) + (obj.cutPointSigns[i] === 1 ? '+' : '-');
-                e.title = 'Change the sign between ' + ((i - 1) < 0 ? +t1Param.value : cutPoints[i - 1].toFixed(3)) + ' and ' + cutPoints[i].toFixed(3);
-                e.setAttribute('data-toggle', 'tooltip');
-                e.onclick = function (ev) {
-                    var ih = ev.target.innerHTML;
-                    var sign = ih[ih.length - 1];
-                    if (sign === '+')
-                        ev.target.innerHTML = ih.substring(0, ih.length - 1) + '-';
-                    else
-                        ev.target.innerHTML = ih.substring(0, ih.length - 1) + '+';
-                    saveConfigToBrowser();
-                };
-                g.appendChild(e);
-            }
+            for (var i = 0; i < cutPoints.length; i++)
+                g.appendChild(createSignElement(i, obj.cutPointSigns[i] === 1 ? '+' : '-', (i - 1) < 0 ? +t1Param.value : cutPoints[i - 1], cutPoints[i]));
             var topCxt = topCanvas.getContext('2d');
             var bottomCxt = bottomCanvas.getContext('2d');
             var funcCxt = funcCanvas.getContext('2d');
@@ -391,7 +373,7 @@ function loadConfig(files) {
 //     var maxDotDist = 0;
 //     var maxDot = null;
 //     for (var key in dots) {
-//         var dotDist = Math.abs(dots[key].distance);
+//         var dotDist = Math.abs(dots[key].ratio);
 //         if (dotDist > maxDotDist) {
 //             maxDot = dots[key];
 //             maxDotDist = dotDist;
@@ -760,7 +742,28 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     cutPoints.push(t2);
     var g = document.getElementById('sign-adjust');
     g.innerHTML = '';
-    var handler = function (ev) {
+    for (var i = 0; i < cutPoints.length; i++)
+        g.appendChild(createSignElement(i, '+', ((i - 1) < 0 ? t1 : cutPoints[i - 1]), cutPoints[i]));
+    $('[data-toggle="tooltip"]').tooltip();
+    return locations;
+}
+
+/**
+ * a template for sign element (the button for changing the sign)
+ * @param {Number} index
+ * @param {string} sign
+ * @param {Number} lower
+ * @param {Number} upper
+ * */
+function createSignElement(index, sign, lower, upper){
+    var e = document.createElement('button');
+    e.id = 'c' + index;
+    e.type = 'button';
+    e.className = 'btn btn-secondary btn-sm';
+    e.innerHTML = upper.toFixed(2) + sign;
+    e.setAttribute('data-toggle', 'tooltip');
+    e.title = 'Change the sign between ' + lower.toFixed(3) + ' and ' + upper.toFixed(3);
+    e.onclick = function (ev) {
         var ih = ev.target.innerHTML;
         var sign = ih[ih.length - 1];
         if (sign === '+')
@@ -769,19 +772,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
             ev.target.innerHTML = ih.substring(0, ih.length - 1) + '+';
         saveConfigToBrowser();
     };
-    for (var i = 0; i < cutPoints.length; i++) {
-        var e = document.createElement('button');
-        e.id = 'c' + i;
-        e.type = 'button';
-        e.className = 'btn btn-secondary btn-sm';
-        e.innerHTML = cutPoints[i].toFixed(2) + '+';
-        e.setAttribute('data-toggle', 'tooltip');
-        e.title = 'Change the sign between ' + ((i - 1) < 0 ? t1 : cutPoints[i - 1].toFixed(3)) + ' and ' + cutPoints[i].toFixed(3);
-        e.onclick = handler;
-        g.appendChild(e);
-    }
-    $('[data-toggle="tooltip"]').tooltip();
-    return locations;
+    return e;
 }
 
 function generateRadius() {
@@ -972,7 +963,7 @@ function Ruler(circle, dots) {
     this.drawDots = function (topCxt) {
         //var previousStyle = topCxt.fillStyle;
         for (var i = 0; i < this.dots.length; i++) {
-            var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].distance, this.calculateRotation(i));
+            var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].ratio / 100 * this.circle.radius, this.calculateRotation(i));
             topCxt.fillStyle = this.dots[i].color;
             topCxt.beginPath();
             topCxt.arc(dotPos[0], dotPos[1], this.dots[i].size, 0, TwoPI);
@@ -987,7 +978,7 @@ function Ruler(circle, dots) {
     this.drawSkeleton = function (bottomCxt) {
         if (this.showSkeleton) {
             for (var i = 0; i < this.dots.length; i++) {
-                var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].distance, this.calculateRotation(i));
+                var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].ratio / 100 * this.circle.radius, this.calculateRotation(i));
                 bottomCxt.moveTo(this.circle.x, this.circle.y);
                 bottomCxt.lineTo(dotPos[0], dotPos[1]);
             }
@@ -1001,7 +992,7 @@ function Ruler(circle, dots) {
         if (this.showSkeleton) {
             bottomCxt.beginPath();
             for (var i = 0; i < this.dots.length; i++) {
-                var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].distance, this.calculateRotation(i));
+                var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].ratio / 100 * this.circle.radius, this.calculateRotation(i));
                 bottomCxt.moveTo(this.circle.x, this.circle.y);
                 bottomCxt.lineTo(dotPos[0], dotPos[1]);
                 bottomCxt.arc(this.circle.x, this.circle.y, 2, 0, TwoPI);
@@ -1024,13 +1015,13 @@ function Ruler(circle, dots) {
  * @constructor
  * @param {Number} size
  * @param {string} color
- * @param {Number} distance
+ * @param {Number} ratio
  * @param {Number} rotOffset
  * */
-function Dot(size, color, distance, rotOffset) {
+function Dot(size, color, ratio, rotOffset) {
     this.size = size;
     this.color = color;
-    this.distance = distance;
+    this.ratio = ratio;
     this.rotOffset = rotOffset / 180 * Math.PI;
 }
 
