@@ -1,5 +1,5 @@
 if (typeof (Math.sign) !== "function")
-    Math.sign = function(x){
+    Math.sign = function (x) {
         return x === 0 ? 0 : x > 0 ? 1 : -1;
     };
 
@@ -71,6 +71,7 @@ window.onload = function (ev) {
     for (var i in effectors) {
         (function (i, existingOnchangeHandler) {
             effectors[i].onchange = function (e) {
+                stopDrawing();
                 if (typeof existingOnchangeHandler === 'function')
                     existingOnchangeHandler(e);
                 locArray = [];
@@ -210,7 +211,7 @@ function saveConfigToBrowser() {
 }
 
 function getConfigJSON() {
-    var isLocValid = locArray.length > 0 && locArray[0].length === 6;
+    var isLocValid = locArray.length > 0 && locArray[0].length >= 6;
     var cutPointSigns = new Array(cutPoints.length);
     if (isLocValid) {
         for (var i = 0; i < cutPoints.length; i++)
@@ -232,7 +233,7 @@ function getConfigJSON() {
         drawingDelay: +drawingDelayParam.value,
         reverseDirection: reverseDirectionCheck.checked,
 
-        radiusMultiple : +radiusMultipleParam.value,
+        radiusMultiple: +radiusMultipleParam.value,
 
         dots: dots,
 
@@ -689,8 +690,17 @@ function buildNecessaryExpressions(xExp, yExp) {
     var dx = nerdamer.diff(xExp);
     var dy = nerdamer.diff(yExp);
 
+    var dx_2 = nerdamer.diff(dx);
+    var dy_2 = nerdamer.diff(dy);
+    console.log(dy_2.text());
+    console.log(dx_2.text());
+
+    var curvatureString = '((' + dx.text() + ') * (' + dy_2.text() + ') - (' + dx_2.text() + ') * (' + dy.text() + '))/((' + dx.text() + ')^2 + (' + dy.text() + ')^2)^1.5';
+    var curvatureExp = nerdamer(curvatureString);
+    console.log(curvatureExp.text());
+    console.log(curvatureString);
     var arcLengthExp = nerdamer('sqrt((' + dx.text() + ')^2 + (' + dy.text() + ')^2)');
-    return [dx.buildFunction(['t']), dy.buildFunction(['t']), arcLengthExp.buildFunction(['t'])];
+    return [dx.buildFunction(['t']), dy.buildFunction(['t']), arcLengthExp.buildFunction(['t']), curvatureExp.buildFunction(['t'])];
 }
 
 /**
@@ -708,7 +718,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     //var arcLengthInt = nerdamer('defint(sqrt((' + dx.text() + ')^2 + (' + dy.text() + ')^2), ' + t1 + ', t2, t)');
 
     var locations = new Array(totalSteps);
-    cutPoints = [];
+    var newCutPoints = [];
 
     var exps = buildNecessaryExpressions(xExp, yExp);
     var dx = exps[0];
@@ -726,7 +736,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         var normal = -dx(t) / dy(t);
 
         if (Math.sign(normal) * Math.sign(lastNormal) === -1 && Math.abs(normal - lastNormal) < 1)
-            cutPoints.push(t - step);
+            newCutPoints.push(t - step);
 
         lastNormal = normal;
         var arcLength = integrate(arcLengthExp, t1, t, counter + 10);
@@ -737,13 +747,26 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         var delY = delX * normal;
 
         var rotAngle = arcLength / radius;
-        locations[counter] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t];
+        locations[counter] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1/exps[3](t)];
     }
-    cutPoints.push(t2);
+    newCutPoints.push(t2);
     var g = document.getElementById('sign-adjust');
+    var signElements = new Array(newCutPoints.length);
+    if (newCutPoints.length === cutPoints.length) {
+        for (var i = 0; i < newCutPoints.length; i++) {
+            var oldElement = document.getElementById('c' + i);
+            signElements[i] = createSignElement(i, oldElement.innerHTML[oldElement.innerHTML.length - 1], ((i - 1) < 0 ? t1 : newCutPoints[i - 1]), newCutPoints[i]);
+        }
+    } else {
+        for (var i = 0; i < newCutPoints.length; i++) {
+            signElements[i] = createSignElement(i, '+', ((i - 1) < 0 ? t1 : newCutPoints[i - 1]), newCutPoints[i]);
+        }
+    }
     g.innerHTML = '';
-    for (var i = 0; i < cutPoints.length; i++)
-        g.appendChild(createSignElement(i, '+', ((i - 1) < 0 ? t1 : cutPoints[i - 1]), cutPoints[i]));
+    for (var i = 0; i < newCutPoints.length; i++) {
+        g.appendChild(signElements[i]);
+    }
+    cutPoints = newCutPoints;
     $('[data-toggle="tooltip"]').tooltip();
     return locations;
 }
@@ -755,7 +778,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
  * @param {Number} lower
  * @param {Number} upper
  * */
-function createSignElement(index, sign, lower, upper){
+function createSignElement(index, sign, lower, upper) {
     var e = document.createElement('button');
     e.id = 'c' + index;
     e.type = 'button';
@@ -837,7 +860,7 @@ function draw(ruler, drawingInterval, callback) {
                         if (counter % 10 === 0) {
                             var progress = i / locArray.length * 100;
                             progressbar.width(progress + '%');
-                            progressLabel.text(lan['Drawing: '] + 't = ' + locArray[i][5].toFixed(2) + ', ' + progress.toFixed(1) + '%');
+                            progressLabel.text(lan['Drawing: '] + 't = ' + locArray[i][5].toFixed(2) + ', rcv = ' + locArray[i][6].toFixed(2) + ', ' + progress.toFixed(1) + '%');
                         }
                     }
                 }, delay);
