@@ -41,6 +41,7 @@ var mDotID = document.getElementById('m-dotID');
 
 var gifSizeParam = document.getElementById('f-size');
 var gifIntervalParam = document.getElementById('f-interval');
+var gifCropCheck = document.getElementById('f-crop');
 var gifTransparentCheck = document.getElementById('f-transparent');
 var gifBgColorParam = document.getElementById('f-bgcolor');
 var gifFrameDelayParam = document.getElementById('f-delay');
@@ -48,7 +49,7 @@ var gifQualityParam = document.getElementById('f-quality');
 var gifLastFrameDelayParam = document.getElementById('f-lastdelay');
 
 var pngWidthParam = document.getElementById('p-width');
-var pngHeightParam = document.getElementById('p-height');
+var pngCropCheck = document.getElementById('p-crop');
 var pngTransparentCheck = document.getElementById('p-transparent');
 var pngBgColorParam = document.getElementById('p-bgcolor');
 
@@ -246,6 +247,7 @@ function getConfigJSON() {
 
         frameSize: +gifSizeParam.value,
         frameDelay: +gifFrameDelayParam.value,
+        frameCrop: gifCropCheck.checked,
         frameTransparent: gifTransparentCheck.checked,
         frameBgColor: gifBgColorParam.value,
         frameQuality: +gifQualityParam.value,
@@ -253,8 +255,8 @@ function getConfigJSON() {
         lastFrameDelay: +gifLastFrameDelayParam.value,
 
         pngWidth: +pngWidthParam.value,
-        pngHeight: +pngHeightParam.value,
         pngTransparent: pngTransparentCheck.checked,
+        pngCrop: pngCropCheck.checked,
         pngBgColor: pngBgColorParam.value,
 
         locArray: isLocValid ? locArray.map(function (value) {
@@ -300,6 +302,7 @@ function parseConfigJSON(json) {
 
         gifSizeParam.value = obj.frameSize === undefined ? 320 : obj.frameSize;
         gifFrameDelayParam.value = obj.frameDelay === undefined ? 25 : obj.frameDelay;
+        gifCropCheck.checked = obj.frameCrop === undefined ? false : obj.frameCrop;
         gifTransparentCheck.checked = obj.frameTransparent === undefined ? false : obj.frameTransparent;
         gifBgColorParam.value = obj.frameBgColor === undefined ? '#FFFFFF' : obj.frameBgColor;
 
@@ -311,8 +314,8 @@ function parseConfigJSON(json) {
         gifLastFrameDelayParam.value = obj.lastFrameDelay === undefined ? 1000 : obj.lastFrameDelay;
 
         pngWidthParam.value = obj.pngWidth === undefined ? 640 : obj.pngWidth;
-        pngHeightParam.value = obj.pngHeight === undefined ? 640 : obj.pngHeight;
         pngTransparentCheck.checked = obj.pngTransparent === undefined ? false : obj.pngTransparent;
+        pngCropCheck.checked = obj.pngCrop === undefined ? false : obj.pngCrop;
         pngBgColorParam.value = obj.pngBgColor === undefined ? '#FFFFFF' : obj.pngBgColor;
 
         if (pngTransparentCheck.checked)
@@ -367,42 +370,59 @@ function loadConfig(files) {
     }
 }
 
-// /**
-//  * @return Array
-//  * */
-// function getRealBounds() {
-//     var maxDotDist = 0;
-//     var maxDot = null;
-//     for (var key in dots) {
-//         var dotDist = Math.abs(dots[key].ratio);
-//         if (dotDist > maxDotDist) {
-//             maxDot = dots[key];
-//             maxDotDist = dotDist;
-//         }
-//     }
-//     var radius = +circleParam.value * +scaleParam.value;
-//     var minX = Infinity, maxX = -Infinity;
-//     var minY = Infinity, maxY = -Infinity;
-//     for (var i = 0; i < locArray.length; i++) {
-//         if (locArray[i][0] < minX)
-//             minX = locArray[i][0];
-//         if (locArray[i][0] > maxX)
-//             maxX = locArray[i][0];
-//         if (locArray[i][1] < minY)
-//             minY = locArray[i][1];
-//         if (locArray[i][1] > maxY)
-//             maxY = locArray[i][1];
-//     }
-//     return [minX - maxDotDist * 2, maxX + maxDotDist * 2, minY - maxDotDist * 2, maxY + maxDotDist * 2];
-// }
+/**
+ * @return Array
+ * */
+function getRealBounds() {
+    var maxDotRatio = 0;
+    var maxDot = null;
+    for (var key in dots) {
+        var dotRatio = Math.abs(dots[key].ratio);
+        if (dotRatio > maxDotRatio) {
+            maxDot = dots[key];
+            maxDotRatio = dotRatio;
+        }
+    }
+    var radius = +circleParam.value * +scaleParam.value;
+    maxDotRatio = maxDotRatio / 50 * radius;
+    if (maxDotRatio < radius * 2)
+        maxDotRatio = radius * 2;
 
-// /**
-//  * @param {Number} realSize
-//  * @return Number
-//  * */
-// function getTranslation(realSize) {
-//     return realSize / 2 - topCanvas.width / 2;
-// }
+    var minX = Infinity, maxX = -Infinity;
+    var minY = Infinity, maxY = -Infinity;
+    for (var i = 0; i < locArray.length; i++) {
+        if (locArray[i][0] < minX)
+            minX = locArray[i][0];
+        if (locArray[i][0] > maxX)
+            maxX = locArray[i][0];
+        if (locArray[i][1] < minY)
+            minY = locArray[i][1];
+        if (locArray[i][1] > maxY)
+            maxY = locArray[i][1];
+    }
+    minX = minX - maxDotRatio * 2;
+    maxX = maxX + maxDotRatio * 2;
+    minY = minY - maxDotRatio * 2;
+    maxY = maxY + maxDotRatio * 2;
+    return [Math.max(-320, minX), Math.min(320, maxX), Math.max(-320, minY), Math.min(320, maxY)];
+}
+
+/**
+ * @param {Array} realBounds
+ * @param {Number} width
+ * @return Array
+ * */
+function getScalingAndTranslation(realBounds, width) {
+    var realWidth = realBounds[1] - realBounds[0];
+    var realHeight = realBounds[3] - realBounds[2];
+
+    var scaling = width / realWidth;
+    var height = width * realHeight / realWidth;
+
+    var wTranslation = -(realBounds[0] + 320);
+    var hTranslation = -(320 + realBounds[2]);
+    return [height, scaling, wTranslation, hTranslation]
+}
 
 function saveToPNG() {
     var circleRadius = +circleParam.value;
@@ -416,20 +436,33 @@ function saveToPNG() {
 
     draw(ruler, +drawingDelayParam.value, function () {
         var pngWidth = +pngWidthParam.value;
-        var pngHeight = +pngHeightParam.value;
         var transparent = pngTransparentCheck.checked;
         var bgColor = pngBgColorParam.value;
 
         tempCanvas.width = pngWidth;
-        tempCanvas.height = pngHeight;
         var tempCxt = tempCanvas.getContext('2d');
 
-        if (!transparent) {
-            tempCxt.fillStyle = bgColor;
-            tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
+        if (pngCropCheck.checked) {
+            var parameters = getScalingAndTranslation(getRealBounds(), tempCanvas.width);
+            tempCanvas.height = parameters[0];
+            if (!transparent) {
+                tempCxt.fillStyle = bgColor;
+                tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
+            }
+            tempCxt.scale(parameters[1], parameters[1]);
+            tempCxt.translate(parameters[2], parameters[3]);
+
+        }
+        else {
+            // noinspection JSSuspiciousNameCombination
+            tempCanvas.height = pngWidth;
+            if (!transparent) {
+                tempCxt.fillStyle = bgColor;
+                tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
+            }
+            tempCxt.scale(pngWidth / topCanvas.width, pngWidth / topCanvas.height);
         }
 
-        tempCxt.scale(pngWidth / topCanvas.width, pngHeight / topCanvas.height);
         tempCxt.drawImage(funcCanvas, 0, 0);
         tempCxt.drawImage(bottomCanvas, 0, 0);
         tempCxt.drawImage(topCanvas, 0, 0);
@@ -438,7 +471,6 @@ function saveToPNG() {
             saveAs(blob, 'parametric-roulette.png');
         });
     });
-
 }
 
 /**
@@ -455,13 +487,6 @@ function saveToGIF() {
     var transparent = gifTransparentCheck.checked;
     var frameInterval = +gifIntervalParam.value;
     var frameDelay = +gifFrameDelayParam.value;
-    var gif = new GIF({
-        workers: 4,
-        quality: +gifQualityParam.value,
-        workerScript: './gif.worker.js',
-        width: frameSize,
-        height: frameSize
-    });
 
     var circleRadius = +circleParam.value;
 
@@ -475,20 +500,39 @@ function saveToGIF() {
     var topCxt = topCanvas.getContext('2d');
     var bottomCxt = bottomCanvas.getContext('2d');
     var funcCxt = funcCanvas.getContext('2d');
-
     var tempCxt = tempCanvas.getContext('2d');
+
     tempCanvas.width = frameSize;
-    tempCanvas.height = frameSize;
+    var gifHeight;
 
-
-    if (!transparent) {
-        tempCxt.fillStyle = gifBgColorParam.value;
-        tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+    if (gifCropCheck.checked) {
+        var parameters = getScalingAndTranslation(getRealBounds(), tempCanvas.width);
+        tempCanvas.height = parameters[0];
+        gifHeight = parameters[0];
+        if (!transparent) {
+            tempCxt.fillStyle = gifBgColorParam.value;
+            tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
+        }
+        tempCxt.scale(parameters[1], parameters[1]);
+        tempCxt.translate(parameters[2], parameters[3]);
+    }
+    else {
+        // noinspection JSSuspiciousNameCombination
+        tempCanvas.height = frameSize;
+        if (!transparent) {
+            tempCxt.fillStyle = gifBgColorParam.value;
+            tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
+        }
+        tempCxt.scale(frameSize / topCanvas.width, frameSize / topCanvas.height);
     }
 
-    // var realPatternSize = getRealSize(), translation = getTranslation(realPatternSize);
-    tempCxt.scale(frameSize / topCanvas.width, frameSize / topCanvas.height);
-    // funcCxt.translate(translation, translation);
+    var gif = new GIF({
+        workers: 4,
+        quality: +gifQualityParam.value,
+        workerScript: './gif.worker.js',
+        width: frameSize,
+        height: gifHeight
+    });
 
     ruler.showSkeleton = skeletonCheck.checked;
 
@@ -541,7 +585,7 @@ function saveToGIF() {
 
                             var progress = i / locArray.length * 100;
                             progressbar.width(progress + '%');
-                            progressLabel.text(lan['Drawing: '] + 't = ' + locArray[i][5].toFixed(2) + ', ' + progress.toFixed(1) + '%');
+                            progressLabel.text(lan['Drawing: '] + 't = ' + locArray[i][5].toFixed(2) + ', rcv = ' + locArray[i][6].toFixed(2) + ', ' + progress.toFixed(1) + '%');
                         }
                     }
                 }, delay);
@@ -747,7 +791,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         var delY = delX * normal;
 
         var rotAngle = arcLength / radius;
-        locations[counter] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1/exps[3](t)];
+        locations[counter] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1 / exps[3](t)];
     }
     newCutPoints.push(t2);
     var g = document.getElementById('sign-adjust');
