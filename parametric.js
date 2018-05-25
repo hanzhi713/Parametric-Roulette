@@ -149,7 +149,7 @@ function randomDot() {
 function addDotHelper(currentTime, dotSize, dotColor, dotRatio, dotRot, save) {
     dots[currentTime] = new Dot(dotSize, dotColor, dotRatio, dotRot);
     $('#settings').append("<tr id=\"" + currentTime + "\">" +
-        "                    <td onclick='preModify(this)' data-toggle=\"modal\" data-target=\"#DotModalCenter\">Ratio: " + dotRatio + "&nbsp;&nbsp;Color:" +
+        "                    <td onclick='preModify(this)' data-toggle=\"modal\" data-target=\"#DotModalCenter\">Ratio: " + dotRatio + "%&nbsp;&nbsp;Color:" +
         "                        <span style=\"width: 15px; height: 15px; background-color: " + dotColor + ";display: inline-block\"></span><br/>" +
         "                        Size: " + dotSize + "&nbsp;&nbsp;Rotation: " + dotRot + "°" +
         "                    </td>" +
@@ -180,7 +180,7 @@ function postModify() {
     var dotRatio = +mDotRatio.value;
     var dotRot = +mDotRot.value;
     var tr = document.getElementById(mDotID.value);
-    tr.cells[0].innerHTML = "Ratio: " + dotRatio + "&nbsp;&nbsp;Color:" +
+    tr.cells[0].innerHTML = "Ratio: " + dotRatio + "%&nbsp;&nbsp;Color:" +
         "                        <span style=\"width: 15px; height: 15px; background-color: " + dotColor + ";display: inline-block\"></span><br/>" +
         "                        Size: " + dotSize + "&nbsp;&nbsp;Rotation: " + dotRot + "°";
     dot.size = dotSize;
@@ -420,7 +420,7 @@ function getScalingAndTranslation(realBounds, width) {
     var height = width * realHeight / realWidth;
 
     var wTranslation = -(realBounds[0] + 320);
-    var hTranslation = -(320 + realBounds[2]);
+    var hTranslation = -(320 - realBounds[3]);
     return [height, scaling, wTranslation, hTranslation]
 }
 
@@ -802,14 +802,12 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
             signElements[i] = createSignElement(i, oldElement.innerHTML[oldElement.innerHTML.length - 1], ((i - 1) < 0 ? t1 : newCutPoints[i - 1]), newCutPoints[i]);
         }
     } else {
-        for (var i = 0; i < newCutPoints.length; i++) {
+        for (var i = 0; i < newCutPoints.length; i++)
             signElements[i] = createSignElement(i, '+', ((i - 1) < 0 ? t1 : newCutPoints[i - 1]), newCutPoints[i]);
-        }
     }
     g.innerHTML = '';
-    for (var i = 0; i < newCutPoints.length; i++) {
+    for (var i = 0; i < newCutPoints.length; i++)
         g.appendChild(signElements[i]);
-    }
     cutPoints = newCutPoints;
     $('[data-toggle="tooltip"]').tooltip();
     return locations;
