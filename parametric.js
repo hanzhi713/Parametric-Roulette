@@ -556,9 +556,8 @@ function saveToGIF() {
     var sign = se === undefined ? 1 : getSign(se);
     for (var i = 0, delay = 0, counter = 0, cut = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
         if (cut < cutPoints.length) {
-            if ((locArray[i][5] - cutPoints[cut]) > 0.000001) {
+            if ((locArray[i][5] - cutPoints[cut]) > 0.000001)
                 sign = getSign(document.getElementById('c' + ++cut));
-            }
         }
         currentJobs.push((function (i, delay, counter, sign) {
                 return setTimeout(function () {
@@ -773,17 +772,23 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     yExp = yExp.buildFunction(['t']);
 
     var lastNormal = 0;
+    var arcLength = 0;
+    var previousArcLength = arcLength;
     var previousLower = t1;
-    var previousArcLength = 0;
-
+    var sliceLength = 64;
     for (var t = t1, counter = 0; t < t2; t += step, counter++) {
         var normal = -dx(t) / dy(t);
 
         if (Math.sign(normal) * Math.sign(lastNormal) === -1 && Math.abs(normal - lastNormal) < 1)
             newCutPoints.push(t - step);
 
+        var sliceIdx = counter % sliceLength;
         lastNormal = normal;
-        var arcLength = integrate(arcLengthExp, t1, t, counter + 10);
+        arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2 + 5);
+        if (counter % sliceIdx === 0){
+            previousLower = t;
+            previousArcLength = arcLength;
+        }
 
         var x = xExp(t);
         var y = yExp(t);
@@ -879,17 +884,11 @@ function draw(ruler, drawingInterval, callback) {
     progressbar.width('0%');
 
     var se = document.getElementById('c0');
-    var getSign = function (element) {
-        if (element === null || element === undefined) return 1;
-        var x = element.innerHTML[element.innerHTML.length - 1];
-        return x === '+' ? 1 : -1;
-    };
     var sign = se === undefined ? 1 : getSign(se);
     for (var i = 0, delay = 0, counter = 0, cut = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
         if (cut < cutPoints.length) {
-            if ((locArray[i][5] - cutPoints[cut]) > 0) {
+            if ((locArray[i][5] - cutPoints[cut]) > 0)
                 sign = getSign(document.getElementById('c' + ++cut));
-            }
         }
         currentJobs.push((function (i, delay, counter, sign) {
                 return setTimeout(function () {
@@ -933,9 +932,7 @@ function integrate(f, a, b, n) {
     var sum = f(a);
     for (var i = 1; i < n - 1; i++)
         sum += 2 * f(a + i * step);
-    sum += f(b);
-    sum *= 0.5 * step;
-    return sum;
+    return (sum + f(b)) * 0.5 * step;
 }
 
 /**
