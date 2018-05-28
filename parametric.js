@@ -776,6 +776,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     var previousArcLength = arcLength;
     var previousLower = t1;
     var sliceLength = 64;
+    var sliceUpper = sliceLength - 1;
     for (var t = t1, counter = 0; t < t2; t += step, counter++) {
         var normal = -dx(t) / dy(t);
 
@@ -785,7 +786,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         var sliceIdx = counter % sliceLength;
         lastNormal = normal;
         arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2 + 5);
-        if (counter % sliceIdx === 0){
+        if (sliceIdx === sliceUpper){
             previousLower = t;
             previousArcLength = arcLength;
         }
