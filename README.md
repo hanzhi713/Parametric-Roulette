@@ -48,7 +48,7 @@ Config is available [here](doc/ellipse.json)
 
 ## Assumption
 
-The radius of curvature at any point on the parametric equation is greater than the radius of the circle rolling on it. If this condition is not met, then the circle may appear to be overlapped with the parametric equation. For example:
+The rolling circle doesn't have a collision box. It will keep rolling even if there's an overlapping region:
 
 <img src="doc/overlap.svg" width="400px">
 
