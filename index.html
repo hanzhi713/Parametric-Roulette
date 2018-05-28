@@ -308,7 +308,9 @@
                                         </table>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="generateRadius()">Generate</button>
+                                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="stopDrawing();locArray = [];disableDrawing();generateRadius();">
+                                            Generate
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -430,7 +432,7 @@
                                             </tr>
                                             <tr>
                                                 <th>
-                                                    <label for="f-interval"
+                                                    <label for="f-interval" data-toggle="tooltip"
                                                            title="Indicates how frequently should frames be taken. 40 means 1 frame per 40 drawing steps">
                                                         Frame interval
                                                     </label>
@@ -442,7 +444,7 @@
                                             </tr>
                                             <tr>
                                                 <th>
-                                                    <label for="f-delay"
+                                                    <label for="f-delay" data-toggle="tooltip"
                                                            title="A number in milliseconds that indicates how long a single frame should stay">
                                                         Frame delay
                                                     </label>
@@ -463,7 +465,7 @@
                                                 <td><input type="color" id="f-bgcolor" value="#FFFFFF" style="width: 60px;"/></td>
                                             </tr>
                                             <tr>
-                                                <th><label for="f-quality"
+                                                <th><label for="f-quality" data-toggle="tooltip"
                                                            title="The lower the number, the better the GIF quality will be">Quality</label>
                                                 </th>
                                                 <td><input type="number" id="f-quality" style="width: 60px" value="10"

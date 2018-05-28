@@ -10,17 +10,25 @@ The interface of my JavaScript drawer is adapted from my [Spirograph drawer](htt
 
 ---
 
-## Example 1: Rolling on a parabola 
+## Example 1: Rolling on a hyperbola 
 
-<img src="http://latex.codecogs.com/svg.latex?\inline&space;\dpi{200}&space;\large&space;\left\{&space;\begin{array}{lr}&space;x=&space;t&space;&&space;\\&space;y=&space;\frac{t^2}{10}&space;\end{array}&space;\right.&space;-30\leq&space;t\leq&space;30" title="\large \left\{ \begin{array}{lr} x= t & \\ y= \frac{t^2}{10} \end{array} \right. -30\leq t\leq 30" />
+<img src="http://latex.codecogs.com/svg.latex?\large&space;\left\{&space;\begin{array}{lr}&space;x=2\cosh{t}&space;&&space;\\&space;y=&space;1.5\sinh{t}&space;\end{array}&space;\right.&space;-\pi\leq&space;t\leq&space;\pi" title="\large \left\{ \begin{array}{lr} x=2\cosh{t} & \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi" />
 
-<img src="doc/on-parabola.svg" width="600px">
+<img src="doc/on-hyperbola.svg" width="500px">
+
+<img src="doc/hyperbola.gif">
+
+Config is available [here](doc/hyperbola.json)
 
 ## Example 2: Rolling on the sine function
 
 <img src="http://latex.codecogs.com/svg.latex?\inline&space;\dpi{200}&space;\large&space;\left\{&space;\begin{array}{lr}&space;x=&space;t&space;&&space;\\&space;y=&space;5\sin(\frac{t}{5})&space;\end{array}&space;\right.&space;-30\leq&space;t\leq&space;30" title="\large \left\{ \begin{array}{lr} x= t & \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30" />
 
 <img src="doc/on-sin(x).svg" width="600px">
+
+<img src="doc/sine.gif">
+
+Config is available [here](doc/sine.json)
 
 ## Example 3: Rolling along an ellipse
 
@@ -29,6 +37,10 @@ The interface of my JavaScript drawer is adapted from my [Spirograph drawer](htt
 <img src="doc/on-ellipse.svg" width="600px">
 
 Note: I made a sign adjustment in this case to ensure that the circle will always appear outside the ellipse.
+
+<img src="doc/ellipse.gif">
+
+Config is available [here](doc/ellipse.json)
 
 ---
 
@@ -98,4 +110,8 @@ The circle will always appear ABOVE the graph, which may cause weird "jumps" at 
 
 <img src="doc/heart.svg" width="600px">
 
-This problem could be resolved by manually adjusting the sign of delta X, which could be achieved in my JavaScript drawer (not available in Geogebra implementation though).
+This problem could be resolved to some extent by manually adjusting the sign of delta X, which could be achieved in my JavaScript drawer (not available in Geogebra implementation though):
+
+<img src="doc/heart.gif">
+
+The config file for this graph is available [here](doc/heart.json)

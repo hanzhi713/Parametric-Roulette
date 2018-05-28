@@ -72,9 +72,9 @@ window.onload = function (ev) {
     for (var i in effectors) {
         (function (i, existingOnchangeHandler) {
             effectors[i].onchange = function (e) {
-                stopDrawing();
                 if (typeof existingOnchangeHandler === 'function')
                     existingOnchangeHandler(e);
+                stopDrawing();
                 locArray = [];
                 disableDrawing();
             };
@@ -400,10 +400,10 @@ function getRealBounds() {
         if (locArray[i][1] > maxY)
             maxY = locArray[i][1];
     }
-    minX = minX - maxDotRatio * 2;
-    maxX = maxX + maxDotRatio * 2;
-    minY = minY - maxDotRatio * 2;
-    maxY = maxY + maxDotRatio * 2;
+    minX = minX - maxDotRatio * 2 + +dxParam.value;
+    maxX = maxX + maxDotRatio * 2 + +dxParam.value;
+    minY = minY - maxDotRatio * 2 + +dyParam.value;
+    maxY = maxY + maxDotRatio * 2 + +dyParam.value;
     return [Math.max(-320, minX), Math.min(320, maxX), Math.max(-320, minY), Math.min(320, maxY)];
 }
 
@@ -666,6 +666,7 @@ function previewRuler() {
     var bottomCxt = bottomCanvas.getContext('2d');
     var funcCxt = funcCanvas.getContext('2d');
     funcCxt.strokeStyle = '#000000';
+    funcCxt.strokeStyle = '#000000';
     setTransform([topCxt, bottomCxt, funcCxt]);
 
     funcCxt.moveTo(locArray[0][0], locArray[0][1]);
@@ -735,13 +736,14 @@ function buildNecessaryExpressions(xExp, yExp) {
 
     var dx_2 = nerdamer.diff(dx);
     var dy_2 = nerdamer.diff(dy);
-    console.log(dy_2.text());
-    console.log(dx_2.text());
+    // console.log(dy_2.text());
+    // console.log(dx_2.text());
 
     var curvatureString = '((' + dx.text() + ') * (' + dy_2.text() + ') - (' + dx_2.text() + ') * (' + dy.text() + '))/((' + dx.text() + ')^2 + (' + dy.text() + ')^2)^1.5';
     var curvatureExp = nerdamer(curvatureString);
-    console.log(curvatureExp.text());
-    console.log(curvatureString);
+    // console.log(curvatureExp.text());
+    // console.log(curvatureString);
+
     var arcLengthExp = nerdamer('sqrt((' + dx.text() + ')^2 + (' + dy.text() + ')^2)');
     return [dx.buildFunction(['t']), dy.buildFunction(['t']), arcLengthExp.buildFunction(['t']), curvatureExp.buildFunction(['t'])];
 }
@@ -767,6 +769,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     var dx = exps[0];
     var dy = exps[1];
     var arcLengthExp = exps[2];
+    var curvature = exps[3];
 
     xExp = xExp.buildFunction(['t']);
     yExp = yExp.buildFunction(['t']);
@@ -775,7 +778,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     var arcLength = 0;
     var previousArcLength = arcLength;
     var previousLower = t1;
-    var sliceLength = 64;
+    var sliceLength = 256;
     var sliceUpper = sliceLength - 1;
     for (var t = t1, counter = 0; t < t2; t += step, counter++) {
         var normal = -dx(t) / dy(t);
@@ -786,7 +789,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         var sliceIdx = counter % sliceLength;
         lastNormal = normal;
         arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2 + 5);
-        if (sliceIdx === sliceUpper){
+        if (sliceIdx === sliceUpper) {
             previousLower = t;
             previousArcLength = arcLength;
         }
@@ -797,7 +800,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         var delY = delX * normal;
 
         var rotAngle = arcLength / radius;
-        locations[counter] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1 / exps[3](t)];
+        locations[counter] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1 / curvature(t)];
     }
     newCutPoints.push(t2);
     var g = document.getElementById('sign-adjust');
@@ -816,6 +819,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         g.appendChild(signElements[i]);
     cutPoints = newCutPoints;
     $('[data-toggle="tooltip"]').tooltip();
+    console.log(arcLength);
     return locations;
 }
 
