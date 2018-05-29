@@ -59,6 +59,7 @@ var currentJobs = [];
 
 var locArray = [];
 var cutPoints = [];
+var cuspPoints = [];
 
 window.onload = function (ev) {
     parseConfigJSON(localStorage.getItem('cache'));
@@ -113,8 +114,8 @@ function removeDot(id) {
     saveConfigToBrowser();
 }
 
-function removeAllDots(){
-    for (var id in dots){
+function removeAllDots() {
+    for (var id in dots) {
         $('#' + id).remove();
     }
     dots = {};
@@ -531,13 +532,14 @@ function saveToGIF() {
     var progressbar = $('#progressbar');
     progressbar.width('0%');
 
+    var epsilon = 0.0001;
     var se = document.getElementById('c0');
 
     var drawingInterval = +drawingDelayParam.value;
     var sign = se === undefined ? 1 : getSign(se);
     for (var i = 0, delay = 0, counter = 0, cut = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
         if (cut < cutPoints.length) {
-            if ((locArray[i][5] - cutPoints[cut]) > 0.000001)
+            if ((locArray[i][5] - cutPoints[cut]) > epsilon)
                 sign = getSign(document.getElementById('c' + ++cut));
         }
         currentJobs.push((function (i, delay, counter, sign) {
@@ -715,6 +717,8 @@ function caller(callback) {
 function buildNecessaryExpressions(xExp, yExp) {
     var dx = nerdamer.diff(xExp);
     var dy = nerdamer.diff(yExp);
+    // console.log(dx.text());
+    // console.log(dy.text());
 
     var dx_2 = nerdamer.diff(dx);
     var dy_2 = nerdamer.diff(dy);
@@ -727,7 +731,8 @@ function buildNecessaryExpressions(xExp, yExp) {
     // console.log(curvatureString);
 
     var arcLengthExp = nerdamer('sqrt((' + dx.text() + ')^2 + (' + dy.text() + ')^2)');
-    return [dx.buildFunction(['t']), dy.buildFunction(['t']), arcLengthExp.buildFunction(['t']), curvatureExp.buildFunction(['t'])];
+    return [dx.buildFunction(['t']), dy.buildFunction(['t']), arcLengthExp.buildFunction(['t']),
+        curvatureExp.buildFunction(['t']), dx_2.buildFunction(['t']), dy_2.buildFunction(['t'])];
 }
 
 /**
@@ -741,10 +746,11 @@ function buildNecessaryExpressions(xExp, yExp) {
  * @return Array
  * */
 function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
-    var totalSteps = Math.round((t2 - t1) / step);
+    cuspPoints = [];
+    //var totalSteps = Math.round((t2 - t1) / step);
     //var arcLengthInt = nerdamer('defint(sqrt((' + dx.text() + ')^2 + (' + dy.text() + ')^2), ' + t1 + ', t2, t)');
 
-    var locations = new Array(totalSteps);
+    var locations = [];
     var newCutPoints = [];
 
     var exps = buildNecessaryExpressions(xExp, yExp);
@@ -764,27 +770,72 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     // longer slice length will result in better accuracy of numerical integration
     var sliceLength = 256;
     var sliceUpper = sliceLength - 1;
-    for (var t = t1, counter = 0; t < t2; t += step, counter++) {
-        var normal = -dx(t) / dy(t);
+    var cuspThreshold = 0.1;
+    var maxError = 0.0001;
+    for (var t = t1, counter = 0, idx = 0; t < t2; t += step, counter++, idx++) {
+        var x = xExp(t);
+        var y = yExp(t);
 
-        if (Math.sign(normal) * Math.sign(lastNormal) === -1 && Math.abs(normal - lastNormal) < 1)
-            newCutPoints.push(t - step);
+        var dyE = dy(t), dxE = dx(t);
 
         var sliceIdx = counter % sliceLength;
-        lastNormal = normal;
         arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2 + 5);
         if (sliceIdx === sliceUpper) {
             previousLower = t;
             previousArcLength = arcLength;
         }
-
-        var x = xExp(t);
-        var y = yExp(t);
-        var delX = radius * Math.sign(normal) / Math.sqrt(normal * normal + 1);
-        var delY = delX * normal;
-
         var rotAngle = arcLength / radius;
-        locations[counter] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1 / curvature(t)];
+        var cuspSteps = 0;
+        //console.log(idx);
+        if (dyE === 0) {
+            locations[idx] = [x * scale, y * scale, 0, radius * scale, rotAngle, t, 1 / curvature(t)];
+        }
+        else {
+            var normal = -dxE / dyE;
+
+            // now we have a cut point
+            if (Math.sign(normal) * Math.sign(lastNormal) === -1 && Math.abs(normal - lastNormal) < 0.5)
+                newCutPoints.push(t - step);
+
+            // if (Math.abs(dyE) < cuspThreshold && Math.abs(dxE) < cuspThreshold) {
+            //     //console.log('cusp!' + t);
+            //     var z1 = findZero(dx, exps[4], t, maxError);
+            //     var z2 = findZero(dy, exps[5], t, maxError);
+            //     if (!isNaN(z1) && !isNaN(z2) && Math.abs(z1 - z2) < maxError * 10) {
+            //         //console.log("Zero: " + z1);
+            //         var currentCusp = cuspPoints.length === 0 ? undefined : cuspPoints[cuspPoints.length - 1];
+            //         if (cuspPoints.length === 0 || Math.abs(z1 - cuspPoints[cuspPoints.length - 1]) > maxError * 10)
+            //             cuspPoints.push(z1);
+            //
+            //         if (Math.abs(t - currentCusp) < step && Math.sign(t - currentCusp) === -1) {
+            //             var rcv = 1 / curvature(currentCusp);
+            //             var cuspX = xExp(currentCusp), cuspY = yExp(currentCusp);
+            //             var nextNormal = -dx(t + step) / dy(t + step);
+            //             var currentRadian = Math.atan(normal);
+            //             var targetRadian = Math.atan(nextNormal);
+            //             console.log(currentRadian);
+            //             console.log(targetRadian);
+            //             var radians = targetRadian - currentRadian;
+            //             console.log("!!!");
+            //             idx++;
+            //             for (var i = 0; i < radians; i += step, idx++, cuspSteps++) {
+            //                 locations[idx] = [cuspX * scale, cuspY * scale, radius * Math.cos(i + currentRadian) * scale,
+            //                     radius * Math.sin(i + currentRadian) * scale, rotAngle + i, currentCusp, rcv];
+            //             }
+            //             idx--;
+            //         }
+            //     }
+            //
+            // }
+            lastNormal = normal;
+
+            var delX = radius * Math.sign(normal) / Math.sqrt(normal * normal + 1);
+            var delY = delX * normal;
+            if (cuspSteps === 0)
+                locations[idx] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1 / curvature(t)];
+            else
+                locations[idx - cuspSteps] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1 / curvature(t)];
+        }
     }
     newCutPoints.push(t2);
     var g = document.getElementById('sign-adjust');
@@ -802,10 +853,29 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     g.innerHTML = '';
     for (var i = 0; i < newCutPoints.length; i++)
         g.appendChild(signElements[i]);
+
     cutPoints = newCutPoints;
     $('[data-toggle="tooltip"]').tooltip();
     console.log(arcLength);
     return locations;
+}
+
+/**
+ * Newton's method to find a zero
+ * @param {Function} f
+ * @param {Function} fp The first derivative
+ * @param {Number} x0 initial value
+ * @param {Number} err Error bound
+ * */
+function findZero(f, fp, x0, err) {
+    var x_n = x0, x_n1;
+    for (var i = 0; i < 20; i++) {
+        x_n1 = x_n - f(x_n) / fp(x_n);
+        if (Math.abs(x_n1 - x_n) < err)
+            return x_n1;
+        x_n = x_n1;
+    }
+    return NaN;
 }
 
 /**
@@ -871,13 +941,14 @@ function draw(ruler, drawingInterval, callback) {
 
     var progressLabel = $('#progressLabel');
     var progressbar = $('#progressbar');
+    var epsilon = 0.0001;
     progressbar.width('0%');
 
     var se = document.getElementById('c0');
     var sign = se === undefined ? 1 : getSign(se);
     for (var i = 0, delay = 0, counter = 0, cut = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
         if (cut < cutPoints.length) {
-            if ((locArray[i][5] - cutPoints[cut]) > 0)
+            if ((locArray[i][5] - cutPoints[cut]) > epsilon)
                 sign = getSign(document.getElementById('c' + ++cut));
         }
         currentJobs.push((function (i, delay, counter, sign) {
