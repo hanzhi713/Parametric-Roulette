@@ -75,8 +75,8 @@ window.onload = function (ev) {
                 if (typeof existingOnchangeHandler === 'function')
                     existingOnchangeHandler(e);
                 stopDrawing();
-                locArray = [];
                 disableDrawing();
+                locArray = [];
             };
         })(i, effectors[i].onchange);
     }
@@ -113,16 +113,19 @@ function removeDot(id) {
     saveConfigToBrowser();
 }
 
+function removeAllDots(){
+    for (var id in dots){
+        $('#' + id).remove();
+    }
+    dots = {};
+}
+
 function addDot() {
     var dotSize = +$('#dotSize').val();
     var dotColor = $('#dotColor').val();
     var dotRatio = +$('#dotRatio').val();
     var dotRot = +$('#dotRotOffset').val();
 
-    // var dotDistCap = +innerCircleParam.value;
-    // if (dotDist > dotDistCap)
-    //     alert('Dot distance should be no greater than the inner circle radius');
-    // else
     addDotHelper((new Date()).valueOf().toString(), dotSize, dotColor, dotRatio, dotRot, true);
 }
 
@@ -137,11 +140,9 @@ function randInt(min, max) {
 }
 
 function randomDot() {
-    // var dotDistCap = +innerCircleParam.value;
-
     var dotSize = randInt(+dotSizeMinParam.value, +dotSizeMaxParam.value);
     var dotColor = '#' + (Math.floor(Math.random() * 256 * 256 * 256)).toString(16);
-    var dotRatio = randInt(+dotRatioMinParam.value, +dotRatioMaxParam.value); //> dotDistCap ? dotDistCap : randDotDistMax);
+    var dotRatio = randInt(+dotRatioMinParam.value, +dotRatioMaxParam.value);
     var dotRot = randInt(+dotRotMinParam.value, +dotRotMaxParam.value);
     addDotHelper((new Date()).valueOf().toString(), dotSize, dotColor, dotRatio, dotRot, true);
 }
@@ -199,12 +200,6 @@ function stopDrawing() {
 }
 
 function adjustDotRatioCap(e) {
-    // var newCap = (+circleParam.value) * (+scaleParam.value);
-    // // var oldCap = +dotRatioMaxParam.max;
-    // dotRatioMaxParam.max = newCap;
-    // var oldValue = +dotRatioMaxParam.value;
-    // if (oldValue > newCap)
-    //     dotRatioMaxParam.value = newCap;
 }
 
 function saveConfigToBrowser() {
@@ -260,9 +255,7 @@ function getConfigJSON() {
         pngBgColor: pngBgColorParam.value,
 
         locArray: isLocValid ? locArray.map(function (value) {
-            return value.map(function (v) {
-                return +(v.toFixed(3))
-            })
+            return [+(value[0].toFixed(2)), +(value[1].toFixed(2)), +(value[2].toFixed(2)), +(value[3].toFixed(2)), +(value[4].toFixed(3)), +(value[5].toFixed(4)), +(value[6].toFixed(2))]
         }) : undefined,
         cutPoints: cutPoints,
         cutPointSigns: isLocValid ? cutPointSigns : undefined
@@ -290,8 +283,6 @@ function parseConfigJSON(json) {
         reverseDirectionCheck.checked = obj.reverseDirection === undefined ? false : obj.reverseDirection;
 
         radiusMultipleParam.value = obj.radiusMultiple === undefined ? 10 : obj.radiusMultiple;
-
-        dots = obj.dots;
 
         dotSizeMinParam.value = obj.dotSizeMin === undefined ? 1 : obj.dotSizeMin;
         dotSizeMaxParam.value = obj.dotSizeMax === undefined ? 3 : obj.dotSizeMax;
@@ -321,8 +312,12 @@ function parseConfigJSON(json) {
         if (pngTransparentCheck.checked)
             pngBgColorParam.disabled = true;
 
+        removeAllDots();
+        dots = obj.dots;
+
         for (var key in dots) {
-            addDotHelper(key, dots[key].size, dots[key].color, dots[key].ratio, Math.round(180 * dots[key].rotOffset / Math.PI), false);
+            addDotHelper(key, dots[key].size, dots[key].color, dots[key].ratio,
+                Math.round(180 * dots[key].rotOffset / Math.PI), false);
         }
 
         if (obj.locArray !== undefined) {
@@ -331,24 +326,10 @@ function parseConfigJSON(json) {
             var g = document.getElementById('sign-adjust');
             g.innerHTML = '';
             for (var i = 0; i < cutPoints.length; i++)
-                g.appendChild(createSignElement(i, obj.cutPointSigns[i] === 1 ? '+' : '-', (i - 1) < 0 ? +t1Param.value : cutPoints[i - 1], cutPoints[i]));
-            var topCxt = topCanvas.getContext('2d');
-            var bottomCxt = bottomCanvas.getContext('2d');
-            var funcCxt = funcCanvas.getContext('2d');
-            funcCxt.strokeStyle = '#000000';
-            setTransform([topCxt, bottomCxt, funcCxt]);
+                g.appendChild(createSignElement(i, obj.cutPointSigns[i] === 1 ? '+' : '-',
+                    (i - 1) < 0 ? +t1Param.value : cutPoints[i - 1], cutPoints[i]));
 
-            funcCxt.moveTo(locArray[0][0], locArray[0][1]);
-            for (i = 1; i < locArray.length; i++)
-                funcCxt.lineTo(locArray[i][0], locArray[i][1]);
-            funcCxt.stroke();
-
-            var ruler = new Ruler(new Circle(locArray[0][2] + locArray[0][0], locArray[0][3] + locArray[0][1], +circleParam.value * +scaleParam.value), getDotArray());
-            ruler.showSkeleton = true;
-            ruler.reverse = reverseDirectionCheck.checked;
-            ruler.draw(topCxt, bottomCxt);
-
-            enableDrawing();
+            drawPreview(+circleParam.value, +scaleParam.value);
         }
     } catch (e) {
         alert(e);
@@ -584,7 +565,8 @@ function saveToGIF() {
 
                             var progress = i / locArray.length * 100;
                             progressbar.width(progress + '%');
-                            progressLabel.text(lan['Drawing: '] + 't = ' + locArray[i][5].toFixed(2) + ', rcv = ' + locArray[i][6].toFixed(2) + ', ' + progress.toFixed(1) + '%');
+                            progressLabel.text(lan['Drawing: '] + 't = ' + locArray[i][5].toFixed(3) + ', rcv = '
+                                + locArray[i][6].toFixed(2) + ', ' + progress.toFixed(1) + '%');
                         }
                     }
                 }, delay);
@@ -653,12 +635,7 @@ function setTransform(cxts) {
         cxts[i].setTransform(1, 0, 0, -1, sx + 320, 320 - sy);
 }
 
-function previewRuler() {
-    stopDrawing();
-    var radius = +circleParam.value;
-    var scale = +scaleParam.value;
-    locArray = calculateLocations(+t1Param.value, +t2Param.value, nerdamer(xParam.value), nerdamer(yParam.value), +drawingStepParam.value, radius, scale);
-
+function drawPreview(radius, scale) {
     if (clearBeforeDrawingCheck.checked)
         clear();
 
@@ -674,11 +651,22 @@ function previewRuler() {
         funcCxt.lineTo(locArray[i][0], locArray[i][1]);
     funcCxt.stroke();
 
-    var ruler = new Ruler(new Circle(locArray[0][2] + locArray[0][0], locArray[0][3] + locArray[0][1], radius * scale), getDotArray());
+    var initialSigns = getSign(document.getElementById('c0'));
+    var ruler = new Ruler(new Circle(locArray[0][2] + initialSigns * locArray[0][0],
+        locArray[0][3] + initialSigns * locArray[0][1], radius * scale), getDotArray());
     ruler.showSkeleton = true;
     ruler.reverse = reverseDirectionCheck.checked;
     ruler.draw(topCxt, bottomCxt);
     enableDrawing();
+}
+
+function previewRuler() {
+    stopDrawing();
+    var radius = +circleParam.value;
+    var scale = +scaleParam.value;
+    locArray = calculateLocations(+t1Param.value, +t2Param.value, nerdamer(xParam.value),
+        nerdamer(yParam.value), +drawingStepParam.value, radius, scale);
+    drawPreview(radius, scale);
     saveConfigToBrowser();
 }
 
@@ -689,24 +677,18 @@ function clear() {
 }
 
 function clearTop() {
-    var topCxt = topCanvas.getContext('2d');
     topCanvas.height++;
     topCanvas.height--;
 }
 
 function clearBottom() {
-    var bottomCxt = bottomCanvas.getContext('2d');
     bottomCanvas.height++;
     bottomCanvas.height--;
 }
 
 function clearFunc() {
-    var cxt = funcCanvas.getContext('2d');
     funcCanvas.height++;
     funcCanvas.height--;
-    // cxt.setTransform(1, 0, 0, 1, 0, 0);
-    // cxt.clearRect(0, 0, funcCanvas.width, funcCanvas.height);
-    // cxt.setTransform(1, 0, 0, -1, 320, 320);
 }
 
 /**
@@ -778,6 +760,8 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     var arcLength = 0;
     var previousArcLength = arcLength;
     var previousLower = t1;
+
+    // longer slice length will result in better accuracy of numerical integration
     var sliceLength = 256;
     var sliceUpper = sliceLength - 1;
     for (var t = t1, counter = 0; t < t2; t += step, counter++) {
@@ -796,7 +780,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
 
         var x = xExp(t);
         var y = yExp(t);
-        var delX = radius * Math.sign(normal) * (Math.cos(Math.atan(normal))); //Math.sqrt(radius * radius / (normal * normal + 1));//
+        var delX = radius * Math.sign(normal) / Math.sqrt(normal * normal + 1);
         var delY = delX * normal;
 
         var rotAngle = arcLength / radius;
@@ -808,7 +792,8 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     if (newCutPoints.length === cutPoints.length) {
         for (var i = 0; i < newCutPoints.length; i++) {
             var oldElement = document.getElementById('c' + i);
-            signElements[i] = createSignElement(i, oldElement.innerHTML[oldElement.innerHTML.length - 1], ((i - 1) < 0 ? t1 : newCutPoints[i - 1]), newCutPoints[i]);
+            signElements[i] = createSignElement(i, oldElement.innerHTML[oldElement.innerHTML.length - 1],
+                ((i - 1) < 0 ? t1 : newCutPoints[i - 1]), newCutPoints[i]);
         }
     } else {
         for (var i = 0; i < newCutPoints.length; i++)
@@ -906,7 +891,8 @@ function draw(ruler, drawingInterval, callback) {
                         if (counter % 10 === 0) {
                             var progress = i / locArray.length * 100;
                             progressbar.width(progress + '%');
-                            progressLabel.text(lan['Drawing: '] + 't = ' + locArray[i][5].toFixed(2) + ', rcv = ' + locArray[i][6].toFixed(2) + ', ' + progress.toFixed(1) + '%');
+                            progressLabel.text(lan['Drawing: '] + 't = ' + locArray[i][5].toFixed(3) +
+                                ', rcv = ' + locArray[i][6].toFixed(2) + ', ' + progress.toFixed(1) + '%');
                         }
                     }
                 }, delay);
@@ -985,7 +971,8 @@ function Ruler(circle, dots) {
     this.reverse = false;
 
     this.calculateRotation = function (i) {
-        return (this.reverse ^ this.rotCorrection) ? this.angle + this.dots[i].rotOffset : TwoPI - (this.angle + this.dots[i].rotOffset) % TwoPI
+        return (this.reverse ^ this.rotCorrection) ?
+            this.angle + this.dots[i].rotOffset : TwoPI - (this.angle + this.dots[i].rotOffset) % TwoPI
     };
 
     /**
@@ -1030,7 +1017,8 @@ function Ruler(circle, dots) {
     this.drawDots = function (topCxt) {
         //var previousStyle = topCxt.fillStyle;
         for (var i = 0; i < this.dots.length; i++) {
-            var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].ratio / 100 * this.circle.radius, this.calculateRotation(i));
+            var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].ratio / 100 * this.circle.radius,
+                this.calculateRotation(i));
             topCxt.fillStyle = this.dots[i].color;
             topCxt.beginPath();
             topCxt.arc(dotPos[0], dotPos[1], this.dots[i].size, 0, TwoPI);
@@ -1045,7 +1033,8 @@ function Ruler(circle, dots) {
     this.drawSkeleton = function (bottomCxt) {
         if (this.showSkeleton) {
             for (var i = 0; i < this.dots.length; i++) {
-                var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].ratio / 100 * this.circle.radius, this.calculateRotation(i));
+                var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].ratio / 100 * this.circle.radius,
+                    this.calculateRotation(i));
                 bottomCxt.moveTo(this.circle.x, this.circle.y);
                 bottomCxt.lineTo(dotPos[0], dotPos[1]);
             }
@@ -1059,7 +1048,8 @@ function Ruler(circle, dots) {
         if (this.showSkeleton) {
             bottomCxt.beginPath();
             for (var i = 0; i < this.dots.length; i++) {
-                var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].ratio / 100 * this.circle.radius, this.calculateRotation(i));
+                var dotPos = rad2cor(this.circle.x, this.circle.y, this.dots[i].ratio / 100 * this.circle.radius,
+                    this.calculateRotation(i));
                 bottomCxt.moveTo(this.circle.x, this.circle.y);
                 bottomCxt.lineTo(dotPos[0], dotPos[1]);
                 bottomCxt.arc(this.circle.x, this.circle.y, 2, 0, TwoPI);
