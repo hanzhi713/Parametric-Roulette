@@ -479,6 +479,8 @@ function saveToGIF() {
     var frameInterval = +gifIntervalParam.value;
     var frameDelay = +gifFrameDelayParam.value;
 
+    var drawingInterval = +drawingDelayParam.value;
+
     var circleRadius = +circleParam.value;
 
     var ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
@@ -837,8 +839,8 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         // console.log("!!!");
                         // idx++;
                         // for (var i = 0; i < radians; i += step * 5, idx++, cuspSteps++) {
-                        //     locations[idx] = [cuspX * scale, cuspY * scale, radius * Math.cos(currentRadian - i) * scale,
-                        //         radius * Math.sin(currentRadian - i) * scale, rotAngle + i, currentCusp, rcv];
+                        //     locations[idx] = [cuspX * scale, cuspY * scale, radius * Math.cos(i - currentRadian) * scale,
+                        //         radius * Math.sin(i - currentRadian) * scale, rotAngle + i, currentCusp, rcv];
                         // }
                         // idx--;
                         // previousArcLength -= radius * Math.PI;
