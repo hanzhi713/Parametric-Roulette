@@ -44,7 +44,7 @@
             margin-bottom: 10px;
         }
 
-        .c-default{
+        .c-default {
             position: absolute;
             left: 0;
         }
@@ -62,6 +62,18 @@
             -ms-transition: none;
             -o-transition: none;
             transition: none;
+        }
+
+        .sign-ele {
+            padding-left: 4px;
+            padding-right: 4px;
+            font-size: 12px;
+        }
+
+        .rot-ele {
+            padding-left: 5px;
+            padding-right: 5px;
+            font-size: 13px;
         }
     </style>
 </head>
@@ -96,7 +108,9 @@
                 </tr>
                 <tr>
                     <td>
-                        <label for="dotRatio" title="The proportion of the dot's distance to the center of the circle relative to the circle's radius" data-toggle="tooltip">
+                        <label for="dotRatio"
+                               title="The proportion of the dot's distance to the center of the circle relative to the circle's radius"
+                               data-toggle="tooltip">
                             Ratio of radius
                         </label>
                     </td>
@@ -145,9 +159,11 @@
                                             <tr>
                                                 <td>Distance Ratio</td>
                                                 <td><input id="dotRatioMin" style="width: 50px;" type="number"
-                                                           min="0" max="800" value="50" step="0.1">%</td>
+                                                           min="0" max="800" value="50" step="0.1">%
+                                                </td>
                                                 <td><input id="dotRatioMax" style="width: 50px;" type="number"
-                                                           min="0" max="800" value="100" step="0.1">%</td>
+                                                           min="0" max="800" value="100" step="0.1">%
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <td>Dot Rotation</td>
@@ -233,7 +249,8 @@
                 <canvas id="canvas-top" width="640px" height="640px" class="c-default" style="z-index: 1"></canvas>
                 <canvas id="canvas-bottom" width="640px" height="640px" class="c-default" style="z-index: 0"></canvas>
                 <canvas id="canvas-func" width="640px" height="640px" class="c-default" style="z-index: -1;"></canvas>
-                <canvas id="canvas-temp" width="640px" height="640px" class="c-default" style="z-index: -2;display: none"></canvas>
+                <canvas id="canvas-temp" width="640px" height="640px" class="c-default"
+                        style="z-index: -2;display: none"></canvas>
             </div>
             <div id="progressdiv" class="progress"
                  style="width: 600px; height: 25px; margin: auto auto; text-align: center; position: relative">
@@ -261,35 +278,55 @@
                 </tr>
                 <tr>
                     <td colspan="2" style="text-align: center; font-weight: bold">
-                        <label for="t1" title="Lower limit of the parameter t" data-toggle="tooltip">t<sub>1</sub>: </label>&nbsp;&nbsp;
+                        <label for="t1" title="Lower limit of the parameter t" data-toggle="tooltip">t<sub>1</sub>:
+                        </label>&nbsp;&nbsp;
                         <input type="number" id="t1" style="width: 80px" value="-10" step="0.01"/>&nbsp;&nbsp;&nbsp;&nbsp;
-                        <label for="t2" title="Upper limit of the parameter t" data-toggle="tooltip">t<sub>2</sub>: </label>&nbsp;&nbsp;
+                        <label for="t2" title="Upper limit of the parameter t" data-toggle="tooltip">t<sub>2</sub>:
+                        </label>&nbsp;&nbsp;
                         <input type="number" id="t2" style="width: 80px" value="10" step="0.01"/>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2" style="text-align: center; font-weight: bold; margin: 0 0 0 0">
                         <label for="dx" title="Horizontal translation of the graph" data-toggle="tooltip">dx: </label>
-                        <input type="number" id="dx" style="width: 57px" value="0" step="1" />
+                        <input type="number" id="dx" style="width: 57px" value="0" step="1"/>
                         <label for="dy" title="Vertical translation of the graph" data-toggle="tooltip">dy: </label>
                         <input type="number" id="dy" style="width: 57px" value="0" step="1"/>
-                        <label for="scale" title="Scaling factor of the graph, applied horizontally and vertically" data-toggle="tooltip">s: </label>
-                        <input type="number" id="scale" style="width: 56px" value="1" step="0.1" onchange="adjustDotRatioCap(this)"/>
+                        <label for="scale" title="Scaling factor of the graph, applied horizontally and vertically"
+                               data-toggle="tooltip">s: </label>
+                        <input type="number" id="scale" style="width: 56px" value="1" step="0.1"
+                               onchange="adjustDotRatioCap(this)"/>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2" style="text-align: center">
                         <div id="sign-adjust" class="btn-group" role="group"></div>
+                        <button class="btn btn-info btn-sm" title="reverse all signs" data-toggle="tooltip"
+                                onclick="reverseSign(document.getElementById('sign-adjust').childNodes)"
+                                style="float: right">R
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align: center">
+                        <div id="rot-adjust" class="btn-group" role="group"></div>
+                        <button class="btn btn-info btn-sm" title="reverse all signs" data-toggle="tooltip"
+                                onclick="reverseSign(document.getElementById('rot-adjust').childNodes)"
+                                style="float: right">R
+                        </button>
                     </td>
                 </tr>
                 <tr>
                     <td>
                         <label for="circleRadius">Circle radius</label>
                         <button type="button" class="btn btn-sm" data-toggle="modal" data-target="#radiusSetter">
-                            <i class="fas fa-hand-point-left" title="Generate a radius such that the perimeter of the circle divides the total arc length of your given parametric curve" data-toggle="tooltip"></i>
+                            <i class="fas fa-hand-point-left"
+                               title="Generate a radius such that the perimeter of the circle divides the total arc length of your given parametric curve"
+                               data-toggle="tooltip"></i>
                         </button>
-                        <div class="modal fade" id="radiusSetter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" style="width: 400px"  role="document">
+                        <div class="modal fade" id="radiusSetter" tabindex="-1" role="dialog"
+                             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" style="width: 400px" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="setterTitle">Generate a suitable radius</h5>
@@ -300,15 +337,19 @@
                                     <div class="modal-body">
                                         <table class="table" style="font-size: large; width: 320px; margin: auto auto">
                                             <tr>
-                                                <td><label for="radiusMultiple" title="How many times should the total arc length greater than the perimeter">Multiples</label></td>
+                                                <td><label for="radiusMultiple"
+                                                           title="How many times should the total arc length greater than the perimeter">Multiples</label>
+                                                </td>
                                                 <td>
-                                                    <input id="radiusMultiple" type="number" step="0.5" min="0" max="100" value="10"/>
+                                                    <input id="radiusMultiple" type="number" step="0.5" min="0"
+                                                           max="100" value="10"/>
                                                 </td>
                                             </tr>
                                         </table>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="stopDrawing();locArray = [];disableDrawing();generateRadius();">
+                                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                                onclick="stopDrawing();locArray = [];disableDrawing();generateRadius();">
                                             Generate
                                         </button>
                                     </div>
@@ -327,7 +368,8 @@
                     <td><input type="checkbox" id="showFunc" class="checkbox" checked/></td>
                 </tr>
                 <tr>
-                    <td><label for="showSk" data-toggle="tooltip" title="lines connecting the center of the inner circle and the dots">Show
+                    <td><label for="showSk" data-toggle="tooltip"
+                               title="lines connecting the center of the inner circle and the dots">Show
                         skeleton</label></td>
                     <td><input type="checkbox" id="showSk" class="checkbox" checked/></td>
                 </tr>
@@ -349,7 +391,8 @@
                 </tr>
                 <tr>
                     <td>
-                        <label for="delay" data-toggle="tooltip" title="Delay between each drawing step, in milliseconds">
+                        <label for="delay" data-toggle="tooltip"
+                               title="Delay between each drawing step, in milliseconds">
                             Drawing delay
                         </label>
                     </td>
@@ -357,19 +400,19 @@
                         <input type="number" id="delay" style="width: 50px" value="2" step="1" max="10" min="0">
                     </td>
                 </tr>
-                <tr>
-                    <td><label for="direction" title="Reverse the rotation direction of the circle" data-toggle="tooltip">Reverse direction</label></td>
-                    <td><input type="checkbox" id="direction" class="checkbox"></td>
-                </tr>
             </table>
             <table id="button-group" style="width: 200px; margin: auto auto; text-align: center;">
                 <tr>
                     <td>
-                        <button id="draw" class="btn btn-warning" onclick="caller(undefined)" style="width:75px;" disabled>Draw
+                        <button id="draw" class="btn btn-warning" onclick="caller(undefined)" style="width:75px;"
+                                disabled>Draw
                         </button>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-info" onclick="previewRuler()" title="pre-calculate the path of the circle and preview dots and parametric curve" data-toggle="tooltip">Preview</button>
+                        <button type="button" class="btn btn-info" onclick="previewRuler()"
+                                title="pre-calculate the path of the circle and preview dots and parametric curve"
+                                data-toggle="tooltip">Preview
+                        </button>
                     </td>
                 </tr>
                 <tr>
@@ -398,9 +441,11 @@
                                 <span class="sr-only">Toggle Dropdown</span>
                             </button>
                             <div class="dropdown-menu">
-                                <a style="cursor: pointer" class="dropdown-item" id="savepng" data-toggle="modal" data-target="#PNGModalCenter">Save as
+                                <a style="cursor: pointer" class="dropdown-item" id="savepng" data-toggle="modal"
+                                   data-target="#PNGModalCenter">Save as
                                     PNG</a>
-                                <a style="cursor: pointer" class="dropdown-item" id="savegif" data-toggle="modal" data-target="#GIFModalCenter">Save as
+                                <a style="cursor: pointer" class="dropdown-item" id="savegif" data-toggle="modal"
+                                   data-target="#GIFModalCenter">Save as
                                     GIF</a>
                             </div>
                         </div>
@@ -427,7 +472,8 @@
                                             <tr>
                                                 <th><label for="f-crop">Auto-crop</label></th>
                                                 <td>
-                                                    <input type="checkbox" id="f-crop" style="width: 20px; height: 20px">
+                                                    <input type="checkbox" id="f-crop"
+                                                           style="width: 20px; height: 20px">
                                                 </td>
                                             </tr>
                                             <tr>
@@ -462,7 +508,8 @@
                                             </tr>
                                             <tr>
                                                 <th><label for="f-bgcolor">Background color</label></th>
-                                                <td><input type="color" id="f-bgcolor" value="#FFFFFF" style="width: 60px;"/></td>
+                                                <td><input type="color" id="f-bgcolor" value="#FFFFFF"
+                                                           style="width: 60px;"/></td>
                                             </tr>
                                             <tr>
                                                 <th><label for="f-quality" data-toggle="tooltip"
@@ -522,7 +569,8 @@
                                             <tr>
                                                 <th><label for="p-crop">Auto-crop</label></th>
                                                 <td>
-                                                    <input type="checkbox" id="p-crop" style="width: 20px; height: 20px">
+                                                    <input type="checkbox" id="p-crop"
+                                                           style="width: 20px; height: 20px">
                                                 </td>
                                             </tr>
                                             <tr>
@@ -534,7 +582,8 @@
                                             </tr>
                                             <tr>
                                                 <th><label for="p-bgcolor">Background color</label></th>
-                                                <td><input type="color" id="p-bgcolor" value="#FFFFFF" style="width: 60px;"/></td>
+                                                <td><input type="color" id="p-bgcolor" value="#FFFFFF"
+                                                           style="width: 60px;"/></td>
                                             </tr>
                                         </table>
                                     </div>
@@ -564,12 +613,12 @@
         'Drawing: ': 'Drawing: '
     };
 </script>
-<script src="parametric.js?ver=10"></script>
+<script src="parametric.js?ver=11"></script>
 <div style="width: 300px; margin: auto auto">
     <span style="font-size:18px;">
         Developed by <a href="https://github.com/hanzhi713" target="_blank">Hanzhi Zhou</a>
         <!--Click <a href="https://github.com/hanzhi713/Flowers-Curve/wiki" target="_blank">here</a> to see instructions. <a-->
-            <!--href="index-zh.html">中文</a>-->
+        <!--href="index-zh.html">中文</a>-->
     </span>
 </div>
 </body>

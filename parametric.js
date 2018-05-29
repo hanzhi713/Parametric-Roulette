@@ -22,7 +22,6 @@ var drawingStepParam = document.getElementById('step');
 var drawingDelayParam = document.getElementById('delay');
 var skeletonCheck = document.getElementById('showSk');
 var functionCheck = document.getElementById('showFunc');
-var reverseDirectionCheck = document.getElementById('direction');
 
 var radiusMultipleParam = document.getElementById('radiusMultiple');
 
@@ -209,10 +208,13 @@ function saveConfigToBrowser() {
 
 function getConfigJSON() {
     var isLocValid = locArray.length > 0 && locArray[0].length >= 6;
-    var cutPointSigns = new Array(cutPoints.length);
+    var cutPointSigns = new Array(cutPoints.length), cuspPointSigns = new Array(cuspPoints.length);
     if (isLocValid) {
         for (var i = 0; i < cutPoints.length; i++)
             cutPointSigns[i] = getSign(document.getElementById('c' + i))
+
+        for (i = 0; i < cuspPoints.length; i++)
+            cuspPointSigns[i] = getSign(document.getElementById('r' + i))
     }
     var config = {
         circleRadius: +circleParam.value,
@@ -228,7 +230,6 @@ function getConfigJSON() {
         clearBeforeDrawing: clearBeforeDrawingCheck.checked,
         drawingStep: +drawingStepParam.value,
         drawingDelay: +drawingDelayParam.value,
-        reverseDirection: reverseDirectionCheck.checked,
 
         radiusMultiple: +radiusMultipleParam.value,
 
@@ -259,7 +260,9 @@ function getConfigJSON() {
             return [+(value[0].toFixed(2)), +(value[1].toFixed(2)), +(value[2].toFixed(2)), +(value[3].toFixed(2)), +(value[4].toFixed(3)), +(value[5].toFixed(4)), +(value[6].toFixed(2))]
         }) : undefined,
         cutPoints: cutPoints,
-        cutPointSigns: isLocValid ? cutPointSigns : undefined
+        cutPointSigns: isLocValid ? cutPointSigns : undefined,
+        cuspPoints: cuspPoints,
+        cuspPointSigns: isLocValid ? cuspPointSigns : undefined
     };
     return JSON.stringify(config);
 }
@@ -281,7 +284,6 @@ function parseConfigJSON(json) {
         clearBeforeDrawingCheck.checked = obj.clearBeforeDrawing === undefined ? true : obj.clearBeforeDrawing;
         drawingStepParam.value = obj.drawingStep === undefined ? 0.005 : obj.drawingStep;
         drawingDelayParam.value = obj.drawingDelay === undefined ? 2 : obj.drawingDelay;
-        reverseDirectionCheck.checked = obj.reverseDirection === undefined ? false : obj.reverseDirection;
 
         radiusMultipleParam.value = obj.radiusMultiple === undefined ? 10 : obj.radiusMultiple;
 
@@ -324,11 +326,19 @@ function parseConfigJSON(json) {
         if (obj.locArray !== undefined) {
             locArray = obj.locArray;
             cutPoints = obj.cutPoints;
-            var g = document.getElementById('sign-adjust');
-            g.innerHTML = '';
+            cuspPoints = obj.cuspPoints;
+
+            var signRow = document.getElementById('sign-adjust');
+            signRow.innerHTML = '';
             for (var i = 0; i < cutPoints.length; i++)
-                g.appendChild(createSignElement(i, obj.cutPointSigns[i] === 1 ? '+' : '-',
+                signRow.appendChild(createSignElement(i, obj.cutPointSigns[i] === 1 ? '+' : '-',
                     (i - 1) < 0 ? +t1Param.value : cutPoints[i - 1], cutPoints[i]));
+
+            var rotRow = document.getElementById('rot-adjust');
+            rotRow.innerHTML = '';
+            for (var i = 0; i < cuspPoints.length; i++)
+                rotRow.appendChild(createRotElement(i, obj.cuspPointSigns[i] === 1 ? '+' : '-',
+                    (i - 1) < 0 ? +t1Param.value : cuspPoints[i - 1], cuspPoints[i]));
 
             drawPreview(+circleParam.value, +scaleParam.value);
         }
@@ -411,7 +421,6 @@ function saveToPNG() {
 
     var ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
     ruler.showSkeleton = skeletonCheck.checked;
-    ruler.reverse = reverseDirectionCheck.checked;
 
     stopDrawing();
     flag.stop = false;
@@ -474,7 +483,6 @@ function saveToGIF() {
 
     var ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
     ruler.showSkeleton = skeletonCheck.checked;
-    ruler.reverse = reverseDirectionCheck.checked;
 
     stopDrawing();
     flag.stop = false;
@@ -530,24 +538,32 @@ function saveToGIF() {
 
     var progressLabel = $('#progressLabel');
     var progressbar = $('#progressbar');
+    var epsilon = 0.0001;
     progressbar.width('0%');
 
-    var epsilon = 0.0001;
-    var se = document.getElementById('c0');
-
-    var drawingInterval = +drawingDelayParam.value;
-    var sign = se === undefined ? 1 : getSign(se);
-    for (var i = 0, delay = 0, counter = 0, cut = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
+    var sign = getSign(document.getElementById('c0'));
+    var rot = getSign(document.getElementById('r0'));
+    for (var i = 0, delay = 0, counter = 0, cut = 0, cusp = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
+        var changeRot = i === 0;
         if (cut < cutPoints.length) {
             if ((locArray[i][5] - cutPoints[cut]) > epsilon)
                 sign = getSign(document.getElementById('c' + ++cut));
         }
-        currentJobs.push((function (i, delay, counter, sign) {
+        if (cusp < cuspPoints.length) {
+            if ((locArray[i][5] - cuspPoints[cusp]) > epsilon) {
+                rot = getSign(document.getElementById('r' + ++cusp));
+                changeRot = true;
+            }
+        }
+        currentJobs.push((function (i, delay, counter, sign, rot, changeRot) {
                 return setTimeout(function () {
                     if (!flag.stop) {
                         ruler.erase(bottomCxt);
                         ruler.moveTo(locArray[i][0] + sign * locArray[i][2], locArray[i][1] + sign * locArray[i][3]);
                         ruler.angle = locArray[i][4];
+                        if (changeRot)
+                            ruler.changeDirection(rot);
+
                         ruler.draw(topCxt, bottomCxt);
 
                         if (counter % frameInterval === 0) {
@@ -562,7 +578,7 @@ function saveToGIF() {
 
                             gif.addFrame(tempCxt, {
                                 copy: true,
-                                delay: frameDelay //frameInterval + frameInterval * drawingStep
+                                delay: frameDelay
                             });
 
                             var progress = i / locArray.length * 100;
@@ -573,7 +589,7 @@ function saveToGIF() {
                     }
                 }, delay);
             }
-        )(i, delay, counter, sign));
+        )(i, delay, counter, sign, rot, changeRot));
     }
     currentJobs.push((function (i, delay) {
             return setTimeout(function () {
@@ -621,9 +637,8 @@ function saveToGIF() {
  * */
 function getDotArray() {
     var dotArray = [];
-    for (var key in dots) {
+    for (var key in dots)
         dotArray.push(dots[key]);
-    }
     return dotArray;
 }
 
@@ -644,10 +659,9 @@ function drawPreview(radius, scale) {
     var topCxt = topCanvas.getContext('2d');
     var bottomCxt = bottomCanvas.getContext('2d');
     var funcCxt = funcCanvas.getContext('2d');
-    funcCxt.strokeStyle = '#000000';
-    funcCxt.strokeStyle = '#000000';
     setTransform([topCxt, bottomCxt, funcCxt]);
 
+    funcCxt.strokeStyle = '#000000';
     funcCxt.moveTo(locArray[0][0], locArray[0][1]);
     for (var i = 1; i < locArray.length; i++)
         funcCxt.lineTo(locArray[i][0], locArray[i][1]);
@@ -657,7 +671,6 @@ function drawPreview(radius, scale) {
     var ruler = new Ruler(new Circle(locArray[0][2] + initialSigns * locArray[0][0],
         locArray[0][3] + initialSigns * locArray[0][1], radius * scale), getDotArray());
     ruler.showSkeleton = true;
-    ruler.reverse = reverseDirectionCheck.checked;
     ruler.draw(topCxt, bottomCxt);
     enableDrawing();
 }
@@ -701,7 +714,6 @@ function caller(callback) {
 
     var ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
     ruler.showSkeleton = skeletonCheck.checked;
-    ruler.reverse = reverseDirectionCheck.checked;
 
     stopDrawing();
     flag.stop = false;
@@ -746,7 +758,7 @@ function buildNecessaryExpressions(xExp, yExp) {
  * @return Array
  * */
 function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
-    cuspPoints = [];
+    var newCuspPoints = [];
     //var totalSteps = Math.round((t2 - t1) / step);
     //var arcLengthInt = nerdamer('defint(sqrt((' + dx.text() + ')^2 + (' + dy.text() + ')^2), ' + t1 + ', t2, t)');
 
@@ -770,6 +782,8 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     // longer slice length will result in better accuracy of numerical integration
     var sliceLength = 256;
     var sliceUpper = sliceLength - 1;
+
+    // cusp detection threshold
     var cuspThreshold = 0.1;
     var maxError = 0.0001;
     for (var t = t1, counter = 0, idx = 0; t < t2; t += step, counter++, idx++) {
@@ -786,7 +800,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         }
         var rotAngle = arcLength / radius;
         var cuspSteps = 0;
-        //console.log(idx);
+
         if (dyE === 0) {
             locations[idx] = [x * scale, y * scale, 0, radius * scale, rotAngle, t, 1 / curvature(t)];
         }
@@ -797,36 +811,41 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
             if (Math.sign(normal) * Math.sign(lastNormal) === -1 && Math.abs(normal - lastNormal) < 0.5)
                 newCutPoints.push(t - step);
 
-            // if (Math.abs(dyE) < cuspThreshold && Math.abs(dxE) < cuspThreshold) {
-            //     //console.log('cusp!' + t);
-            //     var z1 = findZero(dx, exps[4], t, maxError);
-            //     var z2 = findZero(dy, exps[5], t, maxError);
-            //     if (!isNaN(z1) && !isNaN(z2) && Math.abs(z1 - z2) < maxError * 10) {
-            //         //console.log("Zero: " + z1);
-            //         var currentCusp = cuspPoints.length === 0 ? undefined : cuspPoints[cuspPoints.length - 1];
-            //         if (cuspPoints.length === 0 || Math.abs(z1 - cuspPoints[cuspPoints.length - 1]) > maxError * 10)
-            //             cuspPoints.push(z1);
-            //
-            //         if (Math.abs(t - currentCusp) < step && Math.sign(t - currentCusp) === -1) {
-            //             var rcv = 1 / curvature(currentCusp);
-            //             var cuspX = xExp(currentCusp), cuspY = yExp(currentCusp);
-            //             var nextNormal = -dx(t + step) / dy(t + step);
-            //             var currentRadian = Math.atan(normal);
-            //             var targetRadian = Math.atan(nextNormal);
-            //             console.log(currentRadian);
-            //             console.log(targetRadian);
-            //             var radians = targetRadian - currentRadian;
-            //             console.log("!!!");
-            //             idx++;
-            //             for (var i = 0; i < radians; i += step, idx++, cuspSteps++) {
-            //                 locations[idx] = [cuspX * scale, cuspY * scale, radius * Math.cos(i + currentRadian) * scale,
-            //                     radius * Math.sin(i + currentRadian) * scale, rotAngle + i, currentCusp, rcv];
-            //             }
-            //             idx--;
-            //         }
-            //     }
-            //
-            // }
+            if (Math.abs(dyE) < cuspThreshold && Math.abs(dxE) < cuspThreshold) {
+                //console.log('cusp!' + t);
+                var z1 = findZero(dx, exps[4], t, maxError);
+                var z2 = findZero(dy, exps[5], t, maxError);
+                if (!isNaN(z1) && !isNaN(z2) && Math.abs(z1 - z2) < maxError * 10) {
+
+                    //console.log("Zero: " + z1);
+                    var currentCusp = newCuspPoints.length === 0 ? undefined : newCuspPoints[newCuspPoints.length - 1];
+                    if (t < z1 && z1 < t2 && (newCuspPoints.length === 0 || Math.abs(z1 - newCuspPoints[newCuspPoints.length - 1]) > maxError * 10))
+                        newCuspPoints.push(z1);
+
+                    if (Math.abs(t - currentCusp) <= step && Math.sign(t - currentCusp) === -1) {
+                        // var rcv = 1 / curvature(currentCusp);
+                        // var cuspX = xExp(currentCusp), cuspY = yExp(currentCusp);
+                        // var nextNormal = -dx(t + step + maxError) / dy(t + step + maxError);
+                        // console.log(t + '||' + currentCusp + '||' + (t + step));
+                        // var currentRadian = Math.sign(normal) * Math.atan(normal);
+                        // var targetRadian = Math.sign(normal) * Math.atan(nextNormal);
+                        // console.log(normal);
+                        // console.log(nextNormal);
+                        // console.log(currentRadian);
+                        // console.log(targetRadian);
+                        // var radians = Math.PI;
+                        // console.log("!!!");
+                        // idx++;
+                        // for (var i = 0; i < radians; i += step * 5, idx++, cuspSteps++) {
+                        //     locations[idx] = [cuspX * scale, cuspY * scale, radius * Math.cos(currentRadian - i) * scale,
+                        //         radius * Math.sin(currentRadian - i) * scale, rotAngle + i, currentCusp, rcv];
+                        // }
+                        // idx--;
+                        // previousArcLength -= radius * Math.PI;
+                    }
+                }
+            }
+
             lastNormal = normal;
 
             var delX = radius * Math.sign(normal) / Math.sqrt(normal * normal + 1);
@@ -838,7 +857,9 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         }
     }
     newCutPoints.push(t2);
-    var g = document.getElementById('sign-adjust');
+    newCuspPoints.push(t2);
+
+    var signRow = document.getElementById('sign-adjust');
     var signElements = new Array(newCutPoints.length);
     if (newCutPoints.length === cutPoints.length) {
         for (var i = 0; i < newCutPoints.length; i++) {
@@ -848,13 +869,30 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         }
     } else {
         for (var i = 0; i < newCutPoints.length; i++)
-            signElements[i] = createSignElement(i, '+', ((i - 1) < 0 ? t1 : newCutPoints[i - 1]), newCutPoints[i]);
+            signElements[i] = createSignElement(i, i % 2 === 0 ? '+' : '-', ((i - 1) < 0 ? t1 : newCutPoints[i - 1]), newCutPoints[i]);
     }
-    g.innerHTML = '';
+    signRow.innerHTML = '';
     for (var i = 0; i < newCutPoints.length; i++)
-        g.appendChild(signElements[i]);
+        signRow.appendChild(signElements[i]);
+
+    var rotRow = document.getElementById('rot-adjust');
+    var rotElements = new Array(newCuspPoints.length);
+    if (newCuspPoints.length === cutPoints.length) {
+        for (var i = 0; i < newCuspPoints.length; i++) {
+            var oldElement = document.getElementById('r' + i);
+            rotElements[i] = createRotElement(i, oldElement.innerHTML[oldElement.innerHTML.length - 1],
+                ((i - 1) < 0 ? t1 : newCuspPoints[i - 1]), newCuspPoints[i]);
+        }
+    } else {
+        for (var i = 0; i < newCuspPoints.length; i++)
+            rotElements[i] = createRotElement(i, i % 2 === 0 ? '+' : '-', ((i - 1) < 0 ? t1 : newCuspPoints[i - 1]), newCuspPoints[i]);
+    }
+    rotRow.innerHTML = '';
+    for (var i = 0; i < newCuspPoints.length; i++)
+        rotRow.appendChild(rotElements[i]);
 
     cutPoints = newCutPoints;
+    cuspPoints = newCuspPoints;
     $('[data-toggle="tooltip"]').tooltip();
     console.log(arcLength);
     return locations;
@@ -889,17 +927,49 @@ function createSignElement(index, sign, lower, upper) {
     var e = document.createElement('button');
     e.id = 'c' + index;
     e.type = 'button';
-    e.className = 'btn btn-secondary btn-sm';
+    e.className = 'btn btn-secondary btn-sm sign-ele';
     e.innerHTML = upper.toFixed(2) + sign;
     e.setAttribute('data-toggle', 'tooltip');
     e.title = 'Change the sign between ' + lower.toFixed(3) + ' and ' + upper.toFixed(3);
     e.onclick = function (ev) {
-        var ih = ev.target.innerHTML;
+        reverseSign([ev.target]);
+        saveConfigToBrowser();
+    };
+    return e;
+}
+
+/**
+ * @param {Array} targets
+ * */
+function reverseSign(targets) {
+    for (var i = 0; i < targets.length; i++) {
+        var t = targets[i];
+        var ih = t.innerHTML;
         var sign = ih[ih.length - 1];
         if (sign === '+')
-            ev.target.innerHTML = ih.substring(0, ih.length - 1) + '-';
+            t.innerHTML = ih.substring(0, ih.length - 1) + '-';
         else
-            ev.target.innerHTML = ih.substring(0, ih.length - 1) + '+';
+            t.innerHTML = ih.substring(0, ih.length - 1) + '+';
+    }
+}
+
+/**
+ * a template for rot (rotation) element (the button for changing the direction of rotation)
+ * @param {Number} index
+ * @param {string} sign
+ * @param {Number} lower
+ * @param {Number} upper
+ * */
+function createRotElement(index, sign, lower, upper) {
+    var e = document.createElement('button');
+    e.id = 'r' + index;
+    e.type = 'button';
+    e.className = 'btn btn-outline-dark btn-sm rot-ele';
+    e.innerHTML = upper.toFixed(2) + sign;
+    e.setAttribute('data-toggle', 'tooltip');
+    e.title = 'Change the direction of rotation between ' + lower.toFixed(3) + ' and ' + upper.toFixed(3);
+    e.onclick = function (ev) {
+        reverseSign([ev.target]);
         saveConfigToBrowser();
     };
     return e;
@@ -944,19 +1014,29 @@ function draw(ruler, drawingInterval, callback) {
     var epsilon = 0.0001;
     progressbar.width('0%');
 
-    var se = document.getElementById('c0');
-    var sign = se === undefined ? 1 : getSign(se);
-    for (var i = 0, delay = 0, counter = 0, cut = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
+    var sign = getSign(document.getElementById('c0'));
+    var rot = getSign(document.getElementById('r0'));
+    for (var i = 0, delay = 0, counter = 0, cut = 0, cusp = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
+        var changeRot = i === 0;
         if (cut < cutPoints.length) {
             if ((locArray[i][5] - cutPoints[cut]) > epsilon)
                 sign = getSign(document.getElementById('c' + ++cut));
         }
-        currentJobs.push((function (i, delay, counter, sign) {
+        if (cusp < cuspPoints.length) {
+            if ((locArray[i][5] - cuspPoints[cusp]) > epsilon) {
+                rot = getSign(document.getElementById('r' + ++cusp));
+                changeRot = true;
+            }
+        }
+        currentJobs.push((function (i, delay, counter, sign, rot, changeRot) {
                 return setTimeout(function () {
                     if (!flag.stop) {
                         ruler.erase(bottomCxt);
                         ruler.moveTo(locArray[i][0] + sign * locArray[i][2], locArray[i][1] + sign * locArray[i][3]);
                         ruler.angle = locArray[i][4];
+                        if (changeRot)
+                            ruler.changeDirection(rot);
+
                         ruler.draw(topCxt, bottomCxt);
 
                         if (counter % 10 === 0) {
@@ -968,7 +1048,7 @@ function draw(ruler, drawingInterval, callback) {
                     }
                 }, delay);
             }
-        )(i, delay, counter, sign));
+        )(i, delay, counter, sign, rot, changeRot));
     }
     currentJobs.push((function (delay) {
             return setTimeout(function () {
@@ -1038,12 +1118,16 @@ function Ruler(circle, dots) {
     this.angle = 0;
     this.showSkeleton = true;
 
-    this.rotCorrection = false;
-    this.reverse = false;
+    this.previousRotation = 0;
+    this.rotSign = 1;
 
     this.calculateRotation = function (i) {
-        return (this.reverse ^ this.rotCorrection) ?
-            this.angle + this.dots[i].rotOffset : TwoPI - (this.angle + this.dots[i].rotOffset) % TwoPI
+        return this.rotSign * this.angle - this.dots[i].rotOffset + 2 * this.previousRotation;
+    };
+
+    this.changeDirection = function (sign) {
+        this.previousRotation = sign === -1 ? this.angle : 0;
+        this.rotSign = sign;
     };
 
     /**
