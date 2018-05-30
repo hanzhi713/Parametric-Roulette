@@ -1,4 +1,4 @@
-if (typeof (Math.sign) !== "function"){
+if (typeof (Math.sign) !== "function") {
     Math.sign = function (x) {
         return x === 0 ? 0 : x > 0 ? 1 : -1;
     };
@@ -364,9 +364,10 @@ function loadConfig(files) {
 }
 
 /**
+ * @param {boolean} canvasBounded
  * @return Array
  * */
-function getRealBounds() {
+function getRealBounds(canvasBounded) {
     var maxDotRatio = 0;
     var maxDot = null;
     for (var key in dots) {
@@ -377,7 +378,7 @@ function getRealBounds() {
         }
     }
     var radius = +circleParam.value * +scaleParam.value;
-    maxDotRatio = maxDotRatio / 50 * radius;
+    maxDotRatio = maxDotRatio / 100 * radius + radius;
     if (maxDotRatio < radius * 2)
         maxDotRatio = radius * 2;
 
@@ -397,24 +398,46 @@ function getRealBounds() {
     maxX = maxX + maxDotRatio * 2 + +dxParam.value;
     minY = minY - maxDotRatio * 2 + +dyParam.value;
     maxY = maxY + maxDotRatio * 2 + +dyParam.value;
-    return [Math.max(-320, minX), Math.min(320, maxX), Math.max(-320, minY), Math.min(320, maxY)];
+    if (canvasBounded)
+        return [Math.max(-320, minX), Math.min(320, maxX), Math.max(-320, minY), Math.min(320, maxY)];
+    else
+        return [minX, maxX, minY, maxY];
 }
 
 /**
  * @param {Array} realBounds
  * @param {Number} width
+ * @param {boolean} convention Whether follow the CV coordinate system or the conventional Cartesian system
  * @return Array
  * */
-function getScalingAndTranslation(realBounds, width) {
+function getScalingAndTranslation(realBounds, width, convention) {
     var realWidth = realBounds[1] - realBounds[0];
     var realHeight = realBounds[3] - realBounds[2];
 
     var scaling = width / realWidth;
     var height = width * realHeight / realWidth;
-
-    var wTranslation = -(realBounds[0] + 320);
-    var hTranslation = -(320 - realBounds[3]);
+    var wTranslation, hTranslation;
+    if (convention) {
+        wTranslation = -320 - realBounds[0] * scaling;
+        hTranslation = 320 - realBounds[3] * scaling;
+    }
+    else {
+        wTranslation = -(realBounds[0] + 320);
+        hTranslation = -(320 - realBounds[3]);
+    }
     return [height, scaling, wTranslation, hTranslation]
+}
+
+function autoAdjustScalingAndTranslation() {
+    if (locArray.length > 0 && locArray[0].length >= 6) {
+        var result = getScalingAndTranslation(getRealBounds(false), 640, true);
+        scaleParam.value = (+scaleParam.value * result[1]).toFixed(1);
+        dxParam.value = (+dxParam.value + result[2]).toFixed(1);
+        dyParam.value = (+dyParam.value + result[3]).toFixed(1);
+    }
+    else {
+        alert('You must first click the preview button to pre-calculate the path');
+    }
 }
 
 function saveToPNG() {
@@ -435,7 +458,7 @@ function saveToPNG() {
         var tempCxt = tempCanvas.getContext('2d');
 
         if (pngCropCheck.checked) {
-            var parameters = getScalingAndTranslation(getRealBounds(), tempCanvas.width);
+            var parameters = getScalingAndTranslation(getRealBounds(true), tempCanvas.width, false);
             tempCanvas.height = parameters[0];
             if (!transparent) {
                 tempCxt.fillStyle = bgColor;
@@ -499,7 +522,7 @@ function saveToGIF() {
     var gifHeight;
 
     if (gifCropCheck.checked) {
-        var parameters = getScalingAndTranslation(getRealBounds(), tempCanvas.width);
+        var parameters = getScalingAndTranslation(getRealBounds(true), tempCanvas.width, false);
         tempCanvas.height = parameters[0];
         gifHeight = parameters[0];
         if (!transparent) {
@@ -671,8 +694,8 @@ function drawPreview(radius, scale) {
     funcCxt.stroke();
 
     var initialSigns = getSign(document.getElementById('c0'));
-    var ruler = new Ruler(new Circle(locArray[0][2] + initialSigns * locArray[0][0],
-        locArray[0][3] + initialSigns * locArray[0][1], radius * scale), getDotArray());
+    var ruler = new Ruler(new Circle(initialSigns * locArray[0][2] + locArray[0][0],
+        initialSigns * locArray[0][3] + locArray[0][1], radius * scale), getDotArray());
     ruler.showSkeleton = true;
     ruler.draw(topCxt, bottomCxt);
     enableDrawing();
@@ -811,7 +834,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         else {
             var normal = -dxE / dyE;
 
-            if (Math.sign(normal) * Math.sign(lastNormal) === -1){
+            if (Math.sign(normal) * Math.sign(lastNormal) === -1) {
                 var z = findZero(dx, exps[4], t, maxError);
                 if (!isNaN(z) && Math.abs(z - t) <= step) {
                     newCutPoints.push(z);
