@@ -75,6 +75,12 @@
             padding-right: 5px;
             font-size: 13px;
         }
+
+        .reverse-btn {
+            padding: 3px 5px;
+            margin-top: 3px;
+            float: right;
+        }
     </style>
 </head>
 <body style="margin: auto auto; width: 1200px">
@@ -300,19 +306,17 @@
                 </tr>
                 <tr>
                     <td colspan="2" style="text-align: center">
-                        <div id="sign-adjust" class="btn-group" role="group"></div>
-                        <button class="btn btn-info btn-sm" title="reverse all signs" data-toggle="tooltip"
-                                onclick="reverseSign(document.getElementById('sign-adjust').childNodes)"
-                                style="float: right">R
+                        <div id="sign-adjust" class="btn-group" role="group" style="display:inline;"></div>
+                        <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs" data-toggle="tooltip"
+                                onclick="reverseSign(document.getElementById('sign-adjust').childNodes)">R
                         </button>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2" style="text-align: center">
                         <div id="rot-adjust" class="btn-group" role="group"></div>
-                        <button class="btn btn-info btn-sm" title="reverse all signs" data-toggle="tooltip"
-                                onclick="reverseSign(document.getElementById('rot-adjust').childNodes)"
-                                style="float: right">R
+                        <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs" data-toggle="tooltip"
+                                onclick="reverseSign(document.getElementById('rot-adjust').childNodes)">R
                         </button>
                     </td>
                 </tr>

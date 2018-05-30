@@ -1,7 +1,8 @@
-if (typeof (Math.sign) !== "function")
+if (typeof (Math.sign) !== "function"){
     Math.sign = function (x) {
         return x === 0 ? 0 : x > 0 ? 1 : -1;
     };
+}
 
 var TwoPI = Math.PI * 2;
 
@@ -942,7 +943,7 @@ function createSignElement(index, sign, lower, upper) {
     e.className = 'btn btn-secondary btn-sm sign-ele';
     e.innerHTML = upper.toFixed(2) + sign;
     e.setAttribute('data-toggle', 'tooltip');
-    e.title = 'Change the sign between ' + lower.toFixed(3) + ' and ' + upper.toFixed(3);
+    e.title = 'Change the sign for t between ' + lower.toFixed(3) + ' and ' + upper.toFixed(3);
     e.onclick = function (ev) {
         reverseSign([ev.target]);
         saveConfigToBrowser();
@@ -979,7 +980,7 @@ function createRotElement(index, sign, lower, upper) {
     e.className = 'btn btn-outline-dark btn-sm rot-ele';
     e.innerHTML = upper.toFixed(2) + sign;
     e.setAttribute('data-toggle', 'tooltip');
-    e.title = 'Change the direction of rotation between ' + lower.toFixed(3) + ' and ' + upper.toFixed(3);
+    e.title = 'Change the direction of rotation for t between ' + lower.toFixed(3) + ' and ' + upper.toFixed(3);
     e.onclick = function (ev) {
         reverseSign([ev.target]);
         saveConfigToBrowser();
