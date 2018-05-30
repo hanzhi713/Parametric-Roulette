@@ -325,8 +325,8 @@ function parseConfigJSON(json) {
 
         if (obj.locArray !== undefined) {
             locArray = obj.locArray;
-            cutPoints = obj.cutPoints;
-            cuspPoints = obj.cuspPoints;
+            cutPoints = obj.cutPoints === undefined ? [] : obj.cutPoints;
+            cuspPoints = obj.cuspPoints === undefined ? [] : obj.cuspPoints;
 
             var signRow = document.getElementById('sign-adjust');
             signRow.innerHTML = '';
@@ -889,7 +889,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
 
     var rotRow = document.getElementById('rot-adjust');
     var rotElements = new Array(newCuspPoints.length);
-    if (newCuspPoints.length === cutPoints.length) {
+    if (newCuspPoints.length === cuspPoints.length) {
         for (var i = 0; i < newCuspPoints.length; i++) {
             var oldElement = document.getElementById('r' + i);
             rotElements[i] = createRotElement(i, oldElement.innerHTML[oldElement.innerHTML.length - 1],
@@ -897,7 +897,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         }
     } else {
         for (var i = 0; i < newCuspPoints.length; i++)
-            rotElements[i] = createRotElement(i, i % 2 === 0 ? '+' : '-', ((i - 1) < 0 ? t1 : newCuspPoints[i - 1]), newCuspPoints[i]);
+            rotElements[i] = createRotElement(i, i % 2 === 0 ? '-' : '+', ((i - 1) < 0 ? t1 : newCuspPoints[i - 1]), newCuspPoints[i]);
     }
     rotRow.innerHTML = '';
     for (var i = 0; i < newCuspPoints.length; i++)
