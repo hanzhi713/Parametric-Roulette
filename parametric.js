@@ -766,6 +766,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
 
     var locations = [];
     var newCutPoints = [];
+    var defaultCutPointSigns = [1];
 
     var exps = buildNecessaryExpressions(xExp, yExp);
     var dx = exps[0];
@@ -787,7 +788,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
 
     // cusp detection threshold
     var cuspThreshold = 0.1;
-    var maxError = 0.0001;
+    var maxError = 0.00001;
     for (var t = t1, counter = 0, idx = 0; t < t2; t += step, counter++, idx++) {
         var x = xExp(t);
         var y = yExp(t);
@@ -809,9 +810,19 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         else {
             var normal = -dxE / dyE;
 
-            // now we have a cut point
-            if (Math.sign(normal) * Math.sign(lastNormal) === -1 && Math.abs(normal - lastNormal) < 0.5)
-                newCutPoints.push(t - step);
+            if (Math.sign(normal) * Math.sign(lastNormal) === -1){
+                var z = findZero(dx, exps[4], t, maxError);
+                if (!isNaN(z) && Math.abs(z - t) <= step) {
+                    newCutPoints.push(z);
+                    var lastSign = defaultCutPointSigns[defaultCutPointSigns.length - 1];
+                    if (Math.abs(normal - lastNormal) < 0.5) {
+                        defaultCutPointSigns.push(-lastSign)
+                    }
+                    else {
+                        defaultCutPointSigns.push(lastSign)
+                    }
+                }
+            }
 
             if (Math.abs(dyE) < cuspThreshold && Math.abs(dxE) < cuspThreshold) {
                 //console.log('cusp!' + t);
@@ -829,16 +840,15 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         // var cuspX = xExp(currentCusp), cuspY = yExp(currentCusp);
                         // var nextNormal = -dx(t + step + maxError) / dy(t + step + maxError);
                         // console.log(t + '||' + currentCusp + '||' + (t + step));
-                        // var currentRadian = Math.sign(normal) * Math.atan(normal);
-                        // var targetRadian = Math.sign(normal) * Math.atan(nextNormal);
+                        // var currentRadian = Math.atan(normal);
+                        // var targetRadian = Math.atan(nextNormal);
                         // console.log(normal);
                         // console.log(nextNormal);
                         // console.log(currentRadian);
                         // console.log(targetRadian);
                         // var radians = Math.PI;
-                        // console.log("!!!");
                         // idx++;
-                        // for (var i = 0; i < radians; i += step * 5, idx++, cuspSteps++) {
+                        // for (var i = 0; i < radians; i += step * 6, idx++, cuspSteps++) {
                         //     locations[idx] = [cuspX * scale, cuspY * scale, radius * Math.cos(i - currentRadian) * scale,
                         //         radius * Math.sin(i - currentRadian) * scale, rotAngle + i, currentCusp, rcv];
                         // }
@@ -871,7 +881,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         }
     } else {
         for (var i = 0; i < newCutPoints.length; i++)
-            signElements[i] = createSignElement(i, i % 2 === 0 ? '+' : '-', ((i - 1) < 0 ? t1 : newCutPoints[i - 1]), newCutPoints[i]);
+            signElements[i] = createSignElement(i, defaultCutPointSigns[i] === 1 ? '+' : '-', ((i - 1) < 0 ? t1 : newCutPoints[i - 1]), newCutPoints[i]);
     }
     signRow.innerHTML = '';
     for (var i = 0; i < newCutPoints.length; i++)
