@@ -69,7 +69,7 @@ window.onload = function (ev) {
     };
 
     // parameters that determine the loci. Recalculation of loci is required if they're changed
-    var effectors = [xParam, yParam, t1Param, t2Param, dxParam, dyParam, scaleParam, circleParam, drawingStepParam];
+    var effectors = [dxParam, dyParam, scaleParam, circleParam, drawingStepParam];
     for (var i in effectors) {
         (function (i, existingOnchangeHandler) {
             effectors[i].onchange = function (e) {
@@ -78,6 +78,21 @@ window.onload = function (ev) {
                 stopDrawing();
                 disableDrawing();
                 locArray = [];
+            };
+        })(i, effectors[i].onchange);
+    }
+
+    // changing these things also requires a reset of cut points
+    effectors  = [xParam, yParam, t1Param, t2Param];
+    for (i in effectors) {
+        (function (i, existingOnchangeHandler) {
+            effectors[i].onchange = function (e) {
+                if (typeof existingOnchangeHandler === 'function')
+                    existingOnchangeHandler(e);
+                stopDrawing();
+                disableDrawing();
+                locArray = [];
+                cutPoints = []
             };
         })(i, effectors[i].onchange);
     }
@@ -142,7 +157,7 @@ function randInt(min, max) {
 
 function randomDot() {
     var dotSize = randInt(+dotSizeMinParam.value, +dotSizeMaxParam.value);
-    var dotColor = '#' + (Math.floor(Math.random() * 256 * 256 * 256)).toString(16);
+    var dotColor = '#' + (Math.floor(Math.random() * 255 * 255 * 255 + Math.random())).toString(16);
     var dotRatio = randInt(+dotRatioMinParam.value, +dotRatioMaxParam.value);
     var dotRot = randInt(+dotRotMinParam.value, +dotRotMaxParam.value);
     addDotHelper((new Date()).valueOf().toString(), dotSize, dotColor, dotRatio, dotRot, true);
@@ -434,6 +449,7 @@ function autoAdjustScalingAndTranslation() {
         scaleParam.value = (+scaleParam.value * result[1]).toFixed(1);
         dxParam.value = (+dxParam.value + result[2]).toFixed(1);
         dyParam.value = (+dyParam.value + result[3]).toFixed(1);
+        previewRuler();
     }
     else {
         alert('You must first click the preview button to pre-calculate the path');
@@ -849,35 +865,36 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
             }
 
             if (Math.abs(dyE) < cuspThreshold && Math.abs(dxE) < cuspThreshold) {
-                //console.log('cusp!' + t);
-                var z1 = findZero(dx, exps[4], t, maxError);
-                var z2 = findZero(dy, exps[5], t, maxError);
-                if (!isNaN(z1) && !isNaN(z2) && Math.abs(z1 - z2) < maxError * 10) {
+                var currentCusp = newCuspPoints.length === 0 ? undefined : newCuspPoints[newCuspPoints.length - 1];
+                if (currentCusp === undefined || Math.abs(currentCusp - t) > 10 * step){
+                    var z1 = findZero(dx, exps[4], t, maxError);
+                    var z2 = findZero(dy, exps[5], t, maxError);
+                    if (!isNaN(z1) && !isNaN(z2) && Math.abs(z1 - z2) < maxError * 10) {
 
-                    //console.log("Zero: " + z1);
-                    var currentCusp = newCuspPoints.length === 0 ? undefined : newCuspPoints[newCuspPoints.length - 1];
-                    if (t < z1 && z1 < t2 && (newCuspPoints.length === 0 || Math.abs(z1 - newCuspPoints[newCuspPoints.length - 1]) > maxError * 10))
-                        newCuspPoints.push(z1);
+                        console.log("Zero: " + z1);
+                        if (t < z1 && z1 < t2 && (newCuspPoints.length === 0 || Math.abs(z1 - newCuspPoints[newCuspPoints.length - 1]) > maxError * 10))
+                            newCuspPoints.push(z1);
 
-                    if (Math.abs(t - currentCusp) <= step && Math.sign(t - currentCusp) === -1) {
-                        // var rcv = 1 / curvature(currentCusp);
-                        // var cuspX = xExp(currentCusp), cuspY = yExp(currentCusp);
-                        // var nextNormal = -dx(t + step + maxError) / dy(t + step + maxError);
-                        // console.log(t + '||' + currentCusp + '||' + (t + step));
-                        // var currentRadian = Math.atan(normal);
-                        // var targetRadian = Math.atan(nextNormal);
-                        // console.log(normal);
-                        // console.log(nextNormal);
-                        // console.log(currentRadian);
-                        // console.log(targetRadian);
-                        // var radians = Math.PI;
-                        // idx++;
-                        // for (var i = 0; i < radians; i += step * 6, idx++, cuspSteps++) {
-                        //     locations[idx] = [cuspX * scale, cuspY * scale, radius * Math.cos(i - currentRadian) * scale,
-                        //         radius * Math.sin(i - currentRadian) * scale, rotAngle + i, currentCusp, rcv];
+                        // if (Math.abs(t - currentCusp) <= step && Math.sign(t - currentCusp) === -1) {
+                        //     var rcv = 1 / curvature(currentCusp);
+                        //     var cuspX = xExp(currentCusp), cuspY = yExp(currentCusp);
+                        //     var nextNormal = -dx(t + step + maxError) / dy(t + step + maxError);
+                        //     console.log(t + '||' + currentCusp + '||' + (t + step));
+                        //     var currentRadian = Math.atan(normal);
+                        //     var targetRadian = Math.atan(nextNormal);
+                        //     console.log(normal);
+                        //     console.log(nextNormal);
+                        //     console.log(currentRadian);
+                        //     console.log(targetRadian);
+                        //     var radians = Math.PI;
+                        //     idx++;
+                        //     for (var i = 0; i < radians; i += step * 6, idx++, cuspSteps++) {
+                        //         locations[idx] = [cuspX * scale, cuspY * scale, radius * Math.cos(i - currentRadian) * scale,
+                        //             radius * Math.sin(i - currentRadian) * scale, rotAngle + i, currentCusp, rcv];
+                        //     }
+                        //     idx--;
+                        //     previousArcLength -= radius * Math.PI;
                         // }
-                        // idx--;
-                        // previousArcLength -= radius * Math.PI;
                     }
                 }
             }
