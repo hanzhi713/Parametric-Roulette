@@ -334,7 +334,7 @@
                     <td colspan="2" style="text-align: center">
                         <button class="btn btn-info btn-sm reset-btn" title="reset all signs to default"
                                 data-toggle="tooltip"
-                                onclick="cusp=[];previewRuler();"><i class="fas fa-sync-alt fa-sm"></i>
+                                onclick="cuspPoints=[];previewRuler();"><i class="fas fa-sync-alt fa-sm"></i>
                         </button>
                         <div id="rot-adjust" class="btn-group" role="group"></div>
                         <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs" data-toggle="tooltip"
@@ -396,11 +396,11 @@
                 <tr>
                     <td>
                         <label for="revolve" data-toggle="tooltip"
-                               title="Keep circle always inside/outside the parametric curve. Make the circle to revolve around cusp to keep the roulette continuous. This is an experimental feature.">
+                               title="Keep circle always inside/outside the parametric curve. Make the circle to revolve around cusp to keep the roulette continuous. This is an experimental feature, which may have many bugs">
                             Revolve around cusp
                         </label>
                     </td>
-                    <td><input type="checkbox" id="revolve" class="checkbox" onchange="previewRuler();"/></td>
+                    <td><input type="checkbox" id="revolve" class="checkbox" onchange="cuspPoints=[];cutPoints=[];previewRuler();"/></td>
                 </tr>
                 <tr>
                     <td><label for="showSk" data-toggle="tooltip"
@@ -648,7 +648,7 @@
         'Drawing: ': 'Drawing: '
     };
 </script>
-<script src="parametric.js?ver=12"></script>
+<script src="parametric.js?ver=112"></script>
 <div style="width: 300px; margin: auto auto">
     <span style="font-size:18px;">
         Developed by <a href="https://github.com/hanzhi713" target="_blank">Hanzhi Zhou</a>

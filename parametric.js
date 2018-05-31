@@ -125,7 +125,7 @@ function enableDrawing() {
 
 function removeDot(id) {
     delete dots[id];
-    $('#' + id).hide(300, function () {
+    $('#' + id).hide(200, function () {
         $('#' + id).remove();
     });
     saveConfigToBrowser();
@@ -157,13 +157,13 @@ function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-function randomColor(){
+function randomColor() {
     var R = randInt(0, 255);
-    if (R < 16) R = '0' + R.toString(16);
+    R = R < 16 ? '0' + R.toString(16) : R.toString(16);
     var G = randInt(0, 255);
-    if (G < 16) G = '0' + G.toString(16);
+    G = G < 16 ? '0' + G.toString(16) : G.toString(16);
     var B = randInt(0, 255);
-    if (B < 16) B = '0' + B.toString(16);
+    B = B < 16 ? '0' + B.toString(16) : B.toString(16);
     return '#' + R + G + B;
 }
 
@@ -815,6 +815,13 @@ function buildNecessaryExpressions(xExp, yExp) {
  * @return Array
  * */
 function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
+    var cStep = step;
+    var num = 1;
+    while (cStep < 1) {
+        cStep *= 10;
+        num++;
+    }
+
     var newCuspPoints = [];
     var rotDirection = getSign(document.getElementById('r0'));
     var sign = getSign(document.getElementById('c0'));
@@ -844,10 +851,11 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     // cusp detection threshold
     var cuspThreshold = 0.1;
     var maxError = 0.00001;
-    var epsilon = 1e-14;
-    for (var t = t1, counter = 0, idx = 0; t < t2; t += step, counter++, idx++) {
-        var x = xExp(t), y = yExp(t);
+    var epsilon = 1e-12;
+    for (var t = t1, counter = 0, cut = 0, idx = 0; t < t2; t += step, counter++, idx++) {
 
+        t = +(t.toFixed(num));
+        var x = xExp(t), y = yExp(t);
         var dyE = dy(t), dxE = dx(t);
 
         var sliceIdx = counter % sliceLength;
@@ -860,27 +868,47 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         var cuspSteps = 0;
 
         var z1 = undefined, z2 = undefined;
-        if (dyE === 0) {
-            locations[idx] = [x * scale, y * scale, 0, radius * scale, rotAngle, t, 1 / curvature(t), 0];
+        if (Math.abs(dyE) < epsilon) {
+            if (Math.abs(dxE) < epsilon) {
+                var tNormal = -dx(t - step) / dy(t - step);
+                if (tNormal < 0.5)
+                    locations[idx] = [x * scale, y * scale, -radius * scale, 0, rotAngle, t, 1 / curvature(t), 0];
+                else
+                    locations[idx] = [x * scale, y * scale, 0, -radius * scale, rotAngle, t, 1 / curvature(t), 0];
+            }
+            else
+                locations[idx] = [x * scale, y * scale, 0, radius * scale, rotAngle, t, 1 / curvature(t), 0];
         }
         else {
             var normal = -dxE / dyE;
 
             if (Math.sign(normal) * Math.sign(lastNormal) === -1) {
                 z1 = findZero(dx, exps[4], t, maxError);
+
+                // a vertical tangent or horizontal/vertical cusp
                 if (!isNaN(z1) && Math.abs(z1 - t) <= step) {
                     newCutPoints.push(z1);
                     var lastSign = defaultCutPointSigns[defaultCutPointSigns.length - 1];
                     z2 = findZero(dy, exps[5], t, maxError);
+
+                    // vertical tangent/cusp
                     if (Math.abs(normal - lastNormal) < 0.5) {
+
+                        // vertical cusp does not require sign-adjustment when we want the circle to consistently inside or outside the parametric curve
                         if (revolve.checked && !isNaN(z2) && Math.abs(z2 - z1) < maxError)
                             defaultCutPointSigns.push(lastSign);
                         else
+                        // vertical tangent always requires sign-adjustment.
                             defaultCutPointSigns.push(-lastSign);
                     }
+
+
                     else {
+                        // horizontal cusp requires sign-adjustment when we want the circle to consistently inside or outside the parametric curve
                         if (revolve.checked && !isNaN(z2) && Math.abs(z2 - z1) < maxError)
                             defaultCutPointSigns.push(-lastSign);
+
+                        // stationary point does not need sign-adjustment
                         else
                             defaultCutPointSigns.push(lastSign);
                     }
@@ -890,8 +918,12 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
             if (Math.abs(dyE) < cuspThreshold && Math.abs(dxE) < cuspThreshold) {
                 var currentCusp = newCuspPoints.length === 0 ? undefined : newCuspPoints[newCuspPoints.length - 1];
                 if (currentCusp === undefined || Math.abs(currentCusp - t) > 10 * step) {
+
+                    // no need to recalculate
                     if (z1 === undefined) z1 = findZero(dx, exps[4], t, maxError);
                     if (z2 === undefined) z2 = findZero(dy, exps[5], t, maxError);
+
+                    // both dy/dt and dx/dt approaches zero
                     if (!isNaN(z1) && !isNaN(z2) && Math.abs(z1 - z2) < maxError * 10) {
                         if (t < z1 && z1 < t2 && (newCuspPoints.length === 0 || Math.abs(z1 - newCuspPoints[newCuspPoints.length - 1]) > maxError * 10))
                             newCuspPoints.push(z1);
@@ -918,15 +950,25 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                                 r1 -= Math.PI
                         }
 
-                        // console.log(normal);
-                        // console.log(nextNormal);
-                        // console.log(r1);
-                        // console.log(r2);
-
                         idx++;
+
+                        for (var i = 0; i < newCutPoints.length; i++) {
+                            if (t > newCutPoints[i]) {
+                                sign = getSign(document.getElementById('c' + i));
+                                break;
+                            }
+                        }
+
+                        var tempSign = sign;
+                        if (Math.abs(normal - nextNormal) > 0.5)
+                            tempSign = -sign;
+                        else
+                            tempSign = sign;
+
+
                         for (var i = 0; i < radians; i += step * 5, idx++, cuspSteps++) {
-                            locations[idx] = [cuspX * scale, cuspY * scale, sign * radius * Math.cos(r1 + rotDirection * i) * scale,
-                                sign * radius * Math.sin(r1 + rotDirection * i) * scale, rotAngle + i, currentCusp, rcv, 1];
+                            locations[idx] = [cuspX * scale, cuspY * scale, tempSign * radius * Math.cos(r1 + rotDirection * i) * scale,
+                                tempSign * radius * Math.sin(r1 + rotDirection * i) * scale, rotAngle - rotDirection * i, currentCusp, rcv, 1];
                         }
                         idx--;
                         previousArcLength += radius * radians;
@@ -1081,6 +1123,7 @@ function generateRadius() {
     var t1 = +t1Param.value, t2 = +t2Param.value;
     var arcLength = integrate(exps[2], t1, t2, Math.round((t2 - t1) / (+drawingStepParam.value)) + 10);
     circleParam.value = (arcLength / multiple / TwoPI);
+    previewRuler();
 }
 
 /**
