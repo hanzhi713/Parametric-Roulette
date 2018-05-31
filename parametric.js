@@ -23,6 +23,7 @@ var drawingStepParam = document.getElementById('step');
 var drawingDelayParam = document.getElementById('delay');
 var skeletonCheck = document.getElementById('showSk');
 var functionCheck = document.getElementById('showFunc');
+var revolve = document.getElementById('revolve');
 
 var radiusMultipleParam = document.getElementById('radiusMultiple');
 
@@ -83,7 +84,7 @@ window.onload = function (ev) {
     }
 
     // changing these things also requires a reset of cut points
-    effectors  = [xParam, yParam, t1Param, t2Param];
+    effectors = [xParam, yParam, t1Param, t2Param];
     for (i in effectors) {
         (function (i, existingOnchangeHandler) {
             effectors[i].onchange = function (e) {
@@ -92,7 +93,8 @@ window.onload = function (ev) {
                 stopDrawing();
                 disableDrawing();
                 locArray = [];
-                cutPoints = []
+                cutPoints = [];
+                cuspPoints = [];
             };
         })(i, effectors[i].onchange);
     }
@@ -155,9 +157,19 @@ function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
+function randomColor(){
+    var R = randInt(0, 255);
+    if (R < 16) R = '0' + R.toString(16);
+    var G = randInt(0, 255);
+    if (G < 16) G = '0' + G.toString(16);
+    var B = randInt(0, 255);
+    if (B < 16) B = '0' + B.toString(16);
+    return '#' + R + G + B;
+}
+
 function randomDot() {
     var dotSize = randInt(+dotSizeMinParam.value, +dotSizeMaxParam.value);
-    var dotColor = '#' + (Math.floor(Math.random() * 255 * 255 * 255 + Math.random())).toString(16);
+    var dotColor = randomColor();
     var dotRatio = randInt(+dotRatioMinParam.value, +dotRatioMaxParam.value);
     var dotRot = randInt(+dotRotMinParam.value, +dotRotMaxParam.value);
     addDotHelper((new Date()).valueOf().toString(), dotSize, dotColor, dotRatio, dotRot, true);
@@ -246,6 +258,7 @@ function getConfigJSON() {
         clearBeforeDrawing: clearBeforeDrawingCheck.checked,
         drawingStep: +drawingStepParam.value,
         drawingDelay: +drawingDelayParam.value,
+        revolve: revolve.checked,
 
         radiusMultiple: +radiusMultipleParam.value,
 
@@ -300,6 +313,7 @@ function parseConfigJSON(json) {
         clearBeforeDrawingCheck.checked = obj.clearBeforeDrawing === undefined ? true : obj.clearBeforeDrawing;
         drawingStepParam.value = obj.drawingStep === undefined ? 0.005 : obj.drawingStep;
         drawingDelayParam.value = obj.drawingDelay === undefined ? 2 : obj.drawingDelay;
+        revolve.checked = obj.revolve === undefined ? false : obj.revolve;
 
         radiusMultipleParam.value = obj.radiusMultiple === undefined ? 10 : obj.radiusMultiple;
 
@@ -452,7 +466,8 @@ function autoAdjustScalingAndTranslation() {
         previewRuler();
     }
     else {
-        alert('You must first click the preview button to pre-calculate the path');
+        previewRuler();
+        autoAdjustScalingAndTranslation();
     }
 }
 
@@ -801,18 +816,18 @@ function buildNecessaryExpressions(xExp, yExp) {
  * */
 function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     var newCuspPoints = [];
+    var rotDirection = getSign(document.getElementById('r0'));
+    var sign = getSign(document.getElementById('c0'));
     //var totalSteps = Math.round((t2 - t1) / step);
     //var arcLengthInt = nerdamer('defint(sqrt((' + dx.text() + ')^2 + (' + dy.text() + ')^2), ' + t1 + ', t2, t)');
+    var exps = buildNecessaryExpressions(xExp, yExp);
+    var dx = exps[0], dy = exps[1];
+    var arcLengthExp = exps[2];
+    var curvature = exps[3];
 
     var locations = [];
     var newCutPoints = [];
-    var defaultCutPointSigns = [1];
-
-    var exps = buildNecessaryExpressions(xExp, yExp);
-    var dx = exps[0];
-    var dy = exps[1];
-    var arcLengthExp = exps[2];
-    var curvature = exps[3];
+    var defaultCutPointSigns = [-1];
 
     xExp = xExp.buildFunction(['t']);
     yExp = yExp.buildFunction(['t']);
@@ -829,9 +844,9 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     // cusp detection threshold
     var cuspThreshold = 0.1;
     var maxError = 0.00001;
+    var epsilon = 1e-14;
     for (var t = t1, counter = 0, idx = 0; t < t2; t += step, counter++, idx++) {
-        var x = xExp(t);
-        var y = yExp(t);
+        var x = xExp(t), y = yExp(t);
 
         var dyE = dy(t), dxE = dx(t);
 
@@ -844,57 +859,77 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         var rotAngle = arcLength / radius;
         var cuspSteps = 0;
 
+        var z1 = undefined, z2 = undefined;
         if (dyE === 0) {
-            locations[idx] = [x * scale, y * scale, 0, radius * scale, rotAngle, t, 1 / curvature(t)];
+            locations[idx] = [x * scale, y * scale, 0, radius * scale, rotAngle, t, 1 / curvature(t), 0];
         }
         else {
             var normal = -dxE / dyE;
 
             if (Math.sign(normal) * Math.sign(lastNormal) === -1) {
-                var z = findZero(dx, exps[4], t, maxError);
-                if (!isNaN(z) && Math.abs(z - t) <= step) {
-                    newCutPoints.push(z);
+                z1 = findZero(dx, exps[4], t, maxError);
+                if (!isNaN(z1) && Math.abs(z1 - t) <= step) {
+                    newCutPoints.push(z1);
                     var lastSign = defaultCutPointSigns[defaultCutPointSigns.length - 1];
+                    z2 = findZero(dy, exps[5], t, maxError);
                     if (Math.abs(normal - lastNormal) < 0.5) {
-                        defaultCutPointSigns.push(-lastSign)
+                        if (revolve.checked && !isNaN(z2) && Math.abs(z2 - z1) < maxError)
+                            defaultCutPointSigns.push(lastSign);
+                        else
+                            defaultCutPointSigns.push(-lastSign);
                     }
                     else {
-                        defaultCutPointSigns.push(lastSign)
+                        if (revolve.checked && !isNaN(z2) && Math.abs(z2 - z1) < maxError)
+                            defaultCutPointSigns.push(-lastSign);
+                        else
+                            defaultCutPointSigns.push(lastSign);
                     }
                 }
             }
 
             if (Math.abs(dyE) < cuspThreshold && Math.abs(dxE) < cuspThreshold) {
                 var currentCusp = newCuspPoints.length === 0 ? undefined : newCuspPoints[newCuspPoints.length - 1];
-                if (currentCusp === undefined || Math.abs(currentCusp - t) > 10 * step){
-                    var z1 = findZero(dx, exps[4], t, maxError);
-                    var z2 = findZero(dy, exps[5], t, maxError);
+                if (currentCusp === undefined || Math.abs(currentCusp - t) > 10 * step) {
+                    if (z1 === undefined) z1 = findZero(dx, exps[4], t, maxError);
+                    if (z2 === undefined) z2 = findZero(dy, exps[5], t, maxError);
                     if (!isNaN(z1) && !isNaN(z2) && Math.abs(z1 - z2) < maxError * 10) {
-
-                        console.log("Zero: " + z1);
                         if (t < z1 && z1 < t2 && (newCuspPoints.length === 0 || Math.abs(z1 - newCuspPoints[newCuspPoints.length - 1]) > maxError * 10))
                             newCuspPoints.push(z1);
+                    }
+                }
+                if (currentCusp !== undefined && revolve.checked) {
+                    var nextNormal = -dx(t + step + epsilon) / dy(t + step + epsilon);
+                    if (Math.sign(normal) * Math.sign(nextNormal) === -1 && (t + step) < t2) {
+                        var rcv = 1 / curvature(currentCusp);
+                        var cuspX = xExp(currentCusp), cuspY = yExp(currentCusp);
 
-                        // if (Math.abs(t - currentCusp) <= step && Math.sign(t - currentCusp) === -1) {
-                        //     var rcv = 1 / curvature(currentCusp);
-                        //     var cuspX = xExp(currentCusp), cuspY = yExp(currentCusp);
-                        //     var nextNormal = -dx(t + step + maxError) / dy(t + step + maxError);
-                        //     console.log(t + '||' + currentCusp + '||' + (t + step));
-                        //     var currentRadian = Math.atan(normal);
-                        //     var targetRadian = Math.atan(nextNormal);
-                        //     console.log(normal);
-                        //     console.log(nextNormal);
-                        //     console.log(currentRadian);
-                        //     console.log(targetRadian);
-                        //     var radians = Math.PI;
-                        //     idx++;
-                        //     for (var i = 0; i < radians; i += step * 6, idx++, cuspSteps++) {
-                        //         locations[idx] = [cuspX * scale, cuspY * scale, radius * Math.cos(i - currentRadian) * scale,
-                        //             radius * Math.sin(i - currentRadian) * scale, rotAngle + i, currentCusp, rcv];
-                        //     }
-                        //     idx--;
-                        //     previousArcLength -= radius * Math.PI;
-                        // }
+                        // console.log(t + '||' + currentCusp + '||' + (t + step));
+                        var r1 = Math.atan(normal);
+                        var r2 = Math.atan(nextNormal);
+                        var radians;
+                        if (Math.abs(normal - nextNormal) < 0.5) {
+                            radians = Math.PI - Math.abs(r1) - Math.abs(r2);
+                            if (dyE < 0)
+                                r1 -= Math.PI;
+                        }
+                        else {
+                            radians = Math.abs(r1) + Math.abs(r2);
+                            if (dxE < 0)
+                                r1 -= Math.PI
+                        }
+
+                        // console.log(normal);
+                        // console.log(nextNormal);
+                        // console.log(r1);
+                        // console.log(r2);
+
+                        idx++;
+                        for (var i = 0; i < radians; i += step * 5, idx++, cuspSteps++) {
+                            locations[idx] = [cuspX * scale, cuspY * scale, sign * radius * Math.cos(r1 + rotDirection * i) * scale,
+                                sign * radius * Math.sin(r1 + rotDirection * i) * scale, rotAngle + i, currentCusp, rcv, 1];
+                        }
+                        idx--;
+                        previousArcLength += radius * radians;
                     }
                 }
             }
@@ -904,11 +939,12 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
             var delX = radius * Math.sign(normal) / Math.sqrt(normal * normal + 1);
             var delY = delX * normal;
             if (cuspSteps === 0)
-                locations[idx] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1 / curvature(t)];
+                locations[idx] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1 / curvature(t), 0];
             else
-                locations[idx - cuspSteps] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1 / curvature(t)];
+                locations[idx - cuspSteps] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 1 / curvature(t), 0];
         }
     }
+
     newCutPoints.push(t2);
     newCuspPoints.push(t2);
 
@@ -937,8 +973,12 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                 ((i - 1) < 0 ? t1 : newCuspPoints[i - 1]), newCuspPoints[i]);
         }
     } else {
-        for (var i = 0; i < newCuspPoints.length; i++)
-            rotElements[i] = createRotElement(i, i % 2 === 0 ? '-' : '+', ((i - 1) < 0 ? t1 : newCuspPoints[i - 1]), newCuspPoints[i]);
+        if (revolve.checked)
+            for (var i = 0; i < newCuspPoints.length; i++)
+                rotElements[i] = createRotElement(i, '+', ((i - 1) < 0 ? t1 : newCuspPoints[i - 1]), newCuspPoints[i]);
+        else
+            for (var i = 0; i < newCuspPoints.length; i++)
+                rotElements[i] = createRotElement(i, i % 2 === 0 ? '-' : '+', ((i - 1) < 0 ? t1 : newCuspPoints[i - 1]), newCuspPoints[i]);
     }
     rotRow.innerHTML = '';
     for (var i = 0; i < newCuspPoints.length; i++)
@@ -947,7 +987,6 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     cutPoints = newCutPoints;
     cuspPoints = newCuspPoints;
     $('[data-toggle="tooltip"]').tooltip();
-    console.log(arcLength);
     return locations;
 }
 
@@ -960,10 +999,12 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
  * */
 function findZero(f, fp, x0, err) {
     var x_n = x0, x_n1;
-    for (var i = 0; i < 20; i++) {
+    err /= 2;
+    for (var i = 0; i < 16; i++) {
         x_n1 = x_n - f(x_n) / fp(x_n);
-        if (Math.abs(x_n1 - x_n) < err)
+        if (Math.abs(x_n1 - x_n) < err) {
             return x_n1;
+        }
         x_n = x_n1;
     }
     return NaN;
@@ -984,10 +1025,11 @@ function createSignElement(index, sign, lower, upper) {
     e.innerHTML = upper.toFixed(2) + sign;
     e.setAttribute('data-toggle', 'tooltip');
     e.title = 'Change the sign for t between ' + lower.toFixed(3) + ' and ' + upper.toFixed(3);
-    e.onclick = function (ev) {
-        reverseSign([ev.target]);
-        saveConfigToBrowser();
-    };
+    e.disabled = revolve.checked;
+    if (!revolve.checked)
+        e.onclick = function (ev) {
+            reverseSign([ev.target]);
+        };
     return e;
 }
 
@@ -1004,6 +1046,10 @@ function reverseSign(targets) {
         else
             t.innerHTML = ih.substring(0, ih.length - 1) + '+';
     }
+    if (revolve.checked)
+        previewRuler();
+    else
+        saveConfigToBrowser();
 }
 
 /**
@@ -1021,10 +1067,11 @@ function createRotElement(index, sign, lower, upper) {
     e.innerHTML = upper.toFixed(2) + sign;
     e.setAttribute('data-toggle', 'tooltip');
     e.title = 'Change the direction of rotation for t between ' + lower.toFixed(3) + ' and ' + upper.toFixed(3);
-    e.onclick = function (ev) {
-        reverseSign([ev.target]);
-        saveConfigToBrowser();
-    };
+    e.disabled = revolve.checked;
+    if (!revolve.checked)
+        e.onclick = function (ev) {
+            reverseSign([ev.target]);
+        };
     return e;
 }
 
@@ -1033,7 +1080,6 @@ function generateRadius() {
     var exps = buildNecessaryExpressions(nerdamer(xParam.value), nerdamer(yParam.value));
     var t1 = +t1Param.value, t2 = +t2Param.value;
     var arcLength = integrate(exps[2], t1, t2, Math.round((t2 - t1) / (+drawingStepParam.value)) + 10);
-    console.log(arcLength);
     circleParam.value = (arcLength / multiple / TwoPI);
 }
 
@@ -1085,7 +1131,10 @@ function draw(ruler, drawingInterval, callback) {
                 return setTimeout(function () {
                     if (!flag.stop) {
                         ruler.erase(bottomCxt);
-                        ruler.moveTo(locArray[i][0] + sign * locArray[i][2], locArray[i][1] + sign * locArray[i][3]);
+                        if (locArray[i][7])
+                            ruler.moveTo(locArray[i][0] + locArray[i][2], locArray[i][1] + locArray[i][3]);
+                        else
+                            ruler.moveTo(locArray[i][0] + sign * locArray[i][2], locArray[i][1] + sign * locArray[i][3]);
                         ruler.angle = locArray[i][4];
                         if (changeRot)
                             ruler.changeDirection(rot);
