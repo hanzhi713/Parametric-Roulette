@@ -884,6 +884,8 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
 
     // cusp detection threshold
     var cuspThreshold = 0.1;
+
+    // don't know which value is appropriate here
     var epsilon = 1e-9;
     var maxError = 1e-6;
     for (var t = t1, counter = 0, cut = 0, idx = 0; t < t2; t += step, counter++, idx++) {
@@ -895,7 +897,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
 
         var delX, delY;
         if (normal === 0) {
-            delX = radius;
+            delX = Math.sign(lastNormal) * radius;
             delY = 0;
         }
         else{
@@ -955,6 +957,8 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                 if (currentCusp !== undefined && revolve.checked && cuspIdx < newCuspPoints.length) {
                     var nextNormal = -dx(t + step + epsilon) / dy(t + step + epsilon);
                     var cNormal = normal;
+
+                    // switch to last normal if t is too close
                     if (Math.abs(t - currentCusp) < maxError)
                         cNormal = lastNormal;
                     if (Math.sign(cNormal) * Math.sign(nextNormal) === -1 && (t + step) <= t2) {
@@ -965,6 +969,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         var r1 = Math.atan(cNormal);
                         var r2 = Math.atan(nextNormal);
                         var radians;
+
                         if (Math.abs(cNormal - nextNormal) < 0.5) {
                             radians = Math.PI - Math.abs(r1) - Math.abs(r2);
                             if (dyE < 0) {
@@ -977,9 +982,10 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                             if (dxE < 0) {
                                 r1 -= Math.PI;
                             }
-
                         }
 
+                        // sign-changing still not guaranteed to work for ALL CASES.
+                        // TODO: add manual sign-changing buttons instead
                         for (var i = 0; i < newCutPoints.length; i++) {
                             if (t >= +(newCutPoints[i].toFixed(num))) {
                                 var ele = document.getElementById('c' + i);
@@ -999,14 +1005,19 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         var tempSign = 1;
 
                         idx++;
-                        for (var i = 0; i < radians; i += step * 5, idx++, cuspSteps++) {
+                        for (var i = 0; i < radians; i += step * 4, idx++, cuspSteps++) {
                             locations[idx] = [cuspX * scale, cuspY * scale, tempSign * sign * radius * Math.cos(r1 + rotDirection * i) * scale,
                                 tempSign * sign * radius * Math.sin(r1 + rotDirection * i) * scale, rotAngle + i, currentCusp, 1];
                         }
+                        cuspSteps ++;
+                        locations[idx++] = [cuspX * scale, cuspY * scale, tempSign * sign * radius * Math.cos(r1 + rotDirection * radians) * scale,
+                            tempSign * sign * radius * Math.sin(r1 + rotDirection * radians) * scale, rotAngle + radians, currentCusp, 1];
                         idx--;
                         previousArcLength += radius * radians;
                     }
                 }
+
+                // only matters when it's EXACTLY zero. Set [6] to 2 to disable drawing at this point
                 if (dyE === 0) {
                     locations[idx - cuspSteps] = [NaN, NaN, NaN, NaN, rotAngle, t, 2];
                 }
@@ -1015,16 +1026,17 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                 }
             }
             else {
-                if (Math.sign(normal) * Math.sign(lastNormal) === -1) {
+                if (Math.sign(normal) * Math.sign(lastNormal) === -1 || Math.sign(normal) === 0) {
                     z1 = findZero(dx, exps[4], t, maxError);
 
-                    // a vertical tangent or horizontal/vertical cusp
+                    // a vertical tangent or horizontal tangent (stationary point)
                     if (!isNaN(z1) && Math.abs(z1 - t) <= step) {
                         newCutPoints.push(z1);
-                        // vertical tangent/cusp
                         if (Math.abs(normal - lastNormal) < 0.5) {
                             defaultCutPointSigns.push(-lastSign);
                         }
+
+                        // no need to change sign at stationary point as the Math.sign(normal) in delX does the thing.
                         else {
                             defaultCutPointSigns.push(lastSign);
                         }
