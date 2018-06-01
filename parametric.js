@@ -445,12 +445,14 @@ function getScalingAndTranslation(realBounds, width, convention) {
     var realWidth = realBounds[1] - realBounds[0];
     var realHeight = realBounds[3] - realBounds[2];
 
-    var scaling = width / realWidth;
+    var scaling = convention ? Math.min(width / realWidth, width / realHeight) : width / realWidth;
     var height = width * realHeight / realWidth;
     var wTranslation, hTranslation;
     if (convention) {
-        wTranslation = -320 - realBounds[0] * scaling;
-        hTranslation = 320 - realBounds[3] * scaling;
+        wTranslation = -320 + (640 - realWidth * scaling)/2 - realBounds[0] * scaling;
+        hTranslation = 320 - (640 - realHeight * scaling)/2 - realBounds[3] * scaling;
+        // wTranslation = Math.abs(realBounds[0] * scaling - (640 - realWidth * 2 * scaling));
+        // hTranslation = Math.abs(realBounds[3] * scaling - (640 - realHeight * 2 * scaling));
     }
     else {
         wTranslation = -(realBounds[0] + 320);
@@ -618,7 +620,10 @@ function saveToGIF() {
                 return setTimeout(function () {
                     if (!flag.stop) {
                         ruler.erase(bottomCxt);
-                        ruler.moveTo(locArray[i][0] + sign * locArray[i][2], locArray[i][1] + sign * locArray[i][3]);
+                        if (locArray[i][6] === 1)
+                            ruler.moveTo(locArray[i][0] + locArray[i][2], locArray[i][1] + locArray[i][3]);
+                        else if (locArray[i][6] !== 2)
+                            ruler.moveTo(locArray[i][0] + sign * locArray[i][2], locArray[i][1] + sign * locArray[i][3]);
                         ruler.angle = locArray[i][4];
                         if (changeRot)
                             ruler.changeDirection(rot);
@@ -832,7 +837,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
 
     if (firstRotEle === null || firstSignEle === null)
 
-        // require regeneration of sign-elements (a temporary solution)
+    // require regeneration of sign-elements (a temporary solution)
         callAgain = true;
 
     var initialRotIncrementDirection = rotDirection * sign;
@@ -872,8 +877,16 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         var dyE = dy(t), dxE = dx(t);
         var normal = -dxE / dyE;
 
-        var delX = radius * Math.sign(normal) / Math.sqrt(normal * normal + 1);
-        var delY = delX * normal;
+        var delX, delY;
+        if (normal === 0) {
+            delX = radius;
+            delY = 0;
+        }
+        else{
+            delX = radius * Math.sign(normal) / Math.sqrt(normal * normal + 1);
+            delY = delX * normal;
+        }
+
 
         var sliceIdx = counter % sliceLength;
         arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2 + 5);
@@ -922,6 +935,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
 
                     }
                 }
+                currentCusp = newCuspPoints.length === 0 ? undefined : newCuspPoints[newCuspPoints.length - 1];
                 if (currentCusp !== undefined && revolve.checked && cuspIdx < newCuspPoints.length) {
                     var nextNormal = -dx(t + step + epsilon) / dy(t + step + epsilon);
                     var cNormal = normal;
@@ -937,14 +951,14 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         var radians;
                         if (Math.abs(cNormal - nextNormal) < 0.5) {
                             radians = Math.PI - Math.abs(r1) - Math.abs(r2);
-                            if (dyE < 0){
+                            if (dyE < 0) {
                                 r1 -= Math.PI;
                             }
 
                         }
                         else {
                             radians = Math.abs(r1) + Math.abs(r2);
-                            if (dxE < 0){
+                            if (dxE < 0) {
                                 r1 -= Math.PI;
                             }
 
@@ -954,33 +968,31 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                             if (t >= +(newCutPoints[i].toFixed(num))) {
                                 var ele = document.getElementById('c' + i);
                                 sign = ele === undefined ? defaultCutPointSigns[i] : getSign(ele);
-                                console.log(t+'||'+sign);
+                                console.log(t + '||' + sign);
                                 break;
                             }
                         }
 
-                        if (Math.abs(lastNormal - nextNormal) > 0.5 && initialRotIncrementDirection === 1){
+                        if (Math.abs(lastNormal - nextNormal) > 0.5 && initialRotIncrementDirection === 1) {
                             sign = -sign;
                         }
-                        else{
+                        else {
                             sign = initialRotIncrementDirection * sign;
                         }
 
+                        var tempSign = 1;
+
                         idx++;
                         for (var i = 0; i < radians; i += step * 5, idx++, cuspSteps++) {
-                            locations[idx] = [cuspX * scale, cuspY * scale, sign * radius * Math.cos(r1 + rotDirection * i) * scale,
-                                sign * radius * Math.sin(r1 + rotDirection * i) * scale, rotAngle + i, currentCusp, 1];
+                            locations[idx] = [cuspX * scale, cuspY * scale, tempSign * sign * radius * Math.cos(r1 + rotDirection * i) * scale,
+                                tempSign * sign * radius * Math.sin(r1 + rotDirection * i) * scale, rotAngle + i, currentCusp, 1];
                         }
                         idx--;
                         previousArcLength += radius * radians;
                     }
                 }
-                if (dxE === 0 && dyE === 0) {
-                    var tNormal = -dx(t - step) / dy(t - step);
-                    if (Math.abs(tNormal) < 0.5)
-                        locations[idx - cuspSteps] = [x * scale, y * scale, Math.sign(tNormal) * radius * scale, 0, rotAngle, t, 0];
-                    else
-                        locations[idx - cuspSteps] = [x * scale, y * scale, 0, Math.sign(tNormal) * radius * scale, rotAngle, t, 0];
+                if (dyE === 0) {
+                    locations[idx - cuspSteps] = [NaN, NaN, NaN, NaN, rotAngle, t, 2];
                 }
                 else {
                     locations[idx - cuspSteps] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 0];
@@ -1002,17 +1014,16 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         }
                     }
                 }
-
-                if (dyE === 0) {
-                    locations[idx] = [x * scale, y * scale, 0, radius * scale, rotAngle, t, 0];
-                }
-                else {
-                    locations[idx] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 0];
-                }
+                locations[idx] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 0];
             }
         }
         else {
-            locations[idx] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 0];
+            if (dyE  === 0) {
+                locations[idx] = [x * scale, y * scale, 0, radius * scale, rotAngle, t, 0];
+            }
+            else {
+                locations[idx] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 0];
+            }
         }
         lastNormal = normal;
     }
@@ -1207,11 +1218,12 @@ function draw(ruler, drawingInterval, callback) {
                 return setTimeout(function () {
                     if (!flag.stop) {
                         ruler.erase(bottomCxt);
-                        if (locArray[i][6])
+                        if (locArray[i][6] === 1)
                             ruler.moveTo(locArray[i][0] + locArray[i][2], locArray[i][1] + locArray[i][3]);
-                        else
+                        else if (locArray[i][6] !== 2)
                             ruler.moveTo(locArray[i][0] + sign * locArray[i][2], locArray[i][1] + sign * locArray[i][3]);
                         ruler.angle = locArray[i][4];
+
                         if (changeRot)
                             ruler.changeDirection(rot);
 
