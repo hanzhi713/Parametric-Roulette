@@ -288,7 +288,8 @@ function getConfigJSON() {
         pngBgColor: pngBgColorParam.value,
 
         locArray: isLocValid ? locArray.map(function (value) {
-            return [+(value[0].toFixed(2)), +(value[1].toFixed(2)), +(value[2].toFixed(2)), +(value[3].toFixed(2)), +(value[4].toFixed(3)), +(value[5].toFixed(4)), +(value[6].toFixed(2))]
+            return [value[0] === null ? NaN : +(value[0].toFixed(2)), value[1] === null ? NaN : +(value[1].toFixed(2)), value[2] === null ? NaN : +(value[2].toFixed(2)),
+                value[3] === null ? NaN : +(value[3].toFixed(2)), +(value[4].toFixed(3)), +(value[5].toFixed(4)), +(value[6].toFixed(2))]
         }) : undefined,
         cutPoints: cutPoints,
         cutPointSigns: isLocValid ? cutPointSigns : undefined,
@@ -449,15 +450,15 @@ function getScalingAndTranslation(realBounds, width, convention) {
     var height;
     if (realWidth > realHeight)
         height = width * realHeight / realWidth;
-    else{
+    else {
         height = width;
         width = width * realWidth / realHeight;
     }
 
     var wTranslation, hTranslation;
     if (convention) {
-        wTranslation = -320 + (640 - realWidth * scaling)/2 - realBounds[0] * scaling;
-        hTranslation = 320 - (640 - realHeight * scaling)/2 - realBounds[3] * scaling;
+        wTranslation = -320 + (640 - realWidth * scaling) / 2 - realBounds[0] * scaling;
+        hTranslation = 320 - (640 - realHeight * scaling) / 2 - realBounds[3] * scaling;
         // wTranslation = Math.abs(realBounds[0] * scaling - (640 - realWidth * 2 * scaling));
         // hTranslation = Math.abs(realBounds[3] * scaling - (640 - realHeight * 2 * scaling));
     }
@@ -900,7 +901,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
             delX = Math.sign(lastNormal) * radius;
             delY = 0;
         }
-        else{
+        else {
             delX = radius * Math.sign(normal) / Math.sqrt(normal * normal + 1);
             delY = delX * normal;
         }
@@ -1010,7 +1011,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                             locations[idx] = [cuspX * scale, cuspY * scale, tempSign * sign * radius * Math.cos(r1 + rotDirection * i) * scale,
                                 tempSign * sign * radius * Math.sin(r1 + rotDirection * i) * scale, rotAngle + i, currentCusp, 1];
                         }
-                        cuspSteps ++;
+                        cuspSteps++;
                         locations[idx++] = [cuspX * scale, cuspY * scale, tempSign * sign * radius * Math.cos(r1 + rotDirection * radians) * scale,
                             tempSign * sign * radius * Math.sin(r1 + rotDirection * radians) * scale, rotAngle + radians, currentCusp, 1];
                         idx--;
@@ -1047,7 +1048,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
             }
         }
         else {
-            if (dyE  === 0) {
+            if (dyE === 0) {
                 locations[idx] = [x * scale, y * scale, 0, radius * scale, rotAngle, t, 0];
             }
             else {

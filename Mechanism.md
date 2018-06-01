@@ -85,6 +85,10 @@ The effect is shown in the following table.
 |<img src="doc/heart.gif"> | <img src="doc/astroid.gif"> |
 | config is available [here](doc/heart.json) |config is available [here](doc/astroid.json) |
 
+Currently there's no way to perfectly deal with parametric curve with three cusps because the roulette will always be broken at one cusp.
+
+<img src="doc/three-cusps.png" width="400px"/>
+
 ## 2. Revolving around cusps 
 
 Some considered the first method to be unnatural as the roulette doesn't appear consistently inside or outside the parametric curve. Therefore, I came up with this method in order to correct that issue.
@@ -101,3 +105,5 @@ Additionally, when a vertical or horizontal cusp is met, the circle will revolve
 | config is available [here](doc/heart-revolve.json) |config is available [here](doc/astroid-revolve.json) |
 
 However, the direction of rotation and the sign (whether the half-circle at the cusp should point upward or downward) depend on the original rotation direction, dy/dt, dx/dt and (maybe) some other unknown factors. Up to now, I am unable to find an algorithm that can correctly generate the path of revolution around the cusp for ALL CASES, so you may found the direction of revolution incorrect for some parametric curves.
+
+I will add buttons for you to manually adjust the path of revolution around cusps later.
