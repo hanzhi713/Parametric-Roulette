@@ -8,7 +8,7 @@ The rolling circle doesn't have a collision box. It will keep rolling even if th
 
 ## Computation
 
-Suppose there is a circle with radius r is rolling on the parametric equation defined by 
+Suppose there is a circle with radius r is rolling on the parametric equation defined by
 
 <img src="http://latex.codecogs.com/svg.latex?\inline&space;&space;\left\{&space;\begin{array}{lr}&space;x=&space;f(t)&space;&&space;\\&space;y=&space;g(t)&space;\end{array}&space;\right.&space;a\leq&space;t\leq&space;b" title=" \left\{ \begin{array}{lr} x= f(t) & \\ y= g(t) \end{array} \right. a\leq t\leq b" />
 
@@ -26,7 +26,7 @@ And the rotation angle θ in radians therefore is
 
 <img src="http://latex.codecogs.com/svg.latex?&space;\theta&space;=&space;2\pi&space;\frac{L_{AA'}}{2\pi&space;r}&space;=&space;\frac{L_{AA'}}{r}" title=" \theta = 2\pi \frac{L_{AA'}}{2\pi r} = \frac{L_{AA'}}{r}" />
 
-Since 
+Since
 
 <img src="http://latex.codecogs.com/svg.latex?&space;&space;\angle&space;F'BE''&space;=&space;\angle&space;F'B'E'&space;-&space;\theta&space;=&space;\angle&space;FBE&space;-&space;\theta&space;=&space;\angle&space;FBE&space;-&space;\frac{L_{AA'}}{r}" title="  \angle F'BE'' = \angle F'B'E' - \theta = \angle FBE - \theta = \angle FBE - \frac{L_{AA'}}{r}" />
 
@@ -64,40 +64,40 @@ By the above method of computation, the circle will always appear above the grap
 
 <img src="doc/heart.svg" width="500px">
 
-This problem could be resolved to some extent by adjusting the sign of &Delta;x, which could be achieved automatically in my JavaScript drawer (not available in Geogebra implementation though). There are two ways to do this, but one is experimental and prone to errors.
+This problem could be resolved to some extent by adjusting the sign of &Delta;x, which could be achieved automatically in my JavaScript drawer (not available in Geogebra implementation though). There are two ways to do this, but one is experimental.
 
 ## Common adjustment required
 
-It is found that regardless of the sign-changing method used, sign needs always be adjust at vertical tangent:
+It is found that regardless of the sign-changing method used, sign needs to always be adjust at vertical tangent:
 
 <img src="http://latex.codecogs.com/svg.latex?\begin{array}{l}&space;\textup{vertical&space;tangent&space;at}\&space;t&space;=&space;t_{vt}\\\\&space;\left\{&space;\begin{array}{lr}&space;f'(t_{vt})\ne&space;0&space;&&space;\\&space;g'(t_{vt})=0&space;\end{array}&space;\right.\end{array}" title="\begin{array}{l} \textup{vertical tangent at}\ t = t_{vt}\\\\ \left\{ \begin{array}{lr} f'(t_{vt})\ne 0 & \\ g'(t_{vt})=0 \end{array} \right.\end{array}" />
 
 ## 1. Auto sign-changing by switching sides
 
-I keep the roulette continuous by changing both the sign of &Delta;x and the direction of rotation at vertical cusp:
+I keep the roulette continuous by changing both the sign of &Delta;x at vertical cusp and changing the rotation direction of the circle at all cusps:
 
 <img src="http://latex.codecogs.com/svg.latex?\begin{array}{l}&space;\textup{vertical&space;cusp&space;at}\&space;t&space;=&space;t_{vc}\\\\&space;\left\{&space;\begin{array}{lr}&space;f'(t_{vc})=0&space;&&space;\\&space;g'(t_{vc})=0&space;\\&space;\lim\limits_{t\to&space;t_{vc}^&plus;}\frac{g'(t)}{f'(t)}=\infty\&space;\textup{and}&space;\lim\limits_{t\to&space;t_{vc}^-}\frac{g'(t)}{f'(t)}=-\infty\&space;\textup{or}\&space;\lim\limits_{t\to&space;t_{vc}^&plus;}\frac{g'(t)}{f'(t)}=-\infty\&space;\textup{and}&space;\lim\limits_{t\to&space;t_{vc}^-}\frac{g'(t)}{f'(t)}=\infty\&space;\end{array}\right.&space;\end{array}" title="\begin{array}{l} \textup{vertical cusp at}\ t = t_{vc}\\\\ \left\{ \begin{array}{lr} f'(t_{vc})=0 & \\ g'(t_{vc})=0 \\ \lim\limits_{t\to t_{vc}^+}\frac{g'(t)}{f'(t)}=\infty\ \textup{and} \lim\limits_{t\to t_{vc}^-}\frac{g'(t)}{f'(t)}=-\infty\ \textup{or}\ \lim\limits_{t\to t_{vc}^+}\frac{g'(t)}{f'(t)}=-\infty\ \textup{and} \lim\limits_{t\to t_{vc}^-}\frac{g'(t)}{f'(t)}=\infty\ \end{array}\right. \end{array}" />
 
-The effect is shown in the following table. 
+The effect is shown in the following table.
 
 | Heart | Astroid |
 | ---- | ---- |
 |<img src="doc/heart.gif"> | <img src="doc/astroid.gif"> |
 | config is available [here](doc/heart.json) |config is available [here](doc/astroid.json) |
 
-## 2. Revolving around cusps
+## 2. Revolving around cusps 
 
-Some consider the first method to be unnatural as the roulette doesn't appear consistently inside or outside the parametric curve. Therefore, I came up with this method in order to correct that issue.
+Some considered the first method to be unnatural as the roulette doesn't appear consistently inside or outside the parametric curve. Therefore, I came up with this method in order to correct that issue.
 
-The roulette is kept consistently inside or outside the parametric curve by switching signs of &Delta;x at horizontal cusp rather than vertical cusp. The direction of rotation for the circle is consistent throughout.
+The roulette is kept consistently inside or outside the parametric curve by switching signs of &Delta;x at horizontal cusp rather than vertical cusp. The rotation direction of the circle is consistent throughout.
 
 <img src="http://latex.codecogs.com/svg.latex?\begin{array}{l}&space;\textup{horizontal&space;cusp&space;at}\&space;t&space;=&space;t_{hc}\\\\&space;\left\{&space;\begin{array}{lr}&space;f'(t_{hc})=0&space;&&space;\\&space;g'(t_{hc})=0&space;\\&space;\frac{g'(t)}{f'(t)}\to0^&plus;\&space;\textup{as}\&space;t\to&space;t_{vc}^&plus;\&space;\textup{and}\&space;\frac{g'(t)}{f'(t)}\to&space;0^-\&space;\textup{as}\&space;t\to&space;t_{vc}^-\&space;\&space;\textup{or}\&space;\&space;\frac{g'(t)}{f'(t)}\to0^-\&space;\textup{as}\&space;t\to&space;t_{vc}^&plus;\&space;\textup{and}\&space;\frac{g'(t)}{f'(t)}\to&space;0^&plus;\&space;\textup{as}\&space;t\to&space;t_{vc}^-\&space;\end{array}&space;\right.&space;\end{array}" title="\begin{array}{l} \textup{horizontal cusp at}\ t = t_{hc}\\\\ \left\{ \begin{array}{lr} f'(t_{hc})=0 & \\ g'(t_{hc})=0 \\ \frac{g'(t)}{f'(t)}\to0^+\ \textup{as}\ t\to t_{vc}^+\ \textup{and}\ \frac{g'(t)}{f'(t)}\to 0^-\ \textup{as}\ t\to t_{vc}^-\ \ \textup{or}\ \ \frac{g'(t)}{f'(t)}\to0^-\ \textup{as}\ t\to t_{vc}^+\ \textup{and}\ \frac{g'(t)}{f'(t)}\to 0^+\ \textup{as}\ t\to t_{vc}^-\ \end{array} \right. \end{array}" />
 
-Additionally, when a vertical or horizontal cusp is met, the circle will revolve around the cusp. The drawback of this method is that the roulette around the cusp may appear discontinuous. This is mainly caused by inaccuracies in floating point arithmetic. The effect of this method is shown below, in comparison with the previous method.
+Additionally, when a vertical or horizontal cusp is met, the circle will revolve around the cusp. The drawback of this method is that the path of revolution and the previous roulette may appear to be not contiguous. This is mainly caused by inaccuracies in floating point arithmetic. The effect of this method is shown below, in comparison with the previous method.
 
 | Heart | Astroid |
 | ---- | ---- |
 |<img src="doc/heart-revolve.gif"> | <img src="doc/astroid-revolve.gif"> |
 | config is available [here](doc/heart-revolve.json) |config is available [here](doc/astroid-revolve.json) |
 
-However, the direction of rotation and the sign (whether the half-circle at the cusp should point upward or downward) depend on the original rotation direction, dy/dt, dx/dt and some other unknown factors. Up to now, I am unable to find an algorithm that can correctly generate the path of revolution around the cusp for ALL CASES, so you may found the direction of revolution incorrect for some parametric curves.
+However, the direction of rotation and the sign (whether the half-circle at the cusp should point upward or downward) depend on the original rotation direction, dy/dt, dx/dt and (maybe) some other unknown factors. Up to now, I am unable to find an algorithm that can correctly generate the path of revolution around the cusp for ALL CASES, so you may found the direction of revolution incorrect for some parametric curves.

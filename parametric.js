@@ -847,6 +847,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     }
 
     var newCuspPoints = [];
+    var c_newCuspPoints = [];
     var firstRotEle = document.getElementById('r0'), firstSignEle = document.getElementById('c0');
     var rotDirection = getSign(firstRotEle);
     var sign = getSign(firstSignEle);
@@ -868,7 +869,6 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     var locations = [];
     var newCutPoints = [];
     var defaultCutPointSigns = [-1];
-    var cuspIdx = 0;
 
     xExp = xExp.buildFunction(['t']);
     yExp = yExp.buildFunction(['t']);
@@ -934,6 +934,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         if (t < z1 && z1 < t2 && (newCuspPoints.length === 0 || Math.abs(z1 - newCuspPoints[newCuspPoints.length - 1]) > maxError * 10)) {
                             newCuspPoints.push(z1);
                             newCutPoints.push(z1);
+                            c_newCuspPoints = newCuspPoints.concat();
                             if (Math.abs(normal - lastNormal) < 0.5) {
                                 // vertical cusp does not require sign-adjustment when we want the circle to consistently inside or outside the parametric curve
                                 if (revolve.checked)
@@ -953,16 +954,16 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
 
                     }
                 }
-                currentCusp = newCuspPoints.length === 0 ? undefined : newCuspPoints[newCuspPoints.length - 1];
-                if (currentCusp !== undefined && revolve.checked && cuspIdx < newCuspPoints.length) {
+                currentCusp = c_newCuspPoints.length === 0 ? undefined : c_newCuspPoints[c_newCuspPoints.length - 1];
+                if (currentCusp !== undefined && revolve.checked) {
                     var nextNormal = -dx(t + step + epsilon) / dy(t + step + epsilon);
                     var cNormal = normal;
 
                     // switch to last normal if t is too close
                     if (Math.abs(t - currentCusp) < maxError)
                         cNormal = lastNormal;
-                    if (Math.sign(cNormal) * Math.sign(nextNormal) === -1 && (t + step) <= t2) {
-                        cuspIdx++;
+                    if (Math.sign(cNormal) * Math.sign(nextNormal) === -1 && (t + step) <= t2 && Math.abs(t - currentCusp) <= step) {
+                        c_newCuspPoints.splice(c_newCuspPoints.length - 1, 1);
                         var cuspX = xExp(currentCusp), cuspY = yExp(currentCusp);
 
                         // console.log(t + '||' + currentCusp + '||' + (t + step));
