@@ -445,8 +445,15 @@ function getScalingAndTranslation(realBounds, width, convention) {
     var realWidth = realBounds[1] - realBounds[0];
     var realHeight = realBounds[3] - realBounds[2];
 
-    var scaling = convention ? Math.min(width / realWidth, width / realHeight) : width / realWidth;
-    var height = width * realHeight / realWidth;
+    var scaling = convention ? Math.min(width / realWidth, width / realHeight) : (realWidth > realHeight ? width / realWidth : width / realHeight);
+    var height;
+    if (realWidth > realHeight)
+        height = width * realHeight / realWidth;
+    else{
+        height = width;
+        width = width * realWidth / realHeight;
+    }
+
     var wTranslation, hTranslation;
     if (convention) {
         wTranslation = -320 + (640 - realWidth * scaling)/2 - realBounds[0] * scaling;
@@ -458,7 +465,7 @@ function getScalingAndTranslation(realBounds, width, convention) {
         wTranslation = -(realBounds[0] + 320);
         hTranslation = -(320 - realBounds[3]);
     }
-    return [height, scaling, wTranslation, hTranslation]
+    return [height, scaling, wTranslation, hTranslation, width]
 }
 
 function autoAdjustScalingAndTranslation() {
@@ -494,6 +501,7 @@ function saveToPNG() {
 
         if (pngCropCheck.checked) {
             var parameters = getScalingAndTranslation(getRealBounds(true), tempCanvas.width, false);
+            tempCanvas.width = parameters[4];
             tempCanvas.height = parameters[0];
             if (!transparent) {
                 tempCxt.fillStyle = bgColor;
@@ -556,34 +564,42 @@ function saveToGIF() {
     tempCanvas.width = frameSize;
     var gifHeight;
 
+    var gif;
+
     if (gifCropCheck.checked) {
         var parameters = getScalingAndTranslation(getRealBounds(true), tempCanvas.width, false);
+        tempCanvas.width = parameters[4];
         tempCanvas.height = parameters[0];
-        gifHeight = parameters[0];
         if (!transparent) {
             tempCxt.fillStyle = gifBgColorParam.value;
             tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
         }
         tempCxt.scale(parameters[1], parameters[1]);
         tempCxt.translate(parameters[2], parameters[3]);
+
+        gif = new GIF({
+            workers: 4,
+            quality: +gifQualityParam.value,
+            workerScript: './gif.worker.js',
+            width: parameters[4],
+            height: parameters[0]
+        });
     }
     else {
-        // noinspection JSSuspiciousNameCombination
         tempCanvas.height = frameSize;
         if (!transparent) {
             tempCxt.fillStyle = gifBgColorParam.value;
             tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height)
         }
         tempCxt.scale(frameSize / topCanvas.width, frameSize / topCanvas.height);
+        gif = new GIF({
+            workers: 4,
+            quality: +gifQualityParam.value,
+            workerScript: './gif.worker.js',
+            width: frameSize,
+            height: frameSize
+        });
     }
-
-    var gif = new GIF({
-        workers: 4,
-        quality: +gifQualityParam.value,
-        workerScript: './gif.worker.js',
-        width: frameSize,
-        height: gifHeight
-    });
 
     ruler.showSkeleton = skeletonCheck.checked;
 
