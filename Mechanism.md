@@ -68,7 +68,7 @@ This problem could be resolved to some extent by adjusting the sign of &Delta;x,
 
 ## Common adjustment required
 
-It is found that regardless of the sign-changing method used, sign needs to always be adjust at vertical tangent. The value of t is calculated using [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method). 
+It is found that regardless of the sign-changing method used, sign needs to always be adjusted at vertical tangent. The value of t is calculated using the [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method). 
 
 <img src="http://latex.codecogs.com/svg.latex?\begin{array}{l}&space;\textup{vertical&space;tangent&space;at}\&space;t&space;=&space;t_{vt}\\\\&space;\left\{&space;\begin{array}{lr}&space;f'(t_{vt})\ne&space;0&space;&&space;\\&space;g'(t_{vt})=0&space;\end{array}&space;\right.\end{array}" title="\begin{array}{l} \textup{vertical tangent at}\ t = t_{vt}\\\\ \left\{ \begin{array}{lr} f'(t_{vt})\ne 0 & \\ g'(t_{vt})=0 \end{array} \right.\end{array}" />
 
@@ -104,6 +104,6 @@ Additionally, when a vertical or horizontal cusp is met, the circle will revolve
 |<img src="doc/heart-revolve.gif"> | <img src="doc/astroid-revolve.gif"> |
 | config is available [here](doc/heart-revolve.json) |config is available [here](doc/astroid-revolve.json) |
 
-However, the direction of rotation and the sign (whether the half-circle at the cusp should point upward or downward) depend on the original rotation direction, dy/dt, dx/dt and (maybe) some other unknown factors. Up to now, I am unable to find an algorithm that can correctly generate the path of revolution around the cusp for ALL CASES, so you may found the direction of revolution incorrect for some parametric curves. Additionally, current method does not consider oblique cusps, which can be seen in a previous picture.
+However, the direction of rotation and the sign (whether the half-circle at the cusp should point upward or downward) depend on the original rotation direction, dy/dt, dx/dt and (maybe) some other unknown factors. Up to now, I am unable to find an algorithm that can correctly generate the path of revolution around the cusp for ALL CASES, so you may found the direction of revolution incorrect for some parametric curves. Moreover, current method does not consider oblique cusps, which can be seen in a previous picture.
 
 I will add buttons for you to manually adjust the path of revolution around cusps later.

@@ -930,7 +930,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                     if (z1 === undefined) z1 = findZero(dx, exps[4], t, maxError);
                     if (z2 === undefined) z2 = findZero(dy, exps[5], t, maxError);
 
-                    // both dy/dt and dx/dt approaches zero
+                    // both dy/dt and dx/dt approaches the same value
                     if (!isNaN(z1) && !isNaN(z2) && Math.abs(z1 - z2) < maxError * 2) {
                         if (t < z1 && z1 < t2 && (newCuspPoints.length === 0 || Math.abs(z1 - newCuspPoints[newCuspPoints.length - 1]) > maxError * 10)) {
                             newCuspPoints.push(z1);
