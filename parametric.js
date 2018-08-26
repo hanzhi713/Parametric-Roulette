@@ -4,8 +4,6 @@ if (typeof (Math.sign) !== "function") {
     };
 }
 
-var TwoPI = Math.PI * 2;
-
 var topCanvas = document.getElementById('canvas-top');
 var bottomCanvas = document.getElementById('canvas-bottom');
 var funcCanvas = document.getElementById('canvas-func');
@@ -223,9 +221,8 @@ function postModify() {
 
 function stopDrawing() {
     flag.stop = true;
-    for (var i = 0; i < currentJobs.length; i++) {
+    for (var i = 0; i < currentJobs.length; i++)
         clearTimeout(currentJobs[i]);
-    }
     currentJobs = [];
 }
 
@@ -236,6 +233,9 @@ function saveConfigToBrowser() {
     localStorage.setItem('cache', getConfigJSON());
 }
 
+/**
+ * @return String
+ * */
 function getConfigJSON() {
     var isLocValid = locArray.length > 0 && locArray[0].length >= 6;
     var cutPointSigns = new Array(cutPoints.length), cuspPointSigns = new Array(cuspPoints.length);
@@ -299,6 +299,9 @@ function getConfigJSON() {
     return JSON.stringify(config);
 }
 
+/**
+ * @param {String} json
+ * */
 function parseConfigJSON(json) {
     if (json === "" || json === null) return;
     try {
@@ -542,6 +545,8 @@ function getSign(element) {
 }
 
 function saveToGIF() {
+    var _locArray = locArray;
+
     var frameSize = +gifSizeParam.value;
     var transparent = gifTransparentCheck.checked;
     var frameInterval = +gifIntervalParam.value;
@@ -621,14 +626,14 @@ function saveToGIF() {
 
     var sign = getSign(document.getElementById('c0'));
     var rot = getSign(document.getElementById('r0'));
-    for (var i = 0, delay = 0, counter = 0, cut = 0, cusp = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
+    for (var i = 0, delay = 0, counter = 0, cut = 0, cusp = 0; i < _locArray.length; i++, delay += drawingInterval, counter++) {
         var changeRot = i === 0;
         if (cut < cutPoints.length) {
-            if ((locArray[i][5] - cutPoints[cut]) > epsilon)
+            if ((_locArray[i][5] - cutPoints[cut]) > epsilon)
                 sign = getSign(document.getElementById('c' + ++cut));
         }
         if (cusp < cuspPoints.length) {
-            if ((locArray[i][5] - cuspPoints[cusp]) > epsilon) {
+            if ((_locArray[i][5] - cuspPoints[cusp]) > epsilon) {
                 rot = getSign(document.getElementById('r' + ++cusp));
                 changeRot = true;
             }
@@ -637,11 +642,11 @@ function saveToGIF() {
                 return setTimeout(function () {
                     if (!flag.stop) {
                         ruler.erase(bottomCxt);
-                        if (locArray[i][6] === 1)
-                            ruler.moveTo(locArray[i][0] + locArray[i][2], locArray[i][1] + locArray[i][3]);
-                        else if (locArray[i][6] !== 2)
-                            ruler.moveTo(locArray[i][0] + sign * locArray[i][2], locArray[i][1] + sign * locArray[i][3]);
-                        ruler.angle = locArray[i][4];
+                        if (_locArray[i][6] === 1)
+                            ruler.moveTo(_locArray[i][0] + _locArray[i][2], _locArray[i][1] + _locArray[i][3]);
+                        else if (_locArray[i][6] !== 2)
+                            ruler.moveTo(_locArray[i][0] + sign * _locArray[i][2], _locArray[i][1] + sign * _locArray[i][3]);
+                        ruler.angle = _locArray[i][4];
                         if (changeRot)
                             ruler.changeDirection(rot);
 
@@ -662,9 +667,9 @@ function saveToGIF() {
                                 delay: frameDelay
                             });
 
-                            var progress = i / locArray.length * 100;
+                            var progress = i / _locArray.length * 100;
                             progressbar.width(progress + '%');
-                            progressLabel.text(lan['Drawing: '] + 't = ' + locArray[i][5].toFixed(3) + ', ' + progress.toFixed(1) + '%');
+                            progressLabel.text('Drawing: t = ' + _locArray[i][5].toFixed(3) + ', ' + progress.toFixed(1) + '%');
                         }
                     }
                 }, delay);
@@ -692,12 +697,12 @@ function saveToGIF() {
                     gif.on('progress', function (p) {
                         if (Math.abs(1 - p) < 0.0001) {
                             progressbar.width('100%');
-                            progressLabel.text(lan['Save as GIF: Finished']);
+                            progressLabel.text('Save as GIF: Finished');
                         }
                         else {
                             p = p * 100;
                             progressbar.width(p + '%');
-                            progressLabel.text(lan['Save as GIF: '] + p.toFixed(1) + '%');
+                            progressLabel.text('Save as GIF: ' + p.toFixed(1) + '%');
                         }
                     });
 
@@ -732,6 +737,10 @@ function setTransform(cxts) {
         cxts[i].setTransform(1, 0, 0, -1, sx + 320, 320 - sy);
 }
 
+/**
+ * @param {Number} radius
+ * @param {Number} scale
+ * */
 function drawPreview(radius, scale) {
     if (clearBeforeDrawingCheck.checked)
         clear();
@@ -1118,9 +1127,8 @@ function findZero(f, fp, x0, err) {
     err /= 2;
     for (var i = 0; i < 16; i++) {
         x_n1 = x_n - f(x_n) / fp(x_n);
-        if (Math.abs(x_n1 - x_n) < err) {
+        if (Math.abs(x_n1 - x_n) < err)
             return x_n1;
-        }
         x_n = x_n1;
     }
     return NaN;
@@ -1196,7 +1204,7 @@ function generateRadius() {
     var exps = buildNecessaryExpressions(nerdamer(xParam.value), nerdamer(yParam.value));
     var t1 = +t1Param.value, t2 = +t2Param.value;
     var arcLength = integrate(exps[2], t1, t2, Math.round((t2 - t1) / (+drawingStepParam.value)) + 10);
-    circleParam.value = (arcLength / multiple / TwoPI);
+    circleParam.value = (arcLength / multiple / (2 * Math.PI));
     previewRuler();
 }
 
@@ -1206,7 +1214,9 @@ function generateRadius() {
  * @param {Function} callback
  * */
 function draw(ruler, drawingInterval, callback) {
-    if (locArray.length < 1)
+    // storing the reference to global variable for efficiency
+    var _locArray = locArray;
+    if (_locArray.length < 1)
         return alert('You must first click \'preview\' to calculate drawing path');
 
     var topCxt = topCanvas.getContext('2d');
@@ -1232,14 +1242,14 @@ function draw(ruler, drawingInterval, callback) {
 
     var sign = getSign(document.getElementById('c0'));
     var rot = getSign(document.getElementById('r0'));
-    for (var i = 0, delay = 0, counter = 0, cut = 0, cusp = 0; i < locArray.length; i++, delay += drawingInterval, counter++) {
+    for (var i = 0, delay = 0, counter = 0, cut = 0, cusp = 0; i < _locArray.length; i++, delay += drawingInterval, counter++) {
         var changeRot = i === 0;
         if (cut < cutPoints.length) {
-            if ((locArray[i][5] - cutPoints[cut]) > epsilon)
+            if ((_locArray[i][5] - cutPoints[cut]) > epsilon)
                 sign = getSign(document.getElementById('c' + ++cut));
         }
         if (cusp < cuspPoints.length) {
-            if ((locArray[i][5] - cuspPoints[cusp]) > epsilon) {
+            if ((_locArray[i][5] - cuspPoints[cusp]) > epsilon) {
                 rot = getSign(document.getElementById('r' + ++cusp));
                 changeRot = true;
             }
@@ -1248,11 +1258,11 @@ function draw(ruler, drawingInterval, callback) {
                 return setTimeout(function () {
                     if (!flag.stop) {
                         ruler.erase(bottomCxt);
-                        if (locArray[i][6] === 1)
-                            ruler.moveTo(locArray[i][0] + locArray[i][2], locArray[i][1] + locArray[i][3]);
-                        else if (locArray[i][6] !== 2)
-                            ruler.moveTo(locArray[i][0] + sign * locArray[i][2], locArray[i][1] + sign * locArray[i][3]);
-                        ruler.angle = locArray[i][4];
+                        if (_locArray[i][6] === 1)
+                            ruler.moveTo(_locArray[i][0] + _locArray[i][2], _locArray[i][1] + _locArray[i][3]);
+                        else if (_locArray[i][6] !== 2)
+                            ruler.moveTo(_locArray[i][0] + sign * _locArray[i][2], _locArray[i][1] + sign * _locArray[i][3]);
+                        ruler.angle = _locArray[i][4];
 
                         if (changeRot)
                             ruler.changeDirection(rot);
@@ -1260,9 +1270,9 @@ function draw(ruler, drawingInterval, callback) {
                         ruler.draw(topCxt, bottomCxt);
 
                         if (counter % 10 === 0) {
-                            var progress = i / locArray.length * 100;
+                            var progress = i / _locArray.length * 100;
                             progressbar.width(progress + '%');
-                            progressLabel.text(lan['Drawing: '] + 't = ' + locArray[i][5].toFixed(3) + ', ' + progress.toFixed(1) + '%');
+                            progressLabel.text('Drawing: t = ' + _locArray[i][5].toFixed(3) + ', ' + progress.toFixed(1) + '%');
                         }
                     }
                 }, delay);
@@ -1272,7 +1282,7 @@ function draw(ruler, drawingInterval, callback) {
     currentJobs.push((function (delay) {
             return setTimeout(function () {
                 progressbar.width('100%');
-                progressLabel.text(lan['Drawing: Finished']);
+                progressLabel.text('Drawing: Finished');
                 if (callback !== undefined)
                     callback();
             }, delay);
@@ -1395,7 +1405,7 @@ function Ruler(circle, dots) {
                 this.calculateRotation(i));
             topCxt.fillStyle = this.dots[i].color;
             topCxt.beginPath();
-            topCxt.arc(dotPos[0], dotPos[1], this.dots[i].size, 0, TwoPI);
+            topCxt.arc(dotPos[0], dotPos[1], this.dots[i].size, 0, 2 * Math.PI);
             topCxt.closePath();
             topCxt.fill();
         }
@@ -1426,7 +1436,7 @@ function Ruler(circle, dots) {
                     this.calculateRotation(i));
                 bottomCxt.moveTo(this.circle.x, this.circle.y);
                 bottomCxt.lineTo(dotPos[0], dotPos[1]);
-                bottomCxt.arc(this.circle.x, this.circle.y, 2, 0, TwoPI);
+                bottomCxt.arc(this.circle.x, this.circle.y, 2, 0, 2 * Math.PI);
             }
             bottomCxt.closePath();
             bottomCxt.stroke();
@@ -1472,7 +1482,7 @@ function Circle(x, y, radius) {
      * */
     this.draw = function (cxt) {
         cxt.beginPath();
-        cxt.arc(this.x, this.y, this.radius, 0, TwoPI);
+        cxt.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         cxt.closePath();
         cxt.stroke();
     };
