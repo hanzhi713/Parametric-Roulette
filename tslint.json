@@ -5,14 +5,11 @@
         "exclude": ["node_modules/**"]
     },
     "rules": {
-        "quotemark": [true, "single"],
         "indent": [true, "spaces", 4],
-        "interface-name": false,
         "object-literal-sort-keys": false,
         "trailing-comma": false,
         "arrow-parens": false,
         "radix": false,
-        "no-bitwise": false,
         "no-console": false,
         "curly": false,
         "forin": false,
@@ -21,8 +18,6 @@
         "prefer-for-of": false,
         "one-variable-per-declaration": false,
         "member-access": false,
-        "whitespace": false,
-        "array-type": false,
         "no-reference": false,
         "max-classes-per-file": false
     }
