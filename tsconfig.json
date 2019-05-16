@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "baseUrl": ".",
+        "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+    },
+    "exclude": ["node_modules"]
+}
