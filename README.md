@@ -16,9 +16,9 @@ See [here](Mechanism.md)
 
 ---
 
-## Example 1: Rolling on a hyperbola 
+## Example 1: Rolling on a hyperbola
 
-<img src="http://latex.codecogs.com/svg.latex?&space;\left\{&space;\begin{array}{lr}&space;x=2\cosh{t}&space;&&space;\\&space;y=&space;1.5\sinh{t}&space;\end{array}&space;\right.&space;-\pi\leq&space;t\leq&space;\pi" title=" \left\{ \begin{array}{lr} x=2\cosh{t} & \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi" />
+<img src="https://latex.codecogs.com/svg.latex?\left\{&space;\begin{array}{lr}&space;x=2\cosh{t}&space;&&space;\\&space;y=&space;1.5\sinh{t}&space;\end{array}&space;\right.&space;-\pi\leq&space;t\leq&space;\pi" title="\left\{ \begin{array}{lr} x=2\cosh{t} & \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi" />
 
 <img src="doc/on-hyperbola.svg" width="500px">
 
@@ -28,7 +28,7 @@ Config is available [here](doc/hyperbola.json)
 
 ## Example 2: Rolling on the sine function
 
-<img src="http://latex.codecogs.com/svg.latex?\inline&space;\dpi{200}&space;&space;\left\{&space;\begin{array}{lr}&space;x=&space;t&space;&&space;\\&space;y=&space;5\sin(\frac{t}{5})&space;\end{array}&space;\right.&space;-30\leq&space;t\leq&space;30" title=" \left\{ \begin{array}{lr} x= t & \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30" />
+<img src="https://latex.codecogs.com/svg.latex?\inline&space;\dpi{200}&space;&space;\left\{&space;\begin{array}{lr}&space;x=&space;t&space;&&space;\\&space;y=&space;5\sin(\frac{t}{5})&space;\end{array}&space;\right.&space;-30\leq&space;t\leq&space;30" title=" \left\{ \begin{array}{lr} x= t & \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30" />
 
 <img src="doc/on-sin(x).svg" width="500px">
 
@@ -38,7 +38,7 @@ Config is available [here](doc/sine.json)
 
 ## Example 3: Rolling along an ellipse
 
-<img src="http://latex.codecogs.com/svg.latex?\inline&space;\dpi{200}&space;&space;\left\{&space;\begin{array}{lr}&space;x=&space;10\cos(t)&space;&&space;\\&space;y=&space;6\sin(t)&space;\end{array}&space;\right.&space;-\pi<&space;t\leq&space;\pi" title=" \left\{ \begin{array}{lr} x= 10\cos(t) & \\ y= 6\sin(t) \end{array} \right. -\pi< t\leq \pi" />
+<img src="https://latex.codecogs.com/svg.latex?\inline&space;\dpi{200}&space;&space;\left\{&space;\begin{array}{lr}&space;x=&space;10\cos(t)&space;&&space;\\&space;y=&space;6\sin(t)&space;\end{array}&space;\right.&space;-\pi<&space;t\leq&space;\pi" title=" \left\{ \begin{array}{lr} x= 10\cos(t) & \\ y= 6\sin(t) \end{array} \right. -\pi< t\leq \pi" />
 
 <img src="doc/on-ellipse.svg" width="500px">
 
