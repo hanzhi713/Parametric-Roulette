@@ -1,53 +1,53 @@
 /// <reference path="node_modules/nerdamer/index.d.ts"/>
 /// <reference path="node_modules/@types/file-saver/index.d.ts"/>
-if (typeof Math.sign !== 'function') {
+if (typeof Math.sign !== "function") {
     Math.sign = x => {
         return x === 0 ? 0 : x > 0 ? 1 : -1;
     };
 }
-const topCanvas = document.getElementById('canvas-top');
-const bottomCanvas = document.getElementById('canvas-bottom');
-const funcCanvas = document.getElementById('canvas-func');
-const tempCanvas = document.getElementById('canvas-temp');
-const xParam = document.getElementById('x=');
-const yParam = document.getElementById('y=');
-const t1Param = document.getElementById('t1');
-const t2Param = document.getElementById('t2');
-const dxParam = document.getElementById('dx');
-const dyParam = document.getElementById('dy');
-const scaleParam = document.getElementById('scale');
-const circleParam = document.getElementById('circleRadius');
-const clearBeforeDrawingCheck = document.getElementById('clearBeforeDrawing');
-const drawingStepParam = document.getElementById('step');
-const drawingDelayParam = document.getElementById('delay');
-const skeletonCheck = document.getElementById('showSk');
-const functionCheck = document.getElementById('showFunc');
-const revolve = document.getElementById('revolve');
-const radiusMultipleParam = document.getElementById('radiusMultiple');
-const dotSizeMinParam = document.getElementById('dotSizeMin');
-const dotSizeMaxParam = document.getElementById('dotSizeMax');
-const dotRatioMinParam = document.getElementById('dotRatioMin');
-const dotRatioMaxParam = document.getElementById('dotRatioMax');
-const dotRotMinParam = document.getElementById('dotRotMin');
-const dotRotMaxParam = document.getElementById('dotRotMax');
-const mDotSize = document.getElementById('m-dotSize');
-const mDotColor = document.getElementById('m-dotColor');
-const mDotRatio = document.getElementById('m-dotRatio');
-const mDotRot = document.getElementById('m-dotRot');
-const mDotID = document.getElementById('m-dotID');
-const gifSizeParam = document.getElementById('f-size');
-const gifIntervalParam = document.getElementById('f-interval');
-const gifCropCheck = document.getElementById('f-crop');
-const gifTransparentCheck = document.getElementById('f-transparent');
-const gifBgColorParam = document.getElementById('f-bgcolor');
-const gifFrameDelayParam = document.getElementById('f-delay');
-const gifQualityParam = document.getElementById('f-quality');
-const gifLastFrameDelayParam = document.getElementById('f-lastdelay');
-const pngWidthParam = document.getElementById('p-width');
-const pngCropCheck = document.getElementById('p-crop');
-const pngTransparentCheck = document.getElementById('p-transparent');
-const pngBgColorParam = document.getElementById('p-bgcolor');
-const drawButton = document.getElementById('draw');
+const topCanvas = document.getElementById("canvas-top");
+const bottomCanvas = document.getElementById("canvas-bottom");
+const funcCanvas = document.getElementById("canvas-func");
+const tempCanvas = document.getElementById("canvas-temp");
+const xParam = document.getElementById("x=");
+const yParam = document.getElementById("y=");
+const t1Param = document.getElementById("t1");
+const t2Param = document.getElementById("t2");
+const dxParam = document.getElementById("dx");
+const dyParam = document.getElementById("dy");
+const scaleParam = document.getElementById("scale");
+const circleParam = document.getElementById("circleRadius");
+const clearBeforeDrawingCheck = document.getElementById("clearBeforeDrawing");
+const drawingStepParam = document.getElementById("step");
+const drawingDelayParam = document.getElementById("delay");
+const skeletonCheck = document.getElementById("showSk");
+const functionCheck = document.getElementById("showFunc");
+const revolve = document.getElementById("revolve");
+const radiusMultipleParam = document.getElementById("radiusMultiple");
+const dotSizeMinParam = document.getElementById("dotSizeMin");
+const dotSizeMaxParam = document.getElementById("dotSizeMax");
+const dotRatioMinParam = document.getElementById("dotRatioMin");
+const dotRatioMaxParam = document.getElementById("dotRatioMax");
+const dotRotMinParam = document.getElementById("dotRotMin");
+const dotRotMaxParam = document.getElementById("dotRotMax");
+const mDotSize = document.getElementById("m-dotSize");
+const mDotColor = document.getElementById("m-dotColor");
+const mDotRatio = document.getElementById("m-dotRatio");
+const mDotRot = document.getElementById("m-dotRot");
+const mDotID = document.getElementById("m-dotID");
+const gifSizeParam = document.getElementById("f-size");
+const gifIntervalParam = document.getElementById("f-interval");
+const gifCropCheck = document.getElementById("f-crop");
+const gifTransparentCheck = document.getElementById("f-transparent");
+const gifBgColorParam = document.getElementById("f-bgcolor");
+const gifFrameDelayParam = document.getElementById("f-delay");
+const gifQualityParam = document.getElementById("f-quality");
+const gifLastFrameDelayParam = document.getElementById("f-lastdelay");
+const pngWidthParam = document.getElementById("p-width");
+const pngCropCheck = document.getElementById("p-crop");
+const pngTransparentCheck = document.getElementById("p-transparent");
+const pngBgColorParam = document.getElementById("p-bgcolor");
+const drawButton = document.getElementById("draw");
 const flag = { stop: false };
 let currentJobs = [];
 let dots = {};
@@ -55,7 +55,7 @@ let locArray = [];
 let cutPoints = [];
 let cuspPoints = [];
 window.onload = ev => {
-    parseConfigJSON(localStorage.getItem('cache'));
+    parseConfigJSON(localStorage.getItem("cache"));
     window.onchange = e => {
         saveConfigToBrowser();
     };
@@ -64,7 +64,7 @@ window.onload = ev => {
     for (const i in effectors) {
         const existingOnchangeHandler = effectors[i].onchange;
         effectors[i].onchange = e => {
-            if (typeof existingOnchangeHandler === 'function')
+            if (typeof existingOnchangeHandler === "function")
                 existingOnchangeHandler(e);
             stopDrawing();
             disableDrawing();
@@ -76,65 +76,62 @@ window.onload = ev => {
     for (const i in effectors) {
         const existingOnchangeHandler = effectors[i].onchange;
         effectors[i].onchange = e => {
-            if (typeof existingOnchangeHandler === 'function')
+            if (typeof existingOnchangeHandler === "function")
                 existingOnchangeHandler(e);
             stopDrawing();
             disableDrawing();
             locArray = [];
             cutPoints = [];
             cuspPoints = [];
-            document.getElementById('sign-adjust').innerHTML = '';
-            document.getElementById('rot-adjust').innerHTML = '';
+            document.getElementById("sign-adjust").innerHTML = "";
+            document.getElementById("rot-adjust").innerHTML = "";
         };
     }
     $('[data-toggle="tooltip"]').tooltip();
 };
 function disableDrawing() {
     drawButton.disabled = true;
-    const m = document.getElementById('savepng'), n = document.getElementById('savegif');
-    m.className = 'dropdown-item disabled';
-    n.className = 'dropdown-item disabled';
-    m.style.color = '#6c757d';
-    n.style.color = '#6c757d';
-    m.setAttribute('data-target', '#');
-    n.setAttribute('data-target', '#');
+    const m = document.getElementById("savepng"), n = document.getElementById("savegif");
+    m.className = "dropdown-item disabled";
+    n.className = "dropdown-item disabled";
+    m.style.color = "#6c757d";
+    n.style.color = "#6c757d";
+    m.setAttribute("data-target", "#");
+    n.setAttribute("data-target", "#");
 }
 function enableDrawing() {
     drawButton.disabled = false;
-    const m = document.getElementById('savepng'), n = document.getElementById('savegif');
-    m.className = 'dropdown-item';
-    n.className = 'dropdown-item';
-    m.style.color = '#000';
-    n.style.color = '#000';
-    m.setAttribute('data-target', '#PNGModalCenter');
-    n.setAttribute('data-target', '#GIFModalCenter');
+    const m = document.getElementById("savepng"), n = document.getElementById("savegif");
+    m.className = "dropdown-item";
+    n.className = "dropdown-item";
+    m.style.color = "#000";
+    n.style.color = "#000";
+    m.setAttribute("data-target", "#PNGModalCenter");
+    n.setAttribute("data-target", "#GIFModalCenter");
 }
 function removeDot(id) {
     delete dots[id];
-    $('#' + id).hide(200, function () {
-        $('#' + id).remove();
+    $("#" + id).hide(200, () => {
+        $("#" + id).remove();
     });
     saveConfigToBrowser();
 }
 function removeAllDots() {
     for (const id in dots) {
-        $('#' + id).remove();
+        $("#" + id).remove();
     }
     dots = {};
 }
 function addDot() {
-    const dotSize = +$('#dotSize').val();
-    const dotColor = $('#dotColor').val();
-    const dotRatio = +$('#dotRatio').val();
-    const dotRot = +$('#dotRotOffset').val();
+    const dotSize = +$("#dotSize").val();
+    const dotColor = $("#dotColor").val();
+    const dotRatio = +$("#dotRatio").val();
+    const dotRot = +$("#dotRotOffset").val();
     addDotHelper(new Date().valueOf().toString(), dotSize, dotColor, dotRatio, dotRot, true);
 }
 /**
  * return a random integer in [min, max]
- * @param {number} min
- * @param {number} max
- * @return number
- * */
+ */
 function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -142,10 +139,10 @@ function randomColor() {
     const R = randInt(0, 255);
     const G = randInt(0, 255);
     const B = randInt(0, 255);
-    return ('#' +
-        (R < 16 ? '0' + R.toString(16) : R.toString(16)) +
-        (G < 16 ? '0' + G.toString(16) : G.toString(16)) +
-        (B < 16 ? '0' + B.toString(16) : B.toString(16)));
+    return ("#" +
+        (R < 16 ? "0" + R.toString(16) : R.toString(16)) +
+        (G < 16 ? "0" + G.toString(16) : G.toString(16)) +
+        (B < 16 ? "0" + B.toString(16) : B.toString(16)));
 }
 function randomDot() {
     const dotSize = randInt(+dotSizeMinParam.value, +dotSizeMaxParam.value);
@@ -156,29 +153,29 @@ function randomDot() {
 }
 function addDotHelper(currentTime, dotSize, dotColor, dotRatio, dotRot, save) {
     dots[currentTime] = new Dot(dotSize, dotColor, dotRatio, dotRot);
-    $('#settings').append('<tr id="' +
+    $("#settings").append('<tr id="' +
         currentTime +
         '">' +
         '<td onclick=\'preModify(this)\' data-toggle="modal" data-target="#DotModalCenter">Ratio: ' +
         dotRatio +
-        '%&nbsp;&nbsp;Color:' +
+        "%&nbsp;&nbsp;Color:" +
         '<span style="width: 15px; height: 15px; background-color: ' +
         dotColor +
         ';display: inline-block"></span><br/>' +
-        '                        Size: ' +
+        "                        Size: " +
         dotSize +
-        '&nbsp;&nbsp;Rotation: ' +
+        "&nbsp;&nbsp;Rotation: " +
         dotRot +
-        '°' +
-        '                    </td>' +
+        "°" +
+        "                    </td>" +
         "<th width='50px'>" +
         '<button type="button" class="close" aria-label="Close" onclick="removeDot(\'' +
         currentTime +
-        '\')">' +
+        "')\">" +
         '                            <span aria-hidden="true">&times;</span>' +
-        '                        </button>' +
-        '                    </th>' +
-        '                </tr>');
+        "                        </button>" +
+        "                    </th>" +
+        "                </tr>");
     if (save)
         saveConfigToBrowser();
 }
@@ -198,17 +195,17 @@ function postModify() {
     const dotRot = +mDotRot.value;
     const tr = document.getElementById(mDotID.value);
     tr.cells[0].innerHTML =
-        'Ratio: ' +
+        "Ratio: " +
             dotRatio +
-            '%&nbsp;&nbsp;Color:' +
+            "%&nbsp;&nbsp;Color:" +
             '                        <span style="width: 15px; height: 15px; background-color: ' +
             dotColor +
             ';display: inline-block"></span><br/>' +
-            '                        Size: ' +
+            "                        Size: " +
             dotSize +
-            '&nbsp;&nbsp;Rotation: ' +
+            "&nbsp;&nbsp;Rotation: " +
             dotRot +
-            '°';
+            "°";
     dot.size = dotSize;
     dot.color = dotColor;
     dot.ratio = dotRatio;
@@ -223,16 +220,16 @@ function stopDrawing() {
 }
 function adjustDotRatioCap() { }
 function saveConfigToBrowser() {
-    localStorage.setItem('cache', getConfigJSON());
+    localStorage.setItem("cache", getConfigJSON());
 }
 function getConfigJSON() {
     const isLocValid = locArray.length > 0 && locArray[0].length >= 6;
     const cutPointSigns = new Array(cutPoints.length), cuspPointSigns = new Array(cuspPoints.length);
     if (isLocValid) {
         for (let i = 0; i < cutPoints.length; i++)
-            cutPointSigns[i] = getSign(document.getElementById('c' + i));
+            cutPointSigns[i] = getSign(document.getElementById("c" + i));
         for (let i = 0; i < cuspPoints.length; i++)
-            cuspPointSigns[i] = getSign(document.getElementById('r' + i));
+            cuspPointSigns[i] = getSign(document.getElementById("r" + i));
     }
     const config = {
         circleRadius: +circleParam.value,
@@ -290,13 +287,13 @@ function getConfigJSON() {
     return JSON.stringify(config);
 }
 function parseConfigJSON(json) {
-    if (json === '' || json === null)
+    if (json === "" || json === null)
         return;
     try {
         const obj = JSON.parse(json);
         circleParam.value = obj.circleRadius === undefined ? 120 : obj.circleRadius;
-        xParam.value = obj.xParam === undefined ? '' : obj.xParam;
-        yParam.value = obj.yParam === undefined ? '' : obj.yParam;
+        xParam.value = obj.xParam === undefined ? "" : obj.xParam;
+        yParam.value = obj.yParam === undefined ? "" : obj.yParam;
         t1Param.value = obj.t1 === undefined ? -5 : obj.t1;
         t2Param.value = obj.t2 === undefined ? 5 : obj.t2;
         dxParam.value = obj.dx === undefined ? 0 : obj.dx;
@@ -304,8 +301,7 @@ function parseConfigJSON(json) {
         scaleParam.value = obj.scale === undefined ? 1 : obj.scale;
         skeletonCheck.checked = obj.showSkeleton === undefined ? true : obj.showSkeleton;
         functionCheck.checked = obj.showFunction === undefined ? true : obj.showFunction;
-        clearBeforeDrawingCheck.checked =
-            obj.clearBeforeDrawing === undefined ? true : obj.clearBeforeDrawing;
+        clearBeforeDrawingCheck.checked = obj.clearBeforeDrawing === undefined ? true : obj.clearBeforeDrawing;
         drawingStepParam.value = obj.drawingStep === undefined ? 0.005 : obj.drawingStep;
         drawingDelayParam.value = obj.drawingDelay === undefined ? 2 : obj.drawingDelay;
         revolve.checked = obj.revolve === undefined ? false : obj.revolve;
@@ -319,9 +315,8 @@ function parseConfigJSON(json) {
         gifSizeParam.value = obj.frameSize === undefined ? 320 : obj.frameSize;
         gifFrameDelayParam.value = obj.frameDelay === undefined ? 25 : obj.frameDelay;
         gifCropCheck.checked = obj.frameCrop === undefined ? false : obj.frameCrop;
-        gifTransparentCheck.checked =
-            obj.frameTransparent === undefined ? false : obj.frameTransparent;
-        gifBgColorParam.value = obj.frameBgColor === undefined ? '#FFFFFF' : obj.frameBgColor;
+        gifTransparentCheck.checked = obj.frameTransparent === undefined ? false : obj.frameTransparent;
+        gifBgColorParam.value = obj.frameBgColor === undefined ? "#FFFFFF" : obj.frameBgColor;
         if (gifTransparentCheck.checked)
             gifBgColorParam.disabled = true;
         gifQualityParam.value = obj.frameQuality === undefined ? 10 : obj.frameQuality;
@@ -330,7 +325,7 @@ function parseConfigJSON(json) {
         pngWidthParam.value = obj.pngWidth === undefined ? 640 : obj.pngWidth;
         pngTransparentCheck.checked = obj.pngTransparent === undefined ? false : obj.pngTransparent;
         pngCropCheck.checked = obj.pngCrop === undefined ? false : obj.pngCrop;
-        pngBgColorParam.value = obj.pngBgColor === undefined ? '#FFFFFF' : obj.pngBgColor;
+        pngBgColorParam.value = obj.pngBgColor === undefined ? "#FFFFFF" : obj.pngBgColor;
         if (pngTransparentCheck.checked)
             pngBgColorParam.disabled = true;
         removeAllDots();
@@ -342,14 +337,14 @@ function parseConfigJSON(json) {
             locArray = obj.locArray;
             cutPoints = obj.cutPoints === undefined ? [] : obj.cutPoints;
             cuspPoints = obj.cuspPoints === undefined ? [] : obj.cuspPoints;
-            const signRow = document.getElementById('sign-adjust');
-            signRow.innerHTML = '';
+            const signRow = document.getElementById("sign-adjust");
+            signRow.innerHTML = "";
             for (let i = 0; i < cutPoints.length; i++)
-                signRow.appendChild(createSignElement(i, obj.cutPointSigns[i] === 1 ? '+' : '-', i - 1 < 0 ? +t1Param.value : cutPoints[i - 1], cutPoints[i]));
-            const rotRow = document.getElementById('rot-adjust');
-            rotRow.innerHTML = '';
+                signRow.appendChild(createSignElement(i, obj.cutPointSigns[i] === 1 ? "+" : "-", i - 1 < 0 ? +t1Param.value : cutPoints[i - 1], cutPoints[i]));
+            const rotRow = document.getElementById("rot-adjust");
+            rotRow.innerHTML = "";
             for (let i = 0; i < cuspPoints.length; i++)
-                rotRow.appendChild(createRotElement(i, obj.cuspPointSigns[i] === 1 ? '+' : '-', i - 1 < 0 ? +t1Param.value : cuspPoints[i - 1], cuspPoints[i]));
+                rotRow.appendChild(createRotElement(i, obj.cuspPointSigns[i] === 1 ? "+" : "-", i - 1 < 0 ? +t1Param.value : cuspPoints[i - 1], cuspPoints[i]));
             drawPreview(+circleParam.value, +scaleParam.value);
         }
     }
@@ -358,7 +353,7 @@ function parseConfigJSON(json) {
     }
 }
 function saveConfig() {
-    saveAs(new Blob([getConfigJSON()], { type: 'text/plain;charset=utf-8' }), 'config.json');
+    saveAs(new Blob([getConfigJSON()], { type: "text/plain;charset=utf-8" }), "config.json");
 }
 function loadConfig(files) {
     if (files.length) {
@@ -401,12 +396,7 @@ function getRealBounds(canvasBounded) {
     minY = minY - maxDotRatio * 2 + +dyParam.value;
     maxY = maxY + maxDotRatio * 2 + +dyParam.value;
     if (canvasBounded)
-        return [
-            Math.max(-320, minX),
-            Math.min(320, maxX),
-            Math.max(-320, minY),
-            Math.min(320, maxY)
-        ];
+        return [Math.max(-320, minX), Math.min(320, maxX), Math.max(-320, minY), Math.min(320, maxY)];
     else
         return [minX, maxX, minY, maxY];
 }
@@ -415,7 +405,7 @@ function getRealBounds(canvasBounded) {
  * @param {number} width
  * @param {boolean} convention Whether follow the CV coordinate system or the conventional Cartesian system
  * @return Array
- * */
+ */
 function getScalingAndTranslation(realBounds, width, convention) {
     const realWidth = realBounds[1] - realBounds[0];
     const realHeight = realBounds[3] - realBounds[2];
@@ -468,7 +458,7 @@ function saveToPNG() {
         const transparent = pngTransparentCheck.checked;
         const bgColor = pngBgColorParam.value;
         tempCanvas.width = pngWidth;
-        const tempCxt = tempCanvas.getContext('2d');
+        const tempCxt = tempCanvas.getContext("2d");
         if (pngCropCheck.checked) {
             const parameters = getScalingAndTranslation(getRealBounds(true), tempCanvas.width, false);
             tempCanvas.width = parameters[4];
@@ -493,7 +483,7 @@ function saveToPNG() {
         tempCxt.drawImage(bottomCanvas, 0, 0);
         tempCxt.drawImage(topCanvas, 0, 0);
         tempCanvas.toBlob(blob => {
-            saveAs(blob, 'parametric-roulette.png');
+            saveAs(blob, "parametric-roulette.png");
         });
     });
 }
@@ -504,10 +494,12 @@ function getSign(element) {
     if (element === null || element === undefined)
         return 1;
     const x = element.innerHTML[element.innerHTML.length - 1];
-    return x === '+' ? 1 : -1;
+    return x === "+" ? 1 : -1;
 }
 function saveToGIF() {
     const _locArray = locArray;
+    const _cuspPoints = cuspPoints;
+    const _cutPoints = cutPoints;
     const frameSize = +gifSizeParam.value;
     const transparent = gifTransparentCheck.checked;
     const frameInterval = +gifIntervalParam.value;
@@ -518,10 +510,10 @@ function saveToGIF() {
     ruler.showSkeleton = skeletonCheck.checked;
     stopDrawing();
     flag.stop = false;
-    const topCxt = topCanvas.getContext('2d');
-    const bottomCxt = bottomCanvas.getContext('2d');
-    const funcCxt = funcCanvas.getContext('2d');
-    const tempCxt = tempCanvas.getContext('2d');
+    const topCxt = topCanvas.getContext("2d");
+    const bottomCxt = bottomCanvas.getContext("2d");
+    const funcCxt = funcCanvas.getContext("2d");
+    const tempCxt = tempCanvas.getContext("2d");
     tempCanvas.width = frameSize;
     let gif;
     if (gifCropCheck.checked) {
@@ -537,7 +529,7 @@ function saveToGIF() {
         gif = new GIF({
             workers: 4,
             quality: +gifQualityParam.value,
-            workerScript: './gif.worker.js',
+            workerScript: "./gif.worker.js",
             width: parameters[4],
             height: parameters[0]
         });
@@ -552,7 +544,7 @@ function saveToGIF() {
         gif = new GIF({
             workers: 4,
             quality: +gifQualityParam.value,
-            workerScript: './gif.worker.js',
+            workerScript: "./gif.worker.js",
             width: frameSize,
             height: frameSize
         });
@@ -565,20 +557,20 @@ function saveToGIF() {
     if (!functionCheck.checked)
         clearFunc();
     setTransform([topCxt, bottomCxt, funcCxt]);
-    const progressLabel = $('#progressLabel');
-    const progressbar = $('#progressbar');
+    const progressLabel = $("#progressLabel");
+    const progressbar = $("#progressbar");
     const epsilon = 0.0001;
-    progressbar.width('0%');
+    progressbar.width("0%");
     let delay = 0;
-    for (let i = 0, counter = 0, cut = 0, cusp = 0, sign = getSign(document.getElementById('c0')), rot = getSign(document.getElementById('r0')); i < _locArray.length; i++, delay += drawingInterval, counter++) {
+    for (let i = 0, counter = 0, cut = 0, cusp = 0, sign = getSign(document.getElementById("c0")), rot = getSign(document.getElementById("r0")); i < _locArray.length; i++, delay += drawingInterval, counter++) {
         let changeRot = i === 0;
-        if (cut < cutPoints.length) {
-            if (_locArray[i][5] - cutPoints[cut] > epsilon)
-                sign = getSign(document.getElementById('c' + ++cut));
+        if (cut < _cutPoints.length) {
+            if (_locArray[i][5] - _cutPoints[cut] > epsilon)
+                sign = getSign(document.getElementById("c" + ++cut));
         }
-        if (cusp < cuspPoints.length) {
-            if (_locArray[i][5] - cuspPoints[cusp] > epsilon) {
-                rot = getSign(document.getElementById('r' + ++cusp));
+        if (cusp < _cuspPoints.length) {
+            if (_locArray[i][5] - _cuspPoints[cusp] > epsilon) {
+                rot = getSign(document.getElementById("r" + ++cusp));
                 changeRot = true;
             }
         }
@@ -606,12 +598,8 @@ function saveToGIF() {
                         delay: frameDelay
                     });
                     const progress = (i / _locArray.length) * 100;
-                    progressbar.width(progress + '%');
-                    progressLabel.text('Drawing: t = ' +
-                        _locArray[i][5].toFixed(3) +
-                        ', ' +
-                        progress.toFixed(1) +
-                        '%');
+                    progressbar.width(progress + "%");
+                    progressLabel.text("Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%");
                 }
             }
         }, delay));
@@ -629,20 +617,20 @@ function saveToGIF() {
                 copy: true,
                 delay: +gifLastFrameDelayParam.value
             });
-            progressbar.width('0%');
-            gif.on('progress', (p) => {
+            progressbar.width("0%");
+            gif.on("progress", (p) => {
                 if (Math.abs(1 - p) < 0.0001) {
-                    progressbar.width('100%');
-                    progressLabel.text('Save as GIF: Finished');
+                    progressbar.width("100%");
+                    progressLabel.text("Save as GIF: Finished");
                 }
                 else {
                     p = p * 100;
-                    progressbar.width(p + '%');
-                    progressLabel.text('Save as GIF: ' + p.toFixed(1) + '%');
+                    progressbar.width(p + "%");
+                    progressLabel.text("Save as GIF: " + p.toFixed(1) + "%");
                 }
             });
-            gif.on('finished', (blob) => {
-                saveAs(blob, 'parametric-roulette.gif');
+            gif.on("finished", (blob) => {
+                saveAs(blob, "parametric-roulette.gif");
             });
             gif.render();
         }
@@ -663,17 +651,17 @@ function setTransform(cxts) {
 function drawPreview(radius, scale) {
     if (clearBeforeDrawingCheck.checked)
         clear();
-    const topCxt = topCanvas.getContext('2d');
-    const bottomCxt = bottomCanvas.getContext('2d');
-    const funcCxt = funcCanvas.getContext('2d');
+    const topCxt = topCanvas.getContext("2d");
+    const bottomCxt = bottomCanvas.getContext("2d");
+    const funcCxt = funcCanvas.getContext("2d");
     setTransform([topCxt, bottomCxt, funcCxt]);
-    funcCxt.strokeStyle = '#000000';
+    funcCxt.strokeStyle = "#000000";
     funcCxt.moveTo(locArray[0][0], locArray[0][1]);
     for (let i = 1; i < locArray.length; i++)
         if (!locArray[i][6])
             funcCxt.lineTo(locArray[i][0], locArray[i][1]);
     funcCxt.stroke();
-    const initialSigns = getSign(document.getElementById('c0'));
+    const initialSigns = getSign(document.getElementById("c0"));
     const ruler = new Ruler(new Circle(initialSigns * locArray[0][2] + locArray[0][0], initialSigns * locArray[0][3] + locArray[0][1], radius * scale), getDotArray());
     ruler.showSkeleton = true;
     ruler.draw(topCxt, bottomCxt);
@@ -704,9 +692,6 @@ function clearFunc() {
     funcCanvas.height++;
     funcCanvas.height--;
 }
-/**
- * @param {Function} callback
- */
 function caller() {
     const circleRadius = +circleParam.value;
     const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
@@ -716,38 +701,38 @@ function caller() {
     draw(ruler, +drawingDelayParam.value, undefined);
 }
 function buildNecessaryExpressions(xExp, yExp) {
-    const dx = nerdamer.diff(xExp, 't');
-    const dy = nerdamer.diff(yExp, 't');
+    const dx = nerdamer.diff(xExp, "t");
+    const dy = nerdamer.diff(yExp, "t");
     // console.log(dx.text());
     // console.log(dy.text());
-    const dx_2 = nerdamer.diff(dx, 't');
-    const dy_2 = nerdamer.diff(dy, 't');
+    const dx_2 = nerdamer.diff(dx, "t");
+    const dy_2 = nerdamer.diff(dy, "t");
     // console.log(dy_2.text());
     // console.log(dx_2.text());
-    const curvatureString = '((' +
+    const curvatureString = "((" +
         dx.text() +
-        ') * (' +
+        ") * (" +
         dy_2.text() +
-        ') - (' +
+        ") - (" +
         dx_2.text() +
-        ') * (' +
+        ") * (" +
         dy.text() +
-        '))/((' +
+        "))/((" +
         dx.text() +
-        ')^2 + (' +
+        ")^2 + (" +
         dy.text() +
-        ')^2)^1.5';
+        ")^2)^1.5";
     const curvatureExp = nerdamer(curvatureString);
     // console.log(curvatureExp.text());
     // console.log(curvatureString);
-    const arcLengthExp = nerdamer('sqrt((' + dx.text() + ')^2 + (' + dy.text() + ')^2)');
+    const arcLengthExp = nerdamer("sqrt((" + dx.text() + ")^2 + (" + dy.text() + ")^2)");
     return [
-        dx.buildFunction(['t']),
-        dy.buildFunction(['t']),
-        arcLengthExp.buildFunction(['t']),
-        curvatureExp.buildFunction(['t']),
-        dx_2.buildFunction(['t']),
-        dy_2.buildFunction(['t'])
+        dx.buildFunction(["t"]),
+        dy.buildFunction(["t"]),
+        arcLengthExp.buildFunction(["t"]),
+        curvatureExp.buildFunction(["t"]),
+        dx_2.buildFunction(["t"]),
+        dy_2.buildFunction(["t"])
     ];
 }
 function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
@@ -761,7 +746,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     }
     const newCuspPoints = [];
     let c_newCuspPoints = [];
-    const firstRotEle = document.getElementById('r0'), firstSignEle = document.getElementById('c0');
+    const firstRotEle = document.getElementById("r0"), firstSignEle = document.getElementById("c0");
     const rotDirection = getSign(firstRotEle);
     let sign = getSign(firstSignEle);
     if (firstRotEle === null || firstSignEle === null)
@@ -777,8 +762,8 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     const locations = [];
     const newCutPoints = [];
     const defaultCutPointSigns = [-1];
-    const xFunc = xExp.buildFunction(['t']);
-    const yFunc = yExp.buildFunction(['t']);
+    const xFunc = xExp.buildFunction(["t"]);
+    const yFunc = yExp.buildFunction(["t"]);
     let lastNormal = 0;
     let arcLength = 0;
     let previousArcLength = arcLength;
@@ -818,9 +803,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
             // may be a cusp
             if (Math.abs(dyE) < cuspThreshold) {
                 let cuspSteps = 0;
-                let currentCusp = newCuspPoints.length === 0
-                    ? undefined
-                    : newCuspPoints[newCuspPoints.length - 1];
+                let currentCusp = newCuspPoints.length === 0 ? undefined : newCuspPoints[newCuspPoints.length - 1];
                 if (currentCusp === undefined || Math.abs(currentCusp - t) > 10 * step) {
                     // no need to recalculate
                     if (z1 === undefined)
@@ -832,8 +815,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         if (t < z1 &&
                             z1 < t2 &&
                             (newCuspPoints.length === 0 ||
-                                Math.abs(z1 - newCuspPoints[newCuspPoints.length - 1]) >
-                                    maxError * 10)) {
+                                Math.abs(z1 - newCuspPoints[newCuspPoints.length - 1]) > maxError * 10)) {
                             newCuspPoints.push(z1);
                             newCutPoints.push(z1);
                             c_newCuspPoints = newCuspPoints.concat();
@@ -855,10 +837,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         }
                     }
                 }
-                currentCusp =
-                    c_newCuspPoints.length === 0
-                        ? undefined
-                        : c_newCuspPoints[c_newCuspPoints.length - 1];
+                currentCusp = c_newCuspPoints.length === 0 ? undefined : c_newCuspPoints[c_newCuspPoints.length - 1];
                 if (currentCusp !== undefined && revolve.checked) {
                     const nextNormal = -dx(t + step + epsilon) / dy(t + step + epsilon);
                     let cNormal = normal;
@@ -890,14 +869,13 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         // TODO: add manual sign-changing buttons instead
                         for (let i = 0; i < newCutPoints.length; i++) {
                             if (t >= +newCutPoints[i].toFixed(num)) {
-                                const ele = document.getElementById('c' + i);
+                                const ele = document.getElementById("c" + i);
                                 sign = ele === undefined ? defaultCutPointSigns[i] : getSign(ele);
-                                console.log(t + '||' + sign);
+                                console.log(t + "||" + sign);
                                 break;
                             }
                         }
-                        if (Math.abs(lastNormal - nextNormal) > 0.5 &&
-                            initialRotIncrementDirection === 1) {
+                        if (Math.abs(lastNormal - nextNormal) > 0.5 && initialRotIncrementDirection === 1) {
                             sign = -sign;
                         }
                         else {
@@ -920,16 +898,8 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                         locations[idx++] = [
                             cuspX * scale,
                             cuspY * scale,
-                            tempSign *
-                                sign *
-                                radius *
-                                Math.cos(r1 + rotDirection * radians) *
-                                scale,
-                            tempSign *
-                                sign *
-                                radius *
-                                Math.sin(r1 + rotDirection * radians) *
-                                scale,
+                            tempSign * sign * radius * Math.cos(r1 + rotDirection * radians) * scale,
+                            tempSign * sign * radius * Math.sin(r1 + rotDirection * radians) * scale,
                             rotAngle + radians,
                             currentCusp,
                             1
@@ -943,15 +913,7 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
                     locations[idx - cuspSteps] = [NaN, NaN, NaN, NaN, rotAngle, t, 2];
                 }
                 else {
-                    locations[idx - cuspSteps] = [
-                        x * scale,
-                        y * scale,
-                        delX * scale,
-                        delY * scale,
-                        rotAngle,
-                        t,
-                        0
-                    ];
+                    locations[idx - cuspSteps] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 0];
                 }
             }
             else {
@@ -981,36 +943,36 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
     }
     newCutPoints.push(t2);
     newCuspPoints.push(t2);
-    const signRow = document.getElementById('sign-adjust');
+    const signRow = document.getElementById("sign-adjust");
     const signElements = new Array(newCutPoints.length);
     if (newCutPoints.length === cutPoints.length) {
         for (let i = 0; i < newCutPoints.length; i++) {
-            const oldElement = document.getElementById('c' + i);
+            const oldElement = document.getElementById("c" + i);
             signElements[i] = createSignElement(i, oldElement.innerHTML[oldElement.innerHTML.length - 1], i - 1 < 0 ? t1 : newCutPoints[i - 1], newCutPoints[i]);
         }
     }
     else {
         for (let i = 0; i < newCutPoints.length; i++)
-            signElements[i] = createSignElement(i, defaultCutPointSigns[i] === 1 ? '+' : '-', i - 1 < 0 ? t1 : newCutPoints[i - 1], newCutPoints[i]);
+            signElements[i] = createSignElement(i, defaultCutPointSigns[i] === 1 ? "+" : "-", i - 1 < 0 ? t1 : newCutPoints[i - 1], newCutPoints[i]);
     }
-    signRow.innerHTML = '';
+    signRow.innerHTML = "";
     for (let i = 0; i < newCutPoints.length; i++)
         signRow.appendChild(signElements[i]);
-    const rotRow = document.getElementById('rot-adjust');
+    const rotRow = document.getElementById("rot-adjust");
     const rotElements = new Array(newCuspPoints.length);
     if (newCuspPoints.length === cuspPoints.length) {
         for (let i = 0; i < newCuspPoints.length; i++) {
-            const oldElement = document.getElementById('r' + i);
+            const oldElement = document.getElementById("r" + i);
             rotElements[i] = createRotElement(i, oldElement.innerHTML[oldElement.innerHTML.length - 1], i - 1 < 0 ? t1 : newCuspPoints[i - 1], newCuspPoints[i]);
         }
     }
     else if (revolve.checked)
         for (let i = 0; i < newCuspPoints.length; i++)
-            rotElements[i] = createRotElement(i, '+', i - 1 < 0 ? t1 : newCuspPoints[i - 1], newCuspPoints[i]);
+            rotElements[i] = createRotElement(i, "+", i - 1 < 0 ? t1 : newCuspPoints[i - 1], newCuspPoints[i]);
     else
         for (let i = 0; i < newCuspPoints.length; i++)
-            rotElements[i] = createRotElement(i, i % 2 === 0 ? '-' : '+', i - 1 < 0 ? t1 : newCuspPoints[i - 1], newCuspPoints[i]);
-    rotRow.innerHTML = '';
+            rotElements[i] = createRotElement(i, i % 2 === 0 ? "-" : "+", i - 1 < 0 ? t1 : newCuspPoints[i - 1], newCuspPoints[i]);
+    rotRow.innerHTML = "";
     for (let i = 0; i < newCuspPoints.length; i++)
         rotRow.appendChild(rotElements[i]);
     cutPoints = newCutPoints;
@@ -1020,6 +982,13 @@ function calculateLocations(t1, t2, xExp, yExp, step, radius, scale) {
         return calculateLocations(t1, t2, prevxExp, prevyExp, step, radius, scale);
     return locations;
 }
+/**
+ * find a zero by Newton's method
+ * @param f the function to find zero
+ * @param fp function's first derivative
+ * @param x0 initial guess
+ * @param err the error bound
+ */
 function findZero(f, fp, x0, err) {
     let x_n = x0, x_n1;
     err /= 2;
@@ -1035,13 +1004,13 @@ function findZero(f, fp, x0, err) {
  * a template for sign element (the button for changing the sign)
  */
 function createSignElement(index, sign, lower, upper) {
-    const e = document.createElement('button');
-    e.id = 'c' + index;
-    e.type = 'button';
-    e.className = 'btn btn-secondary btn-sm sign-ele';
+    const e = document.createElement("button");
+    e.id = "c" + index;
+    e.type = "button";
+    e.className = "btn btn-secondary btn-sm sign-ele";
     e.innerHTML = upper.toFixed(2) + sign;
-    e.setAttribute('data-toggle', 'tooltip');
-    e.title = 'Change the sign for t between ' + lower.toFixed(3) + ' and ' + upper.toFixed(3);
+    e.setAttribute("data-toggle", "tooltip");
+    e.title = "Change the sign for t between " + lower.toFixed(3) + " and " + upper.toFixed(3);
     e.disabled = revolve.checked;
     if (!revolve.checked)
         e.onclick = ev => {
@@ -1054,10 +1023,10 @@ function reverseSign(targets) {
         const t = targets[i];
         const ih = t.innerHTML;
         const sign = ih[ih.length - 1];
-        if (sign === '+')
-            t.innerHTML = ih.substring(0, ih.length - 1) + '-';
+        if (sign === "+")
+            t.innerHTML = ih.substring(0, ih.length - 1) + "-";
         else
-            t.innerHTML = ih.substring(0, ih.length - 1) + '+';
+            t.innerHTML = ih.substring(0, ih.length - 1) + "+";
     }
     if (revolve.checked)
         previewRuler();
@@ -1068,17 +1037,13 @@ function reverseSign(targets) {
  * a template for rot (rotation) element (the button for changing the direction of rotation)
  */
 function createRotElement(index, sign, lower, upper) {
-    const e = document.createElement('button');
-    e.id = 'r' + index;
-    e.type = 'button';
-    e.className = 'btn btn-outline-dark btn-sm rot-ele';
+    const e = document.createElement("button");
+    e.id = "r" + index;
+    e.type = "button";
+    e.className = "btn btn-outline-dark btn-sm rot-ele";
     e.innerHTML = upper.toFixed(2) + sign;
-    e.setAttribute('data-toggle', 'tooltip');
-    e.title =
-        'Change the direction of rotation for t between ' +
-            lower.toFixed(3) +
-            ' and ' +
-            upper.toFixed(3);
+    e.setAttribute("data-toggle", "tooltip");
+    e.title = "Change the direction of rotation for t between " + lower.toFixed(3) + " and " + upper.toFixed(3);
     e.disabled = revolve.checked;
     if (!revolve.checked)
         e.onclick = ev => {
@@ -1095,13 +1060,15 @@ function generateRadius() {
     previewRuler();
 }
 function draw(ruler, drawingInterval, callback) {
-    // storing the reference to global constiable for efficiency
+    // storing the reference to global locArray for efficiency
     const _locArray = locArray;
+    const _cuspPoints = cuspPoints;
+    const _cutPoints = cutPoints;
     if (_locArray.length < 1)
         return alert("You must first click 'preview' to calculate drawing path");
-    const topCxt = topCanvas.getContext('2d');
-    const bottomCxt = bottomCanvas.getContext('2d');
-    const funcCxt = funcCanvas.getContext('2d');
+    const topCxt = topCanvas.getContext("2d");
+    const bottomCxt = bottomCanvas.getContext("2d");
+    const funcCxt = funcCanvas.getContext("2d");
     ruler.showSkeleton = skeletonCheck.checked;
     if (clearBeforeDrawingCheck.checked || !ruler.showSkeleton) {
         clearBottom();
@@ -1110,20 +1077,20 @@ function draw(ruler, drawingInterval, callback) {
     if (!functionCheck.checked)
         clearFunc();
     setTransform([topCxt, bottomCxt, funcCxt]);
-    const progressLabel = $('#progressLabel');
-    const progressbar = $('#progressbar');
+    const progressLabel = $("#progressLabel");
+    const progressbar = $("#progressbar");
     const epsilon = 1e-12;
-    progressbar.width('0%');
+    progressbar.width("0%");
     let delay = 0;
-    for (let i = 0, counter = 0, cut = 0, cusp = 0, sign = getSign(document.getElementById('c0')), rot = getSign(document.getElementById('r0')); i < _locArray.length; i++, delay += drawingInterval, counter++) {
+    for (let i = 0, counter = 0, cut = 0, cusp = 0, sign = getSign(document.getElementById("c0")), rot = getSign(document.getElementById("r0")); i < _locArray.length; i++, delay += drawingInterval, counter++) {
         let changeRot = i === 0;
-        if (cut < cutPoints.length) {
-            if (_locArray[i][5] - cutPoints[cut] > epsilon)
-                sign = getSign(document.getElementById('c' + ++cut));
+        if (cut < _cutPoints.length) {
+            if (_locArray[i][5] - _cutPoints[cut] > epsilon)
+                sign = getSign(document.getElementById("c" + ++cut));
         }
-        if (cusp < cuspPoints.length) {
-            if (_locArray[i][5] - cuspPoints[cusp] > epsilon) {
-                rot = getSign(document.getElementById('r' + ++cusp));
+        if (cusp < _cuspPoints.length) {
+            if (_locArray[i][5] - _cuspPoints[cusp] > epsilon) {
+                rot = getSign(document.getElementById("r" + ++cusp));
                 changeRot = true;
             }
         }
@@ -1140,19 +1107,15 @@ function draw(ruler, drawingInterval, callback) {
                 ruler.draw(topCxt, bottomCxt);
                 if (counter % 10 === 0) {
                     const progress = (i / _locArray.length) * 100;
-                    progressbar.width(progress + '%');
-                    progressLabel.text('Drawing: t = ' +
-                        _locArray[i][5].toFixed(3) +
-                        ', ' +
-                        progress.toFixed(1) +
-                        '%');
+                    progressbar.width(progress + "%");
+                    progressLabel.text("Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%");
                 }
             }
         }, delay));
     }
     currentJobs.push(setTimeout(() => {
-        progressbar.width('100%');
-        progressLabel.text('Drawing: Finished');
+        progressbar.width("100%");
+        progressLabel.text("Drawing: Finished");
         if (callback !== undefined)
             callback();
     }, delay));
@@ -1204,10 +1167,10 @@ class Ruler {
         if (this.showSkeleton) {
             const previousLineWidth = bottomCxt.lineWidth;
             bottomCxt.lineWidth = previousLineWidth + 2;
-            bottomCxt.globalCompositeOperation = 'destination-out';
+            bottomCxt.globalCompositeOperation = "destination-out";
             this.eraseCircle(bottomCxt);
             this.eraseSkeleton(bottomCxt);
-            bottomCxt.globalCompositeOperation = 'source-over';
+            bottomCxt.globalCompositeOperation = "source-over";
             bottomCxt.lineWidth = previousLineWidth;
         }
     }
@@ -1279,7 +1242,7 @@ class Circle {
         cxt.stroke();
     }
     erase(cxt) {
-        cxt.globalCompositeOperation = 'destination-out';
+        cxt.globalCompositeOperation = "destination-out";
         const previousLineWidth = cxt.lineWidth;
         cxt.lineWidth = previousLineWidth + 2;
         this.draw(cxt);
