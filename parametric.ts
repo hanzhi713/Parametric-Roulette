@@ -8,9 +8,7 @@ if (typeof Math.sign !== "function") {
 }
 
 const topCanvas = document.getElementById("canvas-top") as HTMLCanvasElement;
-const bottomCanvas = document.getElementById(
-    "canvas-bottom"
-) as HTMLCanvasElement;
+const bottomCanvas = document.getElementById("canvas-bottom") as HTMLCanvasElement;
 const funcCanvas = document.getElementById("canvas-func") as HTMLCanvasElement;
 const tempCanvas = document.getElementById("canvas-temp") as HTMLCanvasElement;
 const xParam = document.getElementById("x=") as HTMLInputElement;
@@ -21,31 +19,19 @@ const dxParam = document.getElementById("dx") as HTMLInputElement;
 const dyParam = document.getElementById("dy") as HTMLInputElement;
 const scaleParam = document.getElementById("scale") as HTMLInputElement;
 const circleParam = document.getElementById("circleRadius") as HTMLInputElement;
-const clearBeforeDrawingCheck = document.getElementById(
-    "clearBeforeDrawing"
-) as HTMLInputElement;
+const clearBeforeDrawingCheck = document.getElementById("clearBeforeDrawing") as HTMLInputElement;
 const drawingStepParam = document.getElementById("step") as HTMLInputElement;
 const drawingDelayParam = document.getElementById("delay") as HTMLInputElement;
 const skeletonCheck = document.getElementById("showSk") as HTMLInputElement;
 const functionCheck = document.getElementById("showFunc") as HTMLInputElement;
 const revolve = document.getElementById("revolve") as HTMLInputElement;
 
-const radiusMultipleParam = document.getElementById(
-    "radiusMultiple"
-) as HTMLInputElement;
+const radiusMultipleParam = document.getElementById("radiusMultiple") as HTMLInputElement;
 
-const dotSizeMinParam = document.getElementById(
-    "dotSizeMin"
-) as HTMLInputElement;
-const dotSizeMaxParam = document.getElementById(
-    "dotSizeMax"
-) as HTMLInputElement;
-const dotRatioMinParam = document.getElementById(
-    "dotRatioMin"
-) as HTMLInputElement;
-const dotRatioMaxParam = document.getElementById(
-    "dotRatioMax"
-) as HTMLInputElement;
+const dotSizeMinParam = document.getElementById("dotSizeMin") as HTMLInputElement;
+const dotSizeMaxParam = document.getElementById("dotSizeMax") as HTMLInputElement;
+const dotRatioMinParam = document.getElementById("dotRatioMin") as HTMLInputElement;
+const dotRatioMaxParam = document.getElementById("dotRatioMax") as HTMLInputElement;
 const dotRotMinParam = document.getElementById("dotRotMin") as HTMLInputElement;
 const dotRotMaxParam = document.getElementById("dotRotMax") as HTMLInputElement;
 
@@ -56,34 +42,18 @@ const mDotRot = document.getElementById("m-dotRot") as HTMLInputElement;
 const mDotID = document.getElementById("m-dotID") as HTMLInputElement;
 
 const gifSizeParam = document.getElementById("f-size") as HTMLInputElement;
-const gifIntervalParam = document.getElementById(
-    "f-interval"
-) as HTMLInputElement;
+const gifIntervalParam = document.getElementById("f-interval") as HTMLInputElement;
 const gifCropCheck = document.getElementById("f-crop") as HTMLInputElement;
-const gifTransparentCheck = document.getElementById(
-    "f-transparent"
-) as HTMLInputElement;
-const gifBgColorParam = document.getElementById(
-    "f-bgcolor"
-) as HTMLInputElement;
-const gifFrameDelayParam = document.getElementById(
-    "f-delay"
-) as HTMLInputElement;
-const gifQualityParam = document.getElementById(
-    "f-quality"
-) as HTMLInputElement;
-const gifLastFrameDelayParam = document.getElementById(
-    "f-lastdelay"
-) as HTMLInputElement;
+const gifTransparentCheck = document.getElementById("f-transparent") as HTMLInputElement;
+const gifBgColorParam = document.getElementById("f-bgcolor") as HTMLInputElement;
+const gifFrameDelayParam = document.getElementById("f-delay") as HTMLInputElement;
+const gifQualityParam = document.getElementById("f-quality") as HTMLInputElement;
+const gifLastFrameDelayParam = document.getElementById("f-lastdelay") as HTMLInputElement;
 
 const pngWidthParam = document.getElementById("p-width") as HTMLInputElement;
 const pngCropCheck = document.getElementById("p-crop") as HTMLInputElement;
-const pngTransparentCheck = document.getElementById(
-    "p-transparent"
-) as HTMLInputElement;
-const pngBgColorParam = document.getElementById(
-    "p-bgcolor"
-) as HTMLInputElement;
+const pngTransparentCheck = document.getElementById("p-transparent") as HTMLInputElement;
+const pngBgColorParam = document.getElementById("p-bgcolor") as HTMLInputElement;
 
 const drawButton = document.getElementById("draw") as HTMLButtonElement;
 
@@ -103,18 +73,11 @@ window.onload = ev => {
     };
 
     // parameters that determine the loci. Recalculation of loci is required if they're changed
-    let effectors = [
-        dxParam,
-        dyParam,
-        scaleParam,
-        circleParam,
-        drawingStepParam
-    ];
+    let effectors = [dxParam, dyParam, scaleParam, circleParam, drawingStepParam];
     for (const i in effectors) {
         const existingOnchangeHandler = effectors[i].onchange as any;
         effectors[i].onchange = e => {
-            if (typeof existingOnchangeHandler === "function")
-                existingOnchangeHandler(e);
+            if (typeof existingOnchangeHandler === "function") existingOnchangeHandler(e);
             stopDrawing();
             disableDrawing();
             locArray = [];
@@ -126,8 +89,7 @@ window.onload = ev => {
     for (const i in effectors) {
         const existingOnchangeHandler = effectors[i].onchange as any;
         effectors[i].onchange = e => {
-            if (typeof existingOnchangeHandler === "function")
-                existingOnchangeHandler(e);
+            if (typeof existingOnchangeHandler === "function") existingOnchangeHandler(e);
             stopDrawing();
             disableDrawing();
             locArray = [];
@@ -166,7 +128,7 @@ function enableDrawing() {
 
 function removeDot(id: number) {
     delete dots[id];
-    $("#" + id).hide(200, function() {
+    $("#" + id).hide(200, () => {
         $("#" + id).remove();
     });
     saveConfigToBrowser();
@@ -185,22 +147,12 @@ function addDot() {
     const dotRatio = +$("#dotRatio").val();
     const dotRot = +$("#dotRotOffset").val();
 
-    addDotHelper(
-        new Date().valueOf().toString(),
-        dotSize,
-        dotColor,
-        dotRatio,
-        dotRot,
-        true
-    );
+    addDotHelper(new Date().valueOf().toString(), dotSize, dotColor, dotRatio, dotRot, true);
 }
 
 /**
  * return a random integer in [min, max]
- * @param {number} min
- * @param {number} max
- * @return number
- * */
+ */
 function randInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -222,14 +174,7 @@ function randomDot() {
     const dotColor = randomColor();
     const dotRatio = randInt(+dotRatioMinParam.value, +dotRatioMaxParam.value);
     const dotRot = randInt(+dotRotMinParam.value, +dotRotMaxParam.value);
-    addDotHelper(
-        new Date().valueOf().toString(),
-        dotSize,
-        dotColor,
-        dotRatio,
-        dotRot,
-        true
-    );
+    addDotHelper(new Date().valueOf().toString(), dotSize, dotColor, dotRatio, dotRot, true);
 }
 
 function addDotHelper(
@@ -321,11 +266,9 @@ function getConfigJSON() {
     const cutPointSigns = new Array(cutPoints.length),
         cuspPointSigns = new Array(cuspPoints.length);
     if (isLocValid) {
-        for (let i = 0; i < cutPoints.length; i++)
-            cutPointSigns[i] = getSign(document.getElementById("c" + i));
+        for (let i = 0; i < cutPoints.length; i++) cutPointSigns[i] = getSign(document.getElementById("c" + i));
 
-        for (let i = 0; i < cuspPoints.length; i++)
-            cuspPointSigns[i] = getSign(document.getElementById("r" + i));
+        for (let i = 0; i < cuspPoints.length; i++) cuspPointSigns[i] = getSign(document.getElementById("r" + i));
     }
     const config = {
         circleRadius: +circleParam.value,
@@ -393,8 +336,7 @@ function parseConfigJSON(json: string) {
     if (json === "" || json === null) return;
     try {
         const obj = JSON.parse(json);
-        circleParam.value =
-            obj.circleRadius === undefined ? 120 : obj.circleRadius;
+        circleParam.value = obj.circleRadius === undefined ? 120 : obj.circleRadius;
         xParam.value = obj.xParam === undefined ? "" : obj.xParam;
         yParam.value = obj.yParam === undefined ? "" : obj.yParam;
         t1Param.value = obj.t1 === undefined ? -5 : obj.t1;
@@ -402,60 +344,38 @@ function parseConfigJSON(json: string) {
         dxParam.value = obj.dx === undefined ? 0 : obj.dx;
         dyParam.value = obj.dy === undefined ? 0 : obj.dy;
         scaleParam.value = obj.scale === undefined ? 1 : obj.scale;
-        skeletonCheck.checked =
-            obj.showSkeleton === undefined ? true : obj.showSkeleton;
-        functionCheck.checked =
-            obj.showFunction === undefined ? true : obj.showFunction;
-        clearBeforeDrawingCheck.checked =
-            obj.clearBeforeDrawing === undefined
-                ? true
-                : obj.clearBeforeDrawing;
-        drawingStepParam.value =
-            obj.drawingStep === undefined ? 0.005 : obj.drawingStep;
-        drawingDelayParam.value =
-            obj.drawingDelay === undefined ? 2 : obj.drawingDelay;
+        skeletonCheck.checked = obj.showSkeleton === undefined ? true : obj.showSkeleton;
+        functionCheck.checked = obj.showFunction === undefined ? true : obj.showFunction;
+        clearBeforeDrawingCheck.checked = obj.clearBeforeDrawing === undefined ? true : obj.clearBeforeDrawing;
+        drawingStepParam.value = obj.drawingStep === undefined ? 0.005 : obj.drawingStep;
+        drawingDelayParam.value = obj.drawingDelay === undefined ? 2 : obj.drawingDelay;
         revolve.checked = obj.revolve === undefined ? false : obj.revolve;
 
-        radiusMultipleParam.value =
-            obj.radiusMultiple === undefined ? 10 : obj.radiusMultiple;
+        radiusMultipleParam.value = obj.radiusMultiple === undefined ? 10 : obj.radiusMultiple;
 
-        dotSizeMinParam.value =
-            obj.dotSizeMin === undefined ? 1 : obj.dotSizeMin;
-        dotSizeMaxParam.value =
-            obj.dotSizeMax === undefined ? 3 : obj.dotSizeMax;
-        dotRatioMinParam.value =
-            obj.dotRatioMin === undefined ? 50 : obj.dotRatioMin;
-        dotRatioMaxParam.value =
-            obj.dotRatioMax === undefined ? 100 : obj.dotRatioMax;
+        dotSizeMinParam.value = obj.dotSizeMin === undefined ? 1 : obj.dotSizeMin;
+        dotSizeMaxParam.value = obj.dotSizeMax === undefined ? 3 : obj.dotSizeMax;
+        dotRatioMinParam.value = obj.dotRatioMin === undefined ? 50 : obj.dotRatioMin;
+        dotRatioMaxParam.value = obj.dotRatioMax === undefined ? 100 : obj.dotRatioMax;
         dotRotMinParam.value = obj.dotRotMin === undefined ? 0 : obj.dotRotMin;
-        dotRotMaxParam.value =
-            obj.dotRotMax === undefined ? 360 : obj.dotRotMax;
+        dotRotMaxParam.value = obj.dotRotMax === undefined ? 360 : obj.dotRotMax;
 
         gifSizeParam.value = obj.frameSize === undefined ? 320 : obj.frameSize;
-        gifFrameDelayParam.value =
-            obj.frameDelay === undefined ? 25 : obj.frameDelay;
-        gifCropCheck.checked =
-            obj.frameCrop === undefined ? false : obj.frameCrop;
-        gifTransparentCheck.checked =
-            obj.frameTransparent === undefined ? false : obj.frameTransparent;
-        gifBgColorParam.value =
-            obj.frameBgColor === undefined ? "#FFFFFF" : obj.frameBgColor;
+        gifFrameDelayParam.value = obj.frameDelay === undefined ? 25 : obj.frameDelay;
+        gifCropCheck.checked = obj.frameCrop === undefined ? false : obj.frameCrop;
+        gifTransparentCheck.checked = obj.frameTransparent === undefined ? false : obj.frameTransparent;
+        gifBgColorParam.value = obj.frameBgColor === undefined ? "#FFFFFF" : obj.frameBgColor;
 
         if (gifTransparentCheck.checked) gifBgColorParam.disabled = true;
 
-        gifQualityParam.value =
-            obj.frameQuality === undefined ? 10 : obj.frameQuality;
-        gifIntervalParam.value =
-            obj.frameInterval === undefined ? 40 : obj.frameInterval;
-        gifLastFrameDelayParam.value =
-            obj.lastFrameDelay === undefined ? 1000 : obj.lastFrameDelay;
+        gifQualityParam.value = obj.frameQuality === undefined ? 10 : obj.frameQuality;
+        gifIntervalParam.value = obj.frameInterval === undefined ? 40 : obj.frameInterval;
+        gifLastFrameDelayParam.value = obj.lastFrameDelay === undefined ? 1000 : obj.lastFrameDelay;
 
         pngWidthParam.value = obj.pngWidth === undefined ? 640 : obj.pngWidth;
-        pngTransparentCheck.checked =
-            obj.pngTransparent === undefined ? false : obj.pngTransparent;
+        pngTransparentCheck.checked = obj.pngTransparent === undefined ? false : obj.pngTransparent;
         pngCropCheck.checked = obj.pngCrop === undefined ? false : obj.pngCrop;
-        pngBgColorParam.value =
-            obj.pngBgColor === undefined ? "#FFFFFF" : obj.pngBgColor;
+        pngBgColorParam.value = obj.pngBgColor === undefined ? "#FFFFFF" : obj.pngBgColor;
 
         if (pngTransparentCheck.checked) pngBgColorParam.disabled = true;
 
@@ -510,10 +430,7 @@ function parseConfigJSON(json: string) {
 }
 
 function saveConfig() {
-    saveAs(
-        new Blob([getConfigJSON()], { type: "text/plain;charset=utf-8" }),
-        "config.json"
-    );
+    saveAs(new Blob([getConfigJSON()], { type: "text/plain;charset=utf-8" }), "config.json");
 }
 
 function loadConfig(files: Blob[]) {
@@ -555,13 +472,7 @@ function getRealBounds(canvasBounded: boolean) {
     maxX = maxX + maxDotRatio * 2 + +dxParam.value;
     minY = minY - maxDotRatio * 2 + +dyParam.value;
     maxY = maxY + maxDotRatio * 2 + +dyParam.value;
-    if (canvasBounded)
-        return [
-            Math.max(-320, minX),
-            Math.min(320, maxX),
-            Math.max(-320, minY),
-            Math.min(320, maxY)
-        ];
+    if (canvasBounded) return [Math.max(-320, minX), Math.min(320, maxX), Math.max(-320, minY), Math.min(320, maxY)];
     else return [minX, maxX, minY, maxY];
 }
 
@@ -571,11 +482,7 @@ function getRealBounds(canvasBounded: boolean) {
  * @param {boolean} convention Whether follow the CV coordinate system or the conventional Cartesian system
  * @return Array
  */
-function getScalingAndTranslation(
-    realBounds: number[],
-    width: number,
-    convention: boolean
-) {
+function getScalingAndTranslation(realBounds: number[], width: number, convention: boolean) {
     const realWidth = realBounds[1] - realBounds[0];
     const realHeight = realBounds[3] - realBounds[2];
 
@@ -593,10 +500,8 @@ function getScalingAndTranslation(
 
     let wTranslation, hTranslation;
     if (convention) {
-        wTranslation =
-            -320 + (640 - realWidth * scaling) / 2 - realBounds[0] * scaling;
-        hTranslation =
-            320 - (640 - realHeight * scaling) / 2 - realBounds[3] * scaling;
+        wTranslation = -320 + (640 - realWidth * scaling) / 2 - realBounds[0] * scaling;
+        hTranslation = 320 - (640 - realHeight * scaling) / 2 - realBounds[3] * scaling;
         // wTranslation = Math.abs(realBounds[0] * scaling - (640 - realWidth * 2 * scaling));
         // hTranslation = Math.abs(realBounds[3] * scaling - (640 - realHeight * 2 * scaling));
     } else {
@@ -608,11 +513,7 @@ function getScalingAndTranslation(
 
 function autoAdjustScalingAndTranslation() {
     if (locArray.length > 0 && locArray[0].length >= 6) {
-        const result = getScalingAndTranslation(
-            getRealBounds(false),
-            640,
-            true
-        );
+        const result = getScalingAndTranslation(getRealBounds(false), 640, true);
         scaleParam.value = (+scaleParam.value * result[1]).toFixed(1);
         dxParam.value = (+dxParam.value + result[2]).toFixed(1);
         dyParam.value = (+dyParam.value + result[3]).toFixed(1);
@@ -626,10 +527,7 @@ function autoAdjustScalingAndTranslation() {
 function saveToPNG() {
     const circleRadius = +circleParam.value;
 
-    const ruler = new Ruler(
-        new Circle(320, 320, +scaleParam.value * circleRadius),
-        getDotArray()
-    );
+    const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
     ruler.showSkeleton = skeletonCheck.checked;
 
     stopDrawing();
@@ -644,11 +542,7 @@ function saveToPNG() {
         const tempCxt = tempCanvas.getContext("2d");
 
         if (pngCropCheck.checked) {
-            const parameters = getScalingAndTranslation(
-                getRealBounds(true),
-                tempCanvas.width,
-                false
-            );
+            const parameters = getScalingAndTranslation(getRealBounds(true), tempCanvas.width, false);
             tempCanvas.width = parameters[4];
             tempCanvas.height = parameters[0];
             if (!transparent) {
@@ -664,10 +558,7 @@ function saveToPNG() {
                 tempCxt.fillStyle = bgColor;
                 tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
             }
-            tempCxt.scale(
-                pngWidth / topCanvas.width,
-                pngWidth / topCanvas.height
-            );
+            tempCxt.scale(pngWidth / topCanvas.width, pngWidth / topCanvas.height);
         }
 
         tempCxt.drawImage(funcCanvas, 0, 0);
@@ -691,20 +582,18 @@ function getSign(element: HTMLElement) {
 
 function saveToGIF() {
     const _locArray = locArray;
+    const _cuspPoints = cuspPoints;
+    const _cutPoints = cutPoints;
 
     const frameSize = +gifSizeParam.value;
     const transparent = gifTransparentCheck.checked;
     const frameInterval = +gifIntervalParam.value;
     const frameDelay = +gifFrameDelayParam.value;
-
     const drawingInterval = +drawingDelayParam.value;
 
     const circleRadius = +circleParam.value;
 
-    const ruler = new Ruler(
-        new Circle(320, 320, +scaleParam.value * circleRadius),
-        getDotArray()
-    );
+    const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
     ruler.showSkeleton = skeletonCheck.checked;
 
     stopDrawing();
@@ -720,11 +609,7 @@ function saveToGIF() {
     let gif: any;
 
     if (gifCropCheck.checked) {
-        const parameters = getScalingAndTranslation(
-            getRealBounds(true),
-            tempCanvas.width,
-            false
-        );
+        const parameters = getScalingAndTranslation(getRealBounds(true), tempCanvas.width, false);
         tempCanvas.width = parameters[4];
         tempCanvas.height = parameters[0];
         if (!transparent) {
@@ -747,10 +632,7 @@ function saveToGIF() {
             tempCxt.fillStyle = gifBgColorParam.value;
             tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
         }
-        tempCxt.scale(
-            frameSize / topCanvas.width,
-            frameSize / topCanvas.height
-        );
+        tempCxt.scale(frameSize / topCanvas.width, frameSize / topCanvas.height);
         gif = new GIF({
             workers: 4,
             quality: +gifQualityParam.value,
@@ -788,12 +670,11 @@ function saveToGIF() {
         i++, delay += drawingInterval, counter++
     ) {
         let changeRot = i === 0;
-        if (cut < cutPoints.length) {
-            if (_locArray[i][5] - cutPoints[cut] > epsilon)
-                sign = getSign(document.getElementById("c" + ++cut));
+        if (cut < _cutPoints.length) {
+            if (_locArray[i][5] - _cutPoints[cut] > epsilon) sign = getSign(document.getElementById("c" + ++cut));
         }
-        if (cusp < cuspPoints.length) {
-            if (_locArray[i][5] - cuspPoints[cusp] > epsilon) {
+        if (cusp < _cuspPoints.length) {
+            if (_locArray[i][5] - _cuspPoints[cusp] > epsilon) {
                 rot = getSign(document.getElementById("r" + ++cusp));
                 changeRot = true;
             }
@@ -803,10 +684,7 @@ function saveToGIF() {
                 if (!flag.stop) {
                     ruler.erase(bottomCxt);
                     if (_locArray[i][6] === 1)
-                        ruler.moveTo(
-                            _locArray[i][0] + _locArray[i][2],
-                            _locArray[i][1] + _locArray[i][3]
-                        );
+                        ruler.moveTo(_locArray[i][0] + _locArray[i][2], _locArray[i][1] + _locArray[i][3]);
                     else if (_locArray[i][6] !== 2)
                         ruler.moveTo(
                             _locArray[i][0] + sign * _locArray[i][2],
@@ -818,20 +696,8 @@ function saveToGIF() {
                     ruler.draw(topCxt, bottomCxt);
 
                     if (counter % frameInterval === 0) {
-                        if (transparent)
-                            tempCxt.clearRect(
-                                0,
-                                0,
-                                topCanvas.width,
-                                topCanvas.height
-                            );
-                        else
-                            tempCxt.fillRect(
-                                0,
-                                0,
-                                topCanvas.width,
-                                topCanvas.height
-                            );
+                        if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
+                        else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
 
                         tempCxt.drawImage(funcCanvas, 0, 0);
                         tempCxt.drawImage(bottomCanvas, 0, 0);
@@ -845,11 +711,7 @@ function saveToGIF() {
                         const progress = (i / _locArray.length) * 100;
                         progressbar.width(progress + "%");
                         progressLabel.text(
-                            "Drawing: t = " +
-                                _locArray[i][5].toFixed(3) +
-                                ", " +
-                                progress.toFixed(1) +
-                                "%"
+                            "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%"
                         );
                     }
                 }
@@ -859,8 +721,7 @@ function saveToGIF() {
     currentJobs.push(
         setTimeout(() => {
             if (!flag.stop) {
-                if (transparent)
-                    tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
+                if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
                 else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
 
                 tempCxt.drawImage(funcCanvas, 0, 0);
@@ -880,9 +741,7 @@ function saveToGIF() {
                     } else {
                         p = p * 100;
                         progressbar.width(p + "%");
-                        progressLabel.text(
-                            "Save as GIF: " + p.toFixed(1) + "%"
-                        );
+                        progressLabel.text("Save as GIF: " + p.toFixed(1) + "%");
                     }
                 });
 
@@ -905,8 +764,7 @@ function getDotArray() {
 function setTransform(cxts: CanvasRenderingContext2D[]) {
     const sx = +dxParam.value;
     const sy = +dyParam.value;
-    for (let i = 0; i < cxts.length; i++)
-        cxts[i].setTransform(1, 0, 0, -1, sx + 320, 320 - sy);
+    for (let i = 0; i < cxts.length; i++) cxts[i].setTransform(1, 0, 0, -1, sx + 320, 320 - sy);
 }
 
 function drawPreview(radius: number, scale: number) {
@@ -919,8 +777,7 @@ function drawPreview(radius: number, scale: number) {
 
     funcCxt.strokeStyle = "#000000";
     funcCxt.moveTo(locArray[0][0], locArray[0][1]);
-    for (let i = 1; i < locArray.length; i++)
-        if (!locArray[i][6]) funcCxt.lineTo(locArray[i][0], locArray[i][1]);
+    for (let i = 1; i < locArray.length; i++) if (!locArray[i][6]) funcCxt.lineTo(locArray[i][0], locArray[i][1]);
     funcCxt.stroke();
 
     const initialSigns = getSign(document.getElementById("c0"));
@@ -975,16 +832,10 @@ function clearFunc() {
     funcCanvas.height--;
 }
 
-/**
- * @param {Function} callback
- */
 function caller() {
     const circleRadius = +circleParam.value;
 
-    const ruler = new Ruler(
-        new Circle(320, 320, +scaleParam.value * circleRadius),
-        getDotArray()
-    );
+    const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
     ruler.showSkeleton = skeletonCheck.checked;
 
     stopDrawing();
@@ -993,10 +844,7 @@ function caller() {
     draw(ruler, +drawingDelayParam.value, undefined);
 }
 
-function buildNecessaryExpressions(
-    xExp: nerdamer.Expression,
-    yExp: nerdamer.Expression
-) {
+function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Expression) {
     const dx = nerdamer.diff(xExp, "t");
     const dy = nerdamer.diff(yExp, "t");
     // console.log(dx.text());
@@ -1025,9 +873,7 @@ function buildNecessaryExpressions(
     // console.log(curvatureExp.text());
     // console.log(curvatureString);
 
-    const arcLengthExp = nerdamer(
-        "sqrt((" + dx.text() + ")^2 + (" + dy.text() + ")^2)"
-    );
+    const arcLengthExp = nerdamer("sqrt((" + dx.text() + ")^2 + (" + dy.text() + ")^2)");
     return [
         dx.buildFunction(["t"]),
         dy.buildFunction(["t"]),
@@ -1100,11 +946,7 @@ function calculateLocations(
     // don't know which value is appropriate here
     const epsilon = 1e-9;
     const maxError = 1e-6;
-    for (
-        let t = t1, counter = 0, cut = 0, idx = 0;
-        t < t2;
-        t += step, counter++, idx++
-    ) {
+    for (let t = t1, counter = 0, cut = 0, idx = 0; t < t2; t += step, counter++, idx++) {
         t = +t.toFixed(num);
         const x = xFunc(t),
             y = yFunc(t);
@@ -1117,15 +959,12 @@ function calculateLocations(
             delX = Math.sign(lastNormal) * radius;
             delY = 0;
         } else {
-            delX =
-                (radius * Math.sign(normal)) / Math.sqrt(normal * normal + 1);
+            delX = (radius * Math.sign(normal)) / Math.sqrt(normal * normal + 1);
             delY = delX * normal;
         }
 
         const sliceIdx = counter % sliceLength;
-        arcLength =
-            previousArcLength +
-            integrate(arcLengthExp, previousLower, t, sliceIdx * 2 + 5);
+        arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2 + 5);
         if (sliceIdx === sliceUpper) {
             previousLower = t;
             previousArcLength = arcLength;
@@ -1139,65 +978,43 @@ function calculateLocations(
             // may be a cusp
             if (Math.abs(dyE) < cuspThreshold) {
                 let cuspSteps = 0;
-                let currentCusp =
-                    newCuspPoints.length === 0
-                        ? undefined
-                        : newCuspPoints[newCuspPoints.length - 1];
-                if (
-                    currentCusp === undefined ||
-                    Math.abs(currentCusp - t) > 10 * step
-                ) {
+                let currentCusp = newCuspPoints.length === 0 ? undefined : newCuspPoints[newCuspPoints.length - 1];
+                if (currentCusp === undefined || Math.abs(currentCusp - t) > 10 * step) {
                     // no need to recalculate
-                    if (z1 === undefined)
-                        z1 = findZero(dx, exps[4], t, maxError);
-                    if (z2 === undefined)
-                        z2 = findZero(dy, exps[5], t, maxError);
+                    if (z1 === undefined) z1 = findZero(dx, exps[4], t, maxError);
+                    if (z2 === undefined) z2 = findZero(dy, exps[5], t, maxError);
 
                     // both dy/dt and dx/dt approaches the same value
-                    if (
-                        !isNaN(z1) &&
-                        !isNaN(z2) &&
-                        Math.abs(z1 - z2) < maxError * 2
-                    ) {
+                    if (!isNaN(z1) && !isNaN(z2) && Math.abs(z1 - z2) < maxError * 2) {
                         if (
                             t < z1 &&
                             z1 < t2 &&
                             (newCuspPoints.length === 0 ||
-                                Math.abs(
-                                    z1 - newCuspPoints[newCuspPoints.length - 1]
-                                ) >
-                                    maxError * 10)
+                                Math.abs(z1 - newCuspPoints[newCuspPoints.length - 1]) > maxError * 10)
                         ) {
                             newCuspPoints.push(z1);
                             newCutPoints.push(z1);
                             c_newCuspPoints = newCuspPoints.concat();
                             if (Math.abs(normal - lastNormal) < 0.5) {
                                 // vertical cusp does not require sign-adjustment when we want the circle to consistently inside or outside the parametric curve
-                                if (revolve.checked)
-                                    defaultCutPointSigns.push(lastSign);
+                                if (revolve.checked) defaultCutPointSigns.push(lastSign);
                                 else defaultCutPointSigns.push(-lastSign);
                             } else {
                                 // horizontal cusp requires sign-adjustment when we want the circle to consistently inside or outside the parametric curve
-                                if (revolve.checked)
-                                    defaultCutPointSigns.push(-lastSign);
+                                if (revolve.checked) defaultCutPointSigns.push(-lastSign);
                                 // stationary point does not need sign-adjustment
                                 else defaultCutPointSigns.push(lastSign);
                             }
                         }
                     }
                 }
-                currentCusp =
-                    c_newCuspPoints.length === 0
-                        ? undefined
-                        : c_newCuspPoints[c_newCuspPoints.length - 1];
+                currentCusp = c_newCuspPoints.length === 0 ? undefined : c_newCuspPoints[c_newCuspPoints.length - 1];
                 if (currentCusp !== undefined && revolve.checked) {
-                    const nextNormal =
-                        -dx(t + step + epsilon) / dy(t + step + epsilon);
+                    const nextNormal = -dx(t + step + epsilon) / dy(t + step + epsilon);
                     let cNormal = normal;
 
                     // switch to last normal if t is too close
-                    if (Math.abs(t - currentCusp) < maxError)
-                        cNormal = lastNormal;
+                    if (Math.abs(t - currentCusp) < maxError) cNormal = lastNormal;
                     if (
                         Math.sign(cNormal) * Math.sign(nextNormal) === -1 &&
                         t + step <= t2 &&
@@ -1229,19 +1046,13 @@ function calculateLocations(
                         for (let i = 0; i < newCutPoints.length; i++) {
                             if (t >= +newCutPoints[i].toFixed(num)) {
                                 const ele = document.getElementById("c" + i);
-                                sign =
-                                    ele === undefined
-                                        ? defaultCutPointSigns[i]
-                                        : getSign(ele);
+                                sign = ele === undefined ? defaultCutPointSigns[i] : getSign(ele);
                                 console.log(t + "||" + sign);
                                 break;
                             }
                         }
 
-                        if (
-                            Math.abs(lastNormal - nextNormal) > 0.5 &&
-                            initialRotIncrementDirection === 1
-                        ) {
+                        if (Math.abs(lastNormal - nextNormal) > 0.5 && initialRotIncrementDirection === 1) {
                             sign = -sign;
                         } else {
                             sign = initialRotIncrementDirection * sign;
@@ -1250,24 +1061,12 @@ function calculateLocations(
                         const tempSign = 1;
 
                         idx++;
-                        for (
-                            let i = 0;
-                            i < radians;
-                            i += step * 4, idx++, cuspSteps++
-                        ) {
+                        for (let i = 0; i < radians; i += step * 4, idx++, cuspSteps++) {
                             locations[idx] = [
                                 cuspX * scale,
                                 cuspY * scale,
-                                tempSign *
-                                    sign *
-                                    radius *
-                                    Math.cos(r1 + rotDirection * i) *
-                                    scale,
-                                tempSign *
-                                    sign *
-                                    radius *
-                                    Math.sin(r1 + rotDirection * i) *
-                                    scale,
+                                tempSign * sign * radius * Math.cos(r1 + rotDirection * i) * scale,
+                                tempSign * sign * radius * Math.sin(r1 + rotDirection * i) * scale,
                                 rotAngle + i,
                                 currentCusp,
                                 1
@@ -1277,16 +1076,8 @@ function calculateLocations(
                         locations[idx++] = [
                             cuspX * scale,
                             cuspY * scale,
-                            tempSign *
-                                sign *
-                                radius *
-                                Math.cos(r1 + rotDirection * radians) *
-                                scale,
-                            tempSign *
-                                sign *
-                                radius *
-                                Math.sin(r1 + rotDirection * radians) *
-                                scale,
+                            tempSign * sign * radius * Math.cos(r1 + rotDirection * radians) * scale,
+                            tempSign * sign * radius * Math.sin(r1 + rotDirection * radians) * scale,
                             rotAngle + radians,
                             currentCusp,
                             1
@@ -1298,31 +1089,12 @@ function calculateLocations(
 
                 // only matters when it's EXACTLY zero. Set [6] to 2 to disable drawing at this point
                 if (dyE === 0) {
-                    locations[idx - cuspSteps] = [
-                        NaN,
-                        NaN,
-                        NaN,
-                        NaN,
-                        rotAngle,
-                        t,
-                        2
-                    ];
+                    locations[idx - cuspSteps] = [NaN, NaN, NaN, NaN, rotAngle, t, 2];
                 } else {
-                    locations[idx - cuspSteps] = [
-                        x * scale,
-                        y * scale,
-                        delX * scale,
-                        delY * scale,
-                        rotAngle,
-                        t,
-                        0
-                    ];
+                    locations[idx - cuspSteps] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 0];
                 }
             } else {
-                if (
-                    Math.sign(normal) * Math.sign(lastNormal) === -1 ||
-                    Math.sign(normal) === 0
-                ) {
+                if (Math.sign(normal) * Math.sign(lastNormal) === -1 || Math.sign(normal) === 0) {
                     z1 = findZero(dx, exps[4], t, maxError);
 
                     // a vertical tangent or horizontal tangent (stationary point)
@@ -1335,36 +1107,12 @@ function calculateLocations(
                         }
                     }
                 }
-                locations[idx] = [
-                    x * scale,
-                    y * scale,
-                    delX * scale,
-                    delY * scale,
-                    rotAngle,
-                    t,
-                    0
-                ];
+                locations[idx] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 0];
             }
         } else if (dyE === 0) {
-            locations[idx] = [
-                x * scale,
-                y * scale,
-                0,
-                radius * scale,
-                rotAngle,
-                t,
-                0
-            ];
+            locations[idx] = [x * scale, y * scale, 0, radius * scale, rotAngle, t, 0];
         } else {
-            locations[idx] = [
-                x * scale,
-                y * scale,
-                delX * scale,
-                delY * scale,
-                rotAngle,
-                t,
-                0
-            ];
+            locations[idx] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 0];
         }
         lastNormal = normal;
     }
@@ -1394,8 +1142,7 @@ function calculateLocations(
             );
     }
     signRow.innerHTML = "";
-    for (let i = 0; i < newCutPoints.length; i++)
-        signRow.appendChild(signElements[i]);
+    for (let i = 0; i < newCutPoints.length; i++) signRow.appendChild(signElements[i]);
 
     const rotRow = document.getElementById("rot-adjust");
     const rotElements = new Array(newCuspPoints.length);
@@ -1411,12 +1158,7 @@ function calculateLocations(
         }
     } else if (revolve.checked)
         for (let i = 0; i < newCuspPoints.length; i++)
-            rotElements[i] = createRotElement(
-                i,
-                "+",
-                i - 1 < 0 ? t1 : newCuspPoints[i - 1],
-                newCuspPoints[i]
-            );
+            rotElements[i] = createRotElement(i, "+", i - 1 < 0 ? t1 : newCuspPoints[i - 1], newCuspPoints[i]);
     else
         for (let i = 0; i < newCuspPoints.length; i++)
             rotElements[i] = createRotElement(
@@ -1426,32 +1168,24 @@ function calculateLocations(
                 newCuspPoints[i]
             );
     rotRow.innerHTML = "";
-    for (let i = 0; i < newCuspPoints.length; i++)
-        rotRow.appendChild(rotElements[i]);
+    for (let i = 0; i < newCuspPoints.length; i++) rotRow.appendChild(rotElements[i]);
 
     cutPoints = newCutPoints;
     cuspPoints = newCuspPoints;
     $('[data-toggle="tooltip"]').tooltip();
 
-    if (callAgain)
-        return calculateLocations(
-            t1,
-            t2,
-            prevxExp,
-            prevyExp,
-            step,
-            radius,
-            scale
-        );
+    if (callAgain) return calculateLocations(t1, t2, prevxExp, prevyExp, step, radius, scale);
     return locations;
 }
 
-function findZero(
-    f: (x: number) => number,
-    fp: (x: number) => number,
-    x0: number,
-    err: number
-) {
+/**
+ * find a zero by Newton's method
+ * @param f the function to find zero
+ * @param fp function's first derivative
+ * @param x0 initial guess
+ * @param err the error bound
+ */
+function findZero(f: (x: number) => number, fp: (x: number) => number, x0: number, err: number) {
     let x_n = x0,
         x_n1: number;
     err /= 2;
@@ -1466,23 +1200,14 @@ function findZero(
 /**
  * a template for sign element (the button for changing the sign)
  */
-function createSignElement(
-    index: number,
-    sign: string,
-    lower: number,
-    upper: number
-) {
+function createSignElement(index: number, sign: string, lower: number, upper: number) {
     const e = document.createElement("button");
     e.id = "c" + index;
     e.type = "button";
     e.className = "btn btn-secondary btn-sm sign-ele";
     e.innerHTML = upper.toFixed(2) + sign;
     e.setAttribute("data-toggle", "tooltip");
-    e.title =
-        "Change the sign for t between " +
-        lower.toFixed(3) +
-        " and " +
-        upper.toFixed(3);
+    e.title = "Change the sign for t between " + lower.toFixed(3) + " and " + upper.toFixed(3);
     e.disabled = revolve.checked;
     if (!revolve.checked)
         e.onclick = ev => {
@@ -1506,23 +1231,14 @@ function reverseSign(targets: HTMLElement[]) {
 /**
  * a template for rot (rotation) element (the button for changing the direction of rotation)
  */
-function createRotElement(
-    index: number,
-    sign: string,
-    lower: number,
-    upper: number
-) {
+function createRotElement(index: number, sign: string, lower: number, upper: number) {
     const e = document.createElement("button");
     e.id = "r" + index;
     e.type = "button";
     e.className = "btn btn-outline-dark btn-sm rot-ele";
     e.innerHTML = upper.toFixed(2) + sign;
     e.setAttribute("data-toggle", "tooltip");
-    e.title =
-        "Change the direction of rotation for t between " +
-        lower.toFixed(3) +
-        " and " +
-        upper.toFixed(3);
+    e.title = "Change the direction of rotation for t between " + lower.toFixed(3) + " and " + upper.toFixed(3);
     e.disabled = revolve.checked;
     if (!revolve.checked)
         e.onclick = ev => {
@@ -1533,29 +1249,21 @@ function createRotElement(
 
 function generateRadius() {
     const multiple = +radiusMultipleParam.value;
-    const exps = buildNecessaryExpressions(
-        nerdamer(xParam.value),
-        nerdamer(yParam.value)
-    );
+    const exps = buildNecessaryExpressions(nerdamer(xParam.value), nerdamer(yParam.value));
     const t1 = +t1Param.value,
         t2 = +t2Param.value;
-    const arcLength = integrate(
-        exps[2],
-        t1,
-        t2,
-        Math.round((t2 - t1) / +drawingStepParam.value) + 10
-    );
+    const arcLength = integrate(exps[2], t1, t2, Math.round((t2 - t1) / +drawingStepParam.value) + 10);
     circleParam.value = (arcLength / multiple / (2 * Math.PI)).toString();
     previewRuler();
 }
 
 function draw(ruler: Ruler, drawingInterval: number, callback: Function) {
-    // storing the reference to global constiable for efficiency
+    // storing the reference to global locArray for efficiency
     const _locArray = locArray;
-    if (_locArray.length < 1)
-        return alert(
-            "You must first click 'preview' to calculate drawing path"
-        );
+    const _cuspPoints = cuspPoints;
+    const _cutPoints = cutPoints;
+
+    if (_locArray.length < 1) return alert("You must first click 'preview' to calculate drawing path");
 
     const topCxt = topCanvas.getContext("2d");
     const bottomCxt = bottomCanvas.getContext("2d");
@@ -1589,12 +1297,11 @@ function draw(ruler: Ruler, drawingInterval: number, callback: Function) {
         i++, delay += drawingInterval, counter++
     ) {
         let changeRot = i === 0;
-        if (cut < cutPoints.length) {
-            if (_locArray[i][5] - cutPoints[cut] > epsilon)
-                sign = getSign(document.getElementById("c" + ++cut));
+        if (cut < _cutPoints.length) {
+            if (_locArray[i][5] - _cutPoints[cut] > epsilon) sign = getSign(document.getElementById("c" + ++cut));
         }
-        if (cusp < cuspPoints.length) {
-            if (_locArray[i][5] - cuspPoints[cusp] > epsilon) {
+        if (cusp < _cuspPoints.length) {
+            if (_locArray[i][5] - _cuspPoints[cusp] > epsilon) {
                 rot = getSign(document.getElementById("r" + ++cusp));
                 changeRot = true;
             }
@@ -1605,10 +1312,7 @@ function draw(ruler: Ruler, drawingInterval: number, callback: Function) {
                 if (!flag.stop) {
                     ruler.erase(bottomCxt);
                     if (_locArray[i][6] === 1)
-                        ruler.moveTo(
-                            _locArray[i][0] + _locArray[i][2],
-                            _locArray[i][1] + _locArray[i][3]
-                        );
+                        ruler.moveTo(_locArray[i][0] + _locArray[i][2], _locArray[i][1] + _locArray[i][3]);
                     else if (_locArray[i][6] !== 2)
                         ruler.moveTo(
                             _locArray[i][0] + sign * _locArray[i][2],
@@ -1624,11 +1328,7 @@ function draw(ruler: Ruler, drawingInterval: number, callback: Function) {
                         const progress = (i / _locArray.length) * 100;
                         progressbar.width(progress + "%");
                         progressLabel.text(
-                            "Drawing: t = " +
-                                _locArray[i][5].toFixed(3) +
-                                ", " +
-                                progress.toFixed(1) +
-                                "%"
+                            "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%"
                         );
                     }
                 }
@@ -1688,11 +1388,7 @@ class Ruler {
     }
 
     calculateRotation(i: number) {
-        return (
-            this.rotSign * this.angle -
-            this.dots[i].rotOffset +
-            2 * this.previousRotation
-        );
+        return this.rotSign * this.angle - this.dots[i].rotOffset + 2 * this.previousRotation;
     }
 
     changeDirection(sign: number) {
@@ -1700,10 +1396,7 @@ class Ruler {
         this.rotSign = sign;
     }
 
-    draw(
-        topCxt: CanvasRenderingContext2D,
-        bottomCxt: CanvasRenderingContext2D
-    ) {
+    draw(topCxt: CanvasRenderingContext2D, bottomCxt: CanvasRenderingContext2D) {
         this.drawCircle(bottomCxt);
         this.drawDots(topCxt);
         this.drawSkeleton(bottomCxt);
