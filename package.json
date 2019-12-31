@@ -1,0 +1,32 @@
+{
+  "name": "parametric-roulette",
+  "version": "1.0.0",
+  "description": "## Draw the locus of a point on a circle rolling on an arbitrary parametric function, implemented separately using Geogebra and JavaScript",
+  "main": "parametric.js",
+  "directories": {
+    "doc": "doc"
+  },
+  "dependencies": {
+    "@types/bootstrap": "^4.3.1",
+    "file-saver": "^2.0.2",
+    "nerdamer": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.3.31",
+    "@types/file-saver": "^2.0.1",
+    "typescript": "^3.7.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanzhi713/Parametric-Roulette.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hanzhi713/Parametric-Roulette/issues"
+  },
+  "homepage": "https://github.com/hanzhi713/Parametric-Roulette#readme"
+}

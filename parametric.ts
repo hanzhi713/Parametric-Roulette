@@ -1,5 +1,6 @@
-/// <reference path="node_modules/nerdamer/index.d.ts"/>
-/// <reference path="node_modules/@types/file-saver/index.d.ts"/>
+import { saveAs } from 'file-saver';
+import * as nerdamer from 'nerdamer'
+import 'bootstrap';
 
 if (typeof Math.sign !== "function") {
     Math.sign = x => {
@@ -65,12 +66,10 @@ let locArray: number[][] = [];
 let cutPoints: number[] = [];
 let cuspPoints: number[] = [];
 
-window.onload = ev => {
+window.onload = () => {
     parseConfigJSON(localStorage.getItem("cache"));
 
-    window.onchange = e => {
-        saveConfigToBrowser();
-    };
+    window.onchange = () => saveConfigToBrowser();
 
     // parameters that determine the loci. Recalculation of loci is required if they're changed
     let effectors = [dxParam, dyParam, scaleParam, circleParam, drawingStepParam];
@@ -188,28 +187,28 @@ function addDotHelper(
     dots[currentTime] = new Dot(dotSize, dotColor, dotRatio, dotRot);
     $("#settings").append(
         '<tr id="' +
-            currentTime +
-            '">' +
-            '<td onclick=\'preModify(this)\' data-toggle="modal" data-target="#DotModalCenter">Ratio: ' +
-            dotRatio +
-            "%&nbsp;&nbsp;Color:" +
-            '<span style="width: 15px; height: 15px; background-color: ' +
-            dotColor +
-            ';display: inline-block"></span><br/>' +
-            "                        Size: " +
-            dotSize +
-            "&nbsp;&nbsp;Rotation: " +
-            dotRot +
-            "°" +
-            "                    </td>" +
-            "<th width='50px'>" +
-            '<button type="button" class="close" aria-label="Close" onclick="removeDot(\'' +
-            currentTime +
-            "')\">" +
-            '                            <span aria-hidden="true">&times;</span>' +
-            "                        </button>" +
-            "                    </th>" +
-            "                </tr>"
+        currentTime +
+        '">' +
+        '<td onclick=\'preModify(this)\' data-toggle="modal" data-target="#DotModalCenter">Ratio: ' +
+        dotRatio +
+        "%&nbsp;&nbsp;Color:" +
+        '<span style="width: 15px; height: 15px; background-color: ' +
+        dotColor +
+        ';display: inline-block"></span><br/>' +
+        "                        Size: " +
+        dotSize +
+        "&nbsp;&nbsp;Rotation: " +
+        dotRot +
+        "°" +
+        "                    </td>" +
+        "<th width='50px'>" +
+        '<button type="button" class="close" aria-label="Close" onclick="removeDot(\'' +
+        currentTime +
+        "')\">" +
+        '                            <span aria-hidden="true">&times;</span>' +
+        "                        </button>" +
+        "                    </th>" +
+        "                </tr>"
     );
     if (save) saveConfigToBrowser();
 }
@@ -255,7 +254,7 @@ function stopDrawing() {
     currentJobs = [];
 }
 
-function adjustDotRatioCap() {}
+function adjustDotRatioCap() { }
 
 function saveConfigToBrowser() {
     localStorage.setItem("cache", getConfigJSON());
@@ -313,16 +312,16 @@ function getConfigJSON() {
 
         locArray: isLocValid
             ? locArray.map(value => {
-                  return [
-                      value[0] === null ? NaN : +value[0].toFixed(2),
-                      value[1] === null ? NaN : +value[1].toFixed(2),
-                      value[2] === null ? NaN : +value[2].toFixed(2),
-                      value[3] === null ? NaN : +value[3].toFixed(2),
-                      +value[4].toFixed(3),
-                      +value[5].toFixed(4),
-                      +value[6].toFixed(2)
-                  ];
-              })
+                return [
+                    value[0] === null ? NaN : +value[0].toFixed(2),
+                    value[1] === null ? NaN : +value[1].toFixed(2),
+                    value[2] === null ? NaN : +value[2].toFixed(2),
+                    value[3] === null ? NaN : +value[3].toFixed(2),
+                    +value[4].toFixed(3),
+                    +value[5].toFixed(4),
+                    +value[6].toFixed(2)
+                ];
+            })
             : undefined,
         cutPoints,
         cutPointSigns: isLocValid ? cutPointSigns : undefined,
@@ -333,7 +332,7 @@ function getConfigJSON() {
 }
 
 function parseConfigJSON(json: string) {
-    if (json === "" || json === null) return;
+    if (!json) return;
     try {
         const obj = JSON.parse(json);
         circleParam.value = obj.circleRadius === undefined ? 120 : obj.circleRadius;
@@ -437,7 +436,7 @@ function loadConfig(files: Blob[]) {
     if (files.length) {
         const file = files[0];
         const reader = new FileReader();
-        reader.onload = function() {
+        reader.onload = function () {
             parseConfigJSON(this.result as string);
         };
         reader.readAsText(file);
@@ -489,8 +488,8 @@ function getScalingAndTranslation(realBounds: number[], width: number, conventio
     const scaling = convention
         ? Math.min(width / realWidth, width / realHeight)
         : realWidth > realHeight
-        ? width / realWidth
-        : width / realHeight;
+            ? width / realWidth
+            : width / realHeight;
     let height;
     if (realWidth > realHeight) height = (width * realHeight) / realWidth;
     else {
@@ -661,13 +660,13 @@ function saveToGIF() {
     let delay = 0;
     for (
         let i = 0,
-            counter = 0,
-            cut = 0,
-            cusp = 0,
-            sign = getSign(document.getElementById("c0")),
-            rot = getSign(document.getElementById("r0"));
+        counter = 0,
+        cut = 0,
+        cusp = 0,
+        sign = getSign(document.getElementById("c0")),
+        rot = getSign(document.getElementById("r0"));
         i < _locArray.length;
-        i++, delay += drawingInterval, counter++
+        i++ , delay += drawingInterval, counter++
     ) {
         let changeRot = i === 0;
         if (cut < _cutPoints.length) {
@@ -946,7 +945,7 @@ function calculateLocations(
     // don't know which value is appropriate here
     const epsilon = 1e-9;
     const maxError = 1e-6;
-    for (let t = t1, counter = 0, cut = 0, idx = 0; t < t2; t += step, counter++, idx++) {
+    for (let t = t1, counter = 0, cut = 0, idx = 0; t < t2; t += step, counter++ , idx++) {
         t = +t.toFixed(num);
         const x = xFunc(t),
             y = yFunc(t);
@@ -1061,7 +1060,7 @@ function calculateLocations(
                         const tempSign = 1;
 
                         idx++;
-                        for (let i = 0; i < radians; i += step * 4, idx++, cuspSteps++) {
+                        for (let i = 0; i < radians; i += step * 4, idx++ , cuspSteps++) {
                             locations[idx] = [
                                 cuspX * scale,
                                 cuspY * scale,
@@ -1288,13 +1287,13 @@ function draw(ruler: Ruler, drawingInterval: number, callback: Function) {
     let delay = 0;
     for (
         let i = 0,
-            counter = 0,
-            cut = 0,
-            cusp = 0,
-            sign = getSign(document.getElementById("c0")),
-            rot = getSign(document.getElementById("r0"));
+        counter = 0,
+        cut = 0,
+        cusp = 0,
+        sign = getSign(document.getElementById("c0")),
+        rot = getSign(document.getElementById("r0"));
         i < _locArray.length;
-        i++, delay += drawingInterval, counter++
+        i++ , delay += drawingInterval, counter++
     ) {
         let changeRot = i === 0;
         if (cut < _cutPoints.length) {
