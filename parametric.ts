@@ -262,13 +262,6 @@ function saveConfigToBrowser() {
 
 function getConfigJSON() {
     const isLocValid = locArray.length > 0 && locArray[0].length >= 6;
-    const cutPointSigns = new Array(cutPoints.length),
-        cuspPointSigns = new Array(cuspPoints.length);
-    if (isLocValid) {
-        for (let i = 0; i < cutPoints.length; i++) cutPointSigns[i] = getSign(document.getElementById("c" + i));
-
-        for (let i = 0; i < cuspPoints.length; i++) cuspPointSigns[i] = getSign(document.getElementById("r" + i));
-    }
     const config = {
         circleRadius: +circleParam.value,
         showSkeleton: skeletonCheck.checked,
@@ -309,24 +302,6 @@ function getConfigJSON() {
         pngTransparent: pngTransparentCheck.checked,
         pngCrop: pngCropCheck.checked,
         pngBgColor: pngBgColorParam.value,
-
-        locArray: isLocValid
-            ? locArray.map(value => {
-                return [
-                    value[0] === null ? NaN : +value[0].toFixed(2),
-                    value[1] === null ? NaN : +value[1].toFixed(2),
-                    value[2] === null ? NaN : +value[2].toFixed(2),
-                    value[3] === null ? NaN : +value[3].toFixed(2),
-                    +value[4].toFixed(3),
-                    +value[5].toFixed(4),
-                    +value[6].toFixed(2)
-                ];
-            })
-            : undefined,
-        cutPoints,
-        cutPointSigns: isLocValid ? cutPointSigns : undefined,
-        cuspPoints,
-        cuspPointSigns: isLocValid ? cuspPointSigns : undefined
     };
     return JSON.stringify(config);
 }
@@ -392,37 +367,7 @@ function parseConfigJSON(json: string) {
             );
         }
 
-        if (obj.locArray !== undefined) {
-            locArray = obj.locArray;
-            cutPoints = obj.cutPoints === undefined ? [] : obj.cutPoints;
-            cuspPoints = obj.cuspPoints === undefined ? [] : obj.cuspPoints;
-
-            const signRow = document.getElementById("sign-adjust");
-            signRow.innerHTML = "";
-            for (let i = 0; i < cutPoints.length; i++)
-                signRow.appendChild(
-                    createSignElement(
-                        i,
-                        obj.cutPointSigns[i] === 1 ? "+" : "-",
-                        i - 1 < 0 ? +t1Param.value : cutPoints[i - 1],
-                        cutPoints[i]
-                    )
-                );
-
-            const rotRow = document.getElementById("rot-adjust");
-            rotRow.innerHTML = "";
-            for (let i = 0; i < cuspPoints.length; i++)
-                rotRow.appendChild(
-                    createRotElement(
-                        i,
-                        obj.cuspPointSigns[i] === 1 ? "+" : "-",
-                        i - 1 < 0 ? +t1Param.value : cuspPoints[i - 1],
-                        cuspPoints[i]
-                    )
-                );
-
-            drawPreview(+circleParam.value, +scaleParam.value);
-        }
+        previewRuler();
     } catch (e) {
         alert(e);
     }
@@ -445,11 +390,9 @@ function loadConfig(files: Blob[]) {
 
 function getRealBounds(canvasBounded: boolean) {
     let maxDotRatio = 0;
-    let maxDot = null;
     for (const key in dots) {
         const dotRatio = Math.abs(dots[key].ratio);
         if (dotRatio > maxDotRatio) {
-            maxDot = dots[key];
             maxDotRatio = dotRatio;
         }
     }
@@ -476,10 +419,7 @@ function getRealBounds(canvasBounded: boolean) {
 }
 
 /**
- * @param {number[]} realBounds
- * @param {number} width
- * @param {boolean} convention Whether follow the CV coordinate system or the conventional Cartesian system
- * @return Array
+ * 
  */
 function getScalingAndTranslation(realBounds: number[], width: number, convention: boolean) {
     const realWidth = realBounds[1] - realBounds[0];
@@ -846,13 +786,9 @@ function caller() {
 function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Expression) {
     const dx = nerdamer.diff(xExp, "t");
     const dy = nerdamer.diff(yExp, "t");
-    // console.log(dx.text());
-    // console.log(dy.text());
 
     const dx_2 = nerdamer.diff(dx, "t");
     const dy_2 = nerdamer.diff(dy, "t");
-    // console.log(dy_2.text());
-    // console.log(dx_2.text());
 
     const curvatureString =
         "((" +
@@ -869,8 +805,6 @@ function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Exp
         dy.text() +
         ")^2)^1.5";
     const curvatureExp = nerdamer(curvatureString);
-    // console.log(curvatureExp.text());
-    // console.log(curvatureString);
 
     const arcLengthExp = nerdamer("sqrt((" + dx.text() + ")^2 + (" + dy.text() + ")^2)");
     return [
@@ -878,9 +812,7 @@ function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Exp
         dy.buildFunction(["t"]),
         arcLengthExp.buildFunction(["t"]),
         curvatureExp.buildFunction(["t"]),
-        dx_2.buildFunction(["t"]),
-        dy_2.buildFunction(["t"])
-    ];
+    ] as const;
 }
 
 function calculateLocations(
@@ -892,13 +824,9 @@ function calculateLocations(
     radius: number,
     scale: number
 ): number[][] {
-    const exps = buildNecessaryExpressions(xExp, yExp);
-    const [dx, dy, arcLengthExp, curvature] = exps;
+    const [dx, dy, arcLengthExp, curvature] = buildNecessaryExpressions(xExp, yExp);
 
     const locations: number[][] = [];
-
-    const newCuspPoints: number[] = [];
-    const newCutPoints: [number, number][] = [];
 
     const xFunc = xExp.buildFunction(["t"]);
     const yFunc = yExp.buildFunction(["t"]);
@@ -911,77 +839,113 @@ function calculateLocations(
     const sliceLength = 256;
     const sliceUpper = sliceLength - 1;
 
-    let sign = 1, lastNormal = 0;
+    let sign = 1, lastNormal = 0, lastCuspIdx = 1;
 
-    newCutPoints.push([t1, sign]);
-    newCuspPoints.push(t1);
-    for (let t = t1, counter = 0, idx = 0; t < t2; t += step, counter++ , idx++) {
-        const gradY = dy(t), gradX = dx(t);
-        const normal = -gradX / gradY;
+    const newCuspPoints: [number, number, number][] = [[t1, 0, 0]];
+    const newCutPoints: [number, number][] = [[t1, sign]];
 
-        const sliceIdx = counter % sliceLength;
+    for (let t = t1, idx = 0; t < t2; t += step) {
+        const normal = -dx(t) / dy(t);
+
+        const sliceIdx = idx % sliceLength;
         arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2 + 5);
         if (sliceIdx === sliceUpper) {
             previousLower = t;
             previousArcLength = arcLength;
         }
-        const rotAngle = arcLength / radius;
+        let rotAngle = arcLength / radius;
         if (Math.sign(normal * lastNormal) === -1) { // normal changes sign
-            // for stationary point only
-            if (Math.abs(normal - lastNormal) > 1) {
+            // for stationary points only
+            if (Math.abs(normal - lastNormal) > 1)
                 newCutPoints.push([t, sign = -sign]);
-            }
-        }
-        if (Math.abs(curvature(t)) > 30) {
-            const lastCusp = newCuspPoints[newCuspPoints.length - 1];
-            if (!lastCusp || Math.abs(lastCusp - t) > 0.1) {
-                newCuspPoints.push(t);
-            }
         }
 
+        const cv = Math.abs(curvature(t))
         const x = xFunc(t), y = yFunc(t);
+        if (cv > 25) {        // large curvature -> cusp
+            const lastCusp = newCuspPoints[lastCuspIdx];
+            if (!lastCusp) {
+                newCuspPoints.push([t, cv, 0]);
+            } else {
+                // update the previous cusp's curvature if the current curvature is larger
+                if (cv > lastCusp[1]) {
+                    lastCusp[0] = t;
+                    lastCusp[1] = cv;
+                } else { // curvature stop increasing: curvature is the maximum
+                    if (revolve.checked && !lastCusp[2]) {
+                        lastCusp[2] = 1; // set flag to stop re-revolving around cusps
+
+                        const r1 = Math.atan(-dx(t - 2 * step) / dy(t - 2 * step));
+                        const r2 = Math.atan(normal);
+
+                        // change sign? vertical or horizontal cusp
+                        const temp = Math.abs(r2 - r1);
+                        const radians = temp < Math.PI / 2 ? Math.PI - temp : temp;
+
+                        for (let i = 0; i < radians; i += step * 4) {
+                            locations[idx++] = [
+                                x * scale,
+                                y * scale,
+                                radius * Math.cos(r1 + i) * scale,
+                                radius * Math.sin(r1 + i) * scale,
+                                rotAngle + i,
+                                t - step
+                            ];
+                        }
+                        locations[idx++] = [
+                            x * scale,
+                            y * scale,
+                            radius * Math.cos(r1 + radians) * scale,
+                            radius * Math.sin(r1 + radians) * scale,
+                            rotAngle + radians,
+                            t - step
+                        ];
+
+                        previousArcLength += radius * radians;
+                        rotAngle += radians;
+
+                        const lastCut = newCutPoints[newCutPoints.length - 1]
+                        if (!lastCut || Math.abs(lastCut[0] - t) >= 2 * step) // if the t-value of the lastCut is not the same as this cusp
+                            newCutPoints.push([t, sign = -sign]); // add a new cut corresponding to this cusp
+                        else {
+                            lastCut[1] = sign = -sign; // otherwise, update the sign of the previous cusp
+                        }
+                    }
+                }
+            }
+        } else { // curvature falls below threshold: set last cusp to undefined
+            lastCuspIdx = newCuspPoints.length;
+        }
+
         const delX = radius / Math.sqrt(normal * normal + 1);
         const delY = delX * normal;
+        if (!isNaN(delY))
+            locations[idx++] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t];
 
-        locations[idx] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t, 0];
         lastNormal = normal;
     }
 
     const signRow = document.getElementById("sign-adjust");
-    const signElements = new Array(newCutPoints.length);
-
-    for (let i = 0; i < newCutPoints.length; i++)
-        signElements[i] = createSignElement(
-            i,
-            newCutPoints[i][1] === 1 ? "+" : "-",
-            i - 1 < 0 ? t1 : newCutPoints[i - 1][0],
-            newCutPoints[i][0]
-        );
-
     signRow.innerHTML = "";
-    for (let i = 0; i < newCutPoints.length; i++) signRow.appendChild(signElements[i]);
+    for (let i = 0; i < newCutPoints.length; i++) signRow.appendChild(createSignElement(
+        i,
+        newCutPoints[i][1] === 1 ? "+" : "-",
+        newCutPoints[i][0],
+        (newCutPoints[i + 1] || [t2])[0]
+    ));
 
     const rotRow = document.getElementById("rot-adjust");
-    const rotElements = new Array(newCuspPoints.length);
-    if (revolve.checked)
-        for (let i = 0; i < newCuspPoints.length; i++)
-            rotElements[i] = createRotElement(i, "+", i - 1 < 0 ? t1 : newCuspPoints[i - 1], newCuspPoints[i]);
-    else
-        for (let i = 0; i < newCuspPoints.length; i++)
-            rotElements[i] = createRotElement(
-                i,
-                i % 2 === 0 ? "-" : "+",
-                i - 1 < 0 ? t1 : newCuspPoints[i - 1],
-                newCuspPoints[i]
-            );
     rotRow.innerHTML = "";
-    for (let i = 0; i < newCuspPoints.length; i++) rotRow.appendChild(rotElements[i]);
+    for (let i = 0; i < newCuspPoints.length; i++) rotRow.appendChild(createRotElement(
+        i,
+        i % 2 === 0 && !revolve.checked ? "-" : "+",
+        newCuspPoints[i][0],
+        (newCuspPoints[i + 1] || [t2])[0]
+    ));
 
     cutPoints = newCutPoints.map(x => x[0]);
-    cuspPoints = newCuspPoints;
+    cuspPoints = newCuspPoints.map(x => x[0]);
     $('[data-toggle="tooltip"]').tooltip();
-
-
     return locations;
 }
 
@@ -1102,16 +1066,13 @@ function draw(ruler: Ruler, drawingInterval: number, callback: Function) {
         i++ , delay += drawingInterval
     ) {
         let changeRot = false;
-        if (cut < _cutPoints.length) {
-            if (_locArray[i][5] >= _cutPoints[cut]) sign = getSign(document.getElementById("c" + cut++));
-        }
-        if (cusp < _cuspPoints.length) {
-            if (_locArray[i][5] >= _cuspPoints[cusp]) {
-                rot = getSign(document.getElementById("r" + cusp++));
-                changeRot = true;
-            }
-        }
+        if (cut < _cutPoints.length && _locArray[i][5] >= _cutPoints[cut])
+            sign = getSign(document.getElementById("c" + cut++));
 
+        if (cusp < _cuspPoints.length && _locArray[i][5] >= _cuspPoints[cusp]) {
+            rot = getSign(document.getElementById("r" + cusp++));
+            changeRot = true;
+        }
         currentJobs.push(
             setTimeout(() => {
                 if (!flag.stop) {
@@ -1193,9 +1154,11 @@ class Ruler {
     }
 
     changeDirection(sign: number) {
+        // const a = this.calculateRotation(0);
         if (this.rotSign !== sign) // cancel out previous rotation offset
-            this.offset = - 2 * this.angle - this.offset;
+            this.offset += (sign === -1 ? 2 * this.angle : -2 * this.angle);
         this.rotSign = sign;
+        // console.log((this.calculateRotation(0) - a) % (2*Math.PI), this.angle % (Math.PI * 2));
     }
 
     draw(topCxt: CanvasRenderingContext2D, bottomCxt: CanvasRenderingContext2D) {
