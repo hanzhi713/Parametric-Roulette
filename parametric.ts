@@ -58,8 +58,6 @@ const pngBgColorParam = document.getElementById("p-bgcolor") as HTMLInputElement
 
 const drawButton = document.getElementById("draw") as HTMLButtonElement;
 
-const flag = { stop: false };
-
 let currentJobs: number[] = [];
 let dots: { [x: string]: Dot } = {};
 let locArray: number[][] = [];
@@ -249,7 +247,6 @@ function postModify() {
 }
 
 function stopDrawing() {
-    flag.stop = true;
     for (let i = 0; i < currentJobs.length; i++) clearTimeout(currentJobs[i]);
     currentJobs = [];
 }
@@ -470,7 +467,6 @@ function saveToPNG() {
     ruler.showSkeleton = skeletonCheck.checked;
 
     stopDrawing();
-    flag.stop = false;
 
     draw(ruler, +drawingDelayParam.value, () => {
         const pngWidth = +pngWidthParam.value;
@@ -536,7 +532,6 @@ function saveToGIF() {
     ruler.showSkeleton = skeletonCheck.checked;
 
     stopDrawing();
-    flag.stop = false;
 
     const topCxt = topCanvas.getContext("2d");
     const bottomCxt = bottomCanvas.getContext("2d");
@@ -620,76 +615,75 @@ function saveToGIF() {
         }
         currentJobs.push(
             setTimeout(() => {
-                if (!flag.stop) {
-                    ruler.erase(bottomCxt);
-                    if (_locArray[i][6] === 1)
-                        ruler.moveTo(_locArray[i][0] + _locArray[i][2], _locArray[i][1] + _locArray[i][3]);
-                    else if (_locArray[i][6] !== 2)
-                        ruler.moveTo(
-                            _locArray[i][0] + sign * _locArray[i][2],
-                            _locArray[i][1] + sign * _locArray[i][3]
-                        );
-                    ruler.angle = _locArray[i][4];
-                    if (changeRot) ruler.changeDirection(rot);
 
-                    ruler.draw(topCxt, bottomCxt);
+                ruler.erase(bottomCxt);
+                if (_locArray[i][6] === 1)
+                    ruler.moveTo(_locArray[i][0] + _locArray[i][2], _locArray[i][1] + _locArray[i][3]);
+                else if (_locArray[i][6] !== 2)
+                    ruler.moveTo(
+                        _locArray[i][0] + sign * _locArray[i][2],
+                        _locArray[i][1] + sign * _locArray[i][3]
+                    );
+                ruler.angle = _locArray[i][4];
+                if (changeRot) ruler.changeDirection(rot);
 
-                    if (counter % frameInterval === 0) {
-                        if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
-                        else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
+                ruler.draw(topCxt, bottomCxt);
 
-                        tempCxt.drawImage(funcCanvas, 0, 0);
-                        tempCxt.drawImage(bottomCanvas, 0, 0);
-                        tempCxt.drawImage(topCanvas, 0, 0);
+                if (counter % frameInterval === 0) {
+                    if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
+                    else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
 
-                        gif.addFrame(tempCxt, {
-                            copy: true,
-                            delay: frameDelay
-                        });
+                    tempCxt.drawImage(funcCanvas, 0, 0);
+                    tempCxt.drawImage(bottomCanvas, 0, 0);
+                    tempCxt.drawImage(topCanvas, 0, 0);
 
-                        const progress = (i / _locArray.length) * 100;
-                        progressbar.width(progress + "%");
-                        progressLabel.text(
-                            "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%"
-                        );
-                    }
+                    gif.addFrame(tempCxt, {
+                        copy: true,
+                        delay: frameDelay
+                    });
+
+                    const progress = (i / _locArray.length) * 100;
+                    progressbar.width(progress + "%");
+                    progressLabel.text(
+                        "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%"
+                    );
                 }
+
             }, delay)
         );
     }
     currentJobs.push(
         setTimeout(() => {
-            if (!flag.stop) {
-                if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
-                else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
+            if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
+            else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
 
-                tempCxt.drawImage(funcCanvas, 0, 0);
-                tempCxt.drawImage(bottomCanvas, 0, 0);
-                tempCxt.drawImage(topCanvas, 0, 0);
-                gif.addFrame(tempCxt, {
-                    copy: true,
-                    delay: +gifLastFrameDelayParam.value
-                });
+            tempCxt.drawImage(funcCanvas, 0, 0);
+            tempCxt.drawImage(bottomCanvas, 0, 0);
+            tempCxt.drawImage(topCanvas, 0, 0);
+            gif.addFrame(tempCxt, {
+                copy: true,
+                delay: +gifLastFrameDelayParam.value
+            });
 
-                progressbar.width("0%");
+            progressbar.width("0%");
 
-                gif.on("progress", (p: number) => {
-                    if (Math.abs(1 - p) < 0.0001) {
-                        progressbar.width("100%");
-                        progressLabel.text("Save as GIF: Finished");
-                    } else {
-                        p = p * 100;
-                        progressbar.width(p + "%");
-                        progressLabel.text("Save as GIF: " + p.toFixed(1) + "%");
-                    }
-                });
+            gif.on("progress", (p: number) => {
+                if (Math.abs(1 - p) < 0.0001) {
+                    progressbar.width("100%");
+                    progressLabel.text("Save as GIF: Finished");
+                } else {
+                    p = p * 100;
+                    progressbar.width(p + "%");
+                    progressLabel.text("Save as GIF: " + p.toFixed(1) + "%");
+                }
+            });
 
-                gif.on("finished", (blob: Blob) => {
-                    saveAs(blob, "parametric-roulette.gif");
-                });
+            gif.on("finished", (blob: Blob) => {
+                saveAs(blob, "parametric-roulette.gif");
+            });
 
-                gif.render();
-            }
+            gif.render();
+
         }, delay)
     );
 }
@@ -778,9 +772,8 @@ function caller() {
     ruler.showSkeleton = skeletonCheck.checked;
 
     stopDrawing();
-    flag.stop = false;
 
-    draw(ruler, +drawingDelayParam.value, undefined);
+    draw(ruler, +drawingDelayParam.value);
 }
 
 function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Expression) {
@@ -831,29 +824,16 @@ function calculateLocations(
     const xFunc = xExp.buildFunction(["t"]);
     const yFunc = yExp.buildFunction(["t"]);
 
-    let arcLength = 0;
-    let previousArcLength = arcLength;
+    let previousArcLength = 0;
     let previousLower = t1;
 
     // longer slice length will result in better accuracy of numerical integration
-    const sliceLength = 256;
-    const sliceUpper = sliceLength - 1;
-
     let sign = 1, lastNormal = 0, lastCuspIdx = 1;
 
     const newCuspPoints: [number, number, number][] = [[t1, 0, 0]];
     const newCutPoints: [number, number][] = [[t1, sign]];
-
     for (let t = t1, idx = 0; t < t2; t += step) {
         const normal = -dx(t) / dy(t);
-
-        const sliceIdx = idx % sliceLength;
-        arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2 + 5);
-        if (sliceIdx === sliceUpper) {
-            previousLower = t;
-            previousArcLength = arcLength;
-        }
-        let rotAngle = arcLength / radius;
         if (Math.sign(normal * lastNormal) === -1) { // normal changes sign
             // for stationary points only
             if (Math.abs(normal - lastNormal) > 1)
@@ -861,7 +841,6 @@ function calculateLocations(
         }
 
         const cv = Math.abs(curvature(t))
-        const x = xFunc(t), y = yFunc(t);
         if (cv > 25) {        // large curvature -> cusp
             const lastCusp = newCuspPoints[lastCuspIdx];
             if (!lastCusp) {
@@ -882,10 +861,11 @@ function calculateLocations(
                         const temp = Math.abs(r2 - r1);
                         const radians = temp < Math.PI / 2 ? Math.PI - temp : temp;
 
+                        const [cuspX, cuspY, , , rotAngle] = locations[idx - 1];
                         for (let i = 0; i < radians; i += step * 4) {
                             locations[idx++] = [
-                                x * scale,
-                                y * scale,
+                                cuspX,
+                                cuspY,
                                 radius * Math.cos(r1 + i) * scale,
                                 radius * Math.sin(r1 + i) * scale,
                                 rotAngle + i,
@@ -893,16 +873,15 @@ function calculateLocations(
                             ];
                         }
                         locations[idx++] = [
-                            x * scale,
-                            y * scale,
+                            cuspX,
+                            cuspY,
                             radius * Math.cos(r1 + radians) * scale,
                             radius * Math.sin(r1 + radians) * scale,
                             rotAngle + radians,
                             t - step
                         ];
 
-                        previousArcLength += radius * radians;
-                        rotAngle += radians;
+                        previousArcLength += radius * radians; // 
 
                         const lastCut = newCutPoints[newCutPoints.length - 1]
                         if (!lastCut || Math.abs(lastCut[0] - t) >= 2 * step) // if the t-value of the lastCut is not the same as this cusp
@@ -917,10 +896,22 @@ function calculateLocations(
             lastCuspIdx = newCuspPoints.length;
         }
 
+        // update arc length
+        const sliceIdx = idx % 256;
+        const arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2);
+        if (sliceIdx === 255) {
+            previousLower = t;
+            previousArcLength = arcLength;
+        }
+
+        const rotAngle = arcLength / radius;
         const delX = radius / Math.sqrt(normal * normal + 1);
         const delY = delX * normal;
-        if (!isNaN(delY))
-            locations[idx++] = [x * scale, y * scale, delX * scale, delY * scale, rotAngle, t];
+        if (isFinite(delY) && isFinite(rotAngle))
+            locations[idx++] = [xFunc(t) * scale, yFunc(t) * scale, delX * scale, delY * scale, rotAngle, t];
+        else {
+            locations[idx++] = [NaN, NaN, NaN, NaN, NaN, NaN];
+        }
 
         lastNormal = normal;
     }
@@ -946,6 +937,7 @@ function calculateLocations(
     cutPoints = newCutPoints.map(x => x[0]);
     cuspPoints = newCuspPoints.map(x => x[0]);
     $('[data-toggle="tooltip"]').tooltip();
+
     return locations;
 }
 
@@ -1028,7 +1020,7 @@ function generateRadius() {
     previewRuler();
 }
 
-function draw(ruler: Ruler, drawingInterval: number, callback: Function) {
+function draw(ruler: Ruler, drawingInterval: number, callback?: Function) {
     // storing the reference to global locArray for efficiency
     const _locArray = locArray;
     const _cuspPoints = cuspPoints;
@@ -1075,34 +1067,36 @@ function draw(ruler: Ruler, drawingInterval: number, callback: Function) {
         }
         currentJobs.push(
             setTimeout(() => {
-                if (!flag.stop) {
-                    ruler.erase(bottomCxt);
-                    ruler.moveTo(
-                        _locArray[i][0] + sign * _locArray[i][2],
-                        _locArray[i][1] + sign * _locArray[i][3]
+                if (isNaN(locArray[i][0])) return;
+
+                // erase
+                ruler.erase(bottomCxt);
+
+                // update parameters
+                ruler.moveTo(
+                    _locArray[i][0] + sign * _locArray[i][2],
+                    _locArray[i][1] + sign * _locArray[i][3]
+                );
+                ruler.angle = _locArray[i][4];
+                if (changeRot) ruler.changeDirection(rot);
+
+                // draw
+                ruler.draw(topCxt, bottomCxt);
+
+                if (i % 16 === 0) {
+                    const progress = (i / _locArray.length) * 100;
+                    progressbar.width(progress + "%");
+                    progressLabel.text(
+                        "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%"
                     );
-                    ruler.angle = _locArray[i][4];
-
-                    if (changeRot) ruler.changeDirection(rot);
-
-                    ruler.draw(topCxt, bottomCxt);
-
-                    if (i % 10 === 0) {
-                        const progress = (i / _locArray.length) * 100;
-                        progressbar.width(progress + "%");
-                        progressLabel.text(
-                            "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%"
-                        );
-                    }
                 }
-            }, delay)
-        );
+            }, delay))
     }
     currentJobs.push(
         setTimeout(() => {
             progressbar.width("100%");
             progressLabel.text("Drawing: Finished");
-            if (callback !== undefined) callback();
+            if (typeof callback === "function") callback();
         }, delay)
     );
 }
@@ -1111,6 +1105,7 @@ function draw(ruler: Ruler, drawingInterval: number, callback: Function) {
  * Numerically integrate function f over [a, b] using the trapezoidal rule
  */
 function integrate(f: (x: number) => number, a: number, b: number, n: number) {
+    if (b === a) return 0;
     const step = (b - a) / n;
     let sum = f(a);
     for (let i = 1; i < n - 1; i++) sum += 2 * f(a + i * step);
