@@ -651,7 +651,11 @@
         'Drawing: ': 'Drawing: '
     };
 </script>
-<script src="parametric.js?ver=113"></script>
+<script id="sc-1"></script>
+<script>
+    const s = document.getElementById('sc-1');
+    s.src = './parametric.js?ver=' + Math.random();
+</script>
 <div style="width: 300px; margin: auto auto">
     <span style="font-size:18px;">
         Developed by <a href="https://github.com/hanzhi713" target="_blank">Hanzhi Zhou</a>

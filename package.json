@@ -14,10 +14,13 @@
   "devDependencies": {
     "@types/jquery": "^3.3.31",
     "@types/file-saver": "^2.0.1",
-    "typescript": "^3.7.3"
+    "typescript": "^3.7.3",
+    "nodemon": "^2.0.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "(tsc || exit 0) && node rmip.js",
+    "dev": "./node_modules/nodemon/bin/nodemon.js -e ts  --exec \"npm run compile\""
   },
   "repository": {
     "type": "git",
