@@ -98,8 +98,8 @@ window.onload = () => {
             locArray = [];
             cutPoints = [];
             cuspPoints = [];
-            document.getElementById("sign-adjust").innerHTML = "";
-            document.getElementById("rot-adjust").innerHTML = "";
+            document.getElementById("sign-adjust")!.innerHTML = "";
+            document.getElementById("rot-adjust")!.innerHTML = "";
         };
     }
     $('[data-toggle="tooltip"]').tooltip();
@@ -107,8 +107,8 @@ window.onload = () => {
 
 function disableDrawing() {
     drawButton.disabled = true;
-    const m = document.getElementById("savepng"),
-        n = document.getElementById("savegif");
+    const m = document.getElementById("savepng")!,
+        n = document.getElementById("savegif")!;
     m.className = "dropdown-item disabled";
     n.className = "dropdown-item disabled";
     m.style.color = "#6c757d";
@@ -119,8 +119,8 @@ function disableDrawing() {
 
 function enableDrawing() {
     drawButton.disabled = false;
-    const m = document.getElementById("savepng"),
-        n = document.getElementById("savegif");
+    const m = document.getElementById("savepng")!,
+        n = document.getElementById("savegif")!;
     m.className = "dropdown-item";
     n.className = "dropdown-item";
     m.style.color = "#000";
@@ -145,12 +145,12 @@ function removeAllDots() {
 }
 
 function addDot() {
-    const dotSize = +$("#dotSize").val();
-    const dotColor = $("#dotColor").val() as string;
-    const dotRatio = +$("#dotRatio").val();
-    const dotRot = +$("#dotRotOffset").val();
+    const dotSize = +$("#dotSize").val()!;
+    const dotColor = $("#dotColor").val()!;
+    const dotRatio = +$("#dotRatio").val()!;
+    const dotRot = +$("#dotRotOffset").val()!;
 
-    addDotHelper(new Date().valueOf().toString(), dotSize, dotColor, dotRatio, dotRot, true);
+    addDotHelper(new Date().valueOf().toString(), dotSize, dotColor as string, dotRatio, dotRot, true);
 }
 
 /**
@@ -189,34 +189,24 @@ function addDotHelper(
     save: boolean
 ) {
     dots[currentTime] = new Dot(dotSize, dotColor, dotRatio, dotRot);
-    $("#settings").append(
-        '<tr id="' +
-        currentTime +
-        '">' +
-        '<td onclick=\'preModify(this)\' data-toggle="modal" data-target="#DotModalCenter">Ratio: ' +
-        dotRatio +
-        "%&nbsp;&nbsp;Color:" +
-        '<span style="width: 15px; height: 15px; background-color: ' +
-        dotColor +
-        ';display: inline-block"></span><br/>' +
-        "                        Size: " +
-        dotSize +
-        "&nbsp;&nbsp;Rotation: " +
-        dotRot +
-        "°" +
-        "                    </td>" +
-        "<th width='50px'>" +
-        '<button type="button" class="close" aria-label="Close" onclick="removeDot(\'' +
-        currentTime +
-        "')\">" +
-        '                            <span aria-hidden="true">&times;</span>' +
-        "                        </button>" +
-        "                    </th>" +
-        "                </tr>"
-    );
+    $("#settings").append(`
+<tr id="${currentTime}">
+    <td onclick="preModify(this)" data-toggle="modal" data-target="#DotModalCenter">
+        Ratio: ${dotRatio}%&nbsp;&nbsp;Color: <span class="color-blk" style="background-color: ${dotColor}"></span>
+        <br> 
+        Size: ${dotSize}&nbsp;&nbsp;Rotation: ${dotRot}° 
+    </td>
+    <th width="50px">
+        <button type="button" class="close" aria-label="Close" onclick="removeDot('${currentTime}')">×</button> 
+    </th>
+</tr>
+    `);
     if (save) saveConfigToBrowser();
 }
 
+/**
+ * before the the (dot editing) modal opens, assign the current value to modal fields
+ */
 function preModify(td: HTMLTableCellElement) {
     const dot = dots[(td.parentNode as HTMLElement).id];
     mDotSize.value = dot.size.toString();
@@ -226,6 +216,9 @@ function preModify(td: HTMLTableCellElement) {
     mDotID.value = (td.parentNode as HTMLElement).id;
 }
 
+/**
+ * after user clicks "save", save the new dot attributes and update HTML
+ */
 function postModify() {
     const dot = dots[mDotID.value];
     const dotSize = +mDotSize.value;
@@ -233,18 +226,14 @@ function postModify() {
     const dotRatio = +mDotRatio.value;
     const dotRot = +mDotRot.value;
     const tr = document.getElementById(mDotID.value) as HTMLTableRowElement;
-    tr.cells[0].innerHTML =
-        "Ratio: " +
-        dotRatio +
-        "%&nbsp;&nbsp;Color:" +
-        '                        <span style="width: 15px; height: 15px; background-color: ' +
-        dotColor +
-        ';display: inline-block"></span><br/>' +
-        "                        Size: " +
-        dotSize +
-        "&nbsp;&nbsp;Rotation: " +
-        dotRot +
-        "°";
+
+    tr.cells[0].innerHTML = `
+<td onclick="preModify(this)" data-toggle="modal" data-target="#DotModalCenter">
+    Ratio: ${dotRatio}%&nbsp;&nbsp;Color: <span class="color-blk" style="background-color: ${dotColor}"></span>
+    <br> 
+    Size: ${dotSize}&nbsp;&nbsp;Rotation: ${dotRot}° 
+</td>`;
+
     dot.size = dotSize;
     dot.color = dotColor;
     dot.ratio = dotRatio;
@@ -264,8 +253,7 @@ function saveConfigToBrowser() {
 }
 
 function getConfigJSON() {
-    const isLocValid = locArray.length > 0 && locArray[0].length >= 6;
-    const config = {
+    return JSON.stringify({
         circleRadius: +circleParam.value,
         showSkeleton: skeletonCheck.checked,
         showFunction: functionCheck.checked,
@@ -303,11 +291,10 @@ function getConfigJSON() {
         pngWidth: +pngWidthParam.value,
         pngTransparent: pngTransparentCheck.checked,
         pngBgColor: pngBgColorParam.value,
-    };
-    return JSON.stringify(config);
+    });
 }
 
-function parseConfigJSON(json: string) {
+function parseConfigJSON(json?: string | null) {
     if (!json) return;
     try {
         const obj = JSON.parse(json);
@@ -372,10 +359,16 @@ function parseConfigJSON(json: string) {
     }
 }
 
+/**
+ * save config as a file
+ */
 function saveConfig() {
     saveAs(new Blob([getConfigJSON()], { type: "text/plain;charset=utf-8" }), "config.json");
 }
 
+/**
+ * load config from a file
+ */
 function loadConfig(files: Blob[]) {
     if (files.length) {
         const file = files[0];
@@ -387,6 +380,9 @@ function loadConfig(files: Blob[]) {
     }
 }
 
+/**
+ * @returns [minX, maxX, minY, maxY] of the global locArray
+ */
 function getRealBounds() {
     let maxDotRatio = 0;
     for (const key in dots) {
@@ -417,7 +413,8 @@ function getRealBounds() {
 }
 
 /**
- * 
+ * given [minX, maxX, minY, maxY] (two corners of a rectangle), returns the scaling and translation such that when applied,
+ * the resulting rectangle is centered at (0, 0) and max(width, height) = `maxSize`
  */
 function getScalingAndTranslation(realBounds: ReturnType<typeof getRealBounds>, maxSize = 640) {
     const [minX, maxX, minY, maxY] = realBounds;
@@ -429,6 +426,9 @@ function getScalingAndTranslation(realBounds: ReturnType<typeof getRealBounds>, 
     return [scaling, (-width / 2 - minX) * scaling, (-height / 2 - minY) * scaling, scaling * width, scaling * height] as const;
 }
 
+/**
+ * adjust the scaling and translation of the canvas such that the parametric curve fits within the viewport
+ */
 function autoAdjustScalingAndTranslation() {
     if (locArray.length > 0 && locArray[0].length >= 6) {
         const result = getScalingAndTranslation(getRealBounds(), 640);
@@ -446,7 +446,7 @@ function saveToPNG() {
     stopDrawing();
 
     draw(() => {
-        const tempCxt = tempCanvas.getContext("2d");
+        const tempCxt = tempCanvas.getContext("2d")!;
         const [, , , width, height] = getScalingAndTranslation(getRealBounds(), +pngWidthParam.value);
         tempCanvas.width = width;
         tempCanvas.height = height;
@@ -461,12 +461,13 @@ function saveToPNG() {
         tempCxt.drawImage(topCanvas, 0, 0, width, height);
 
         tempCanvas.toBlob(blob => {
-            saveAs(blob, "parametric-roulette.png");
+            saveAs(blob!, "parametric-roulette.png");
         });
     });
 }
 
 /**
+ * from a sign element, parse the sign as -1 or 1
  * @param {HTMLElement} element
  */
 function getSign(element: HTMLElement) {
@@ -481,7 +482,7 @@ function saveToGIF() {
     const frameSize = +gifSizeParam.value;
     const transparent = gifTransparentCheck.checked;
     const frameDelay = +gifFrameDelayParam.value;
-    const tempCxt = tempCanvas.getContext("2d");
+    const tempCxt = tempCanvas.getContext("2d")!;
 
     const [, , , width, height] = getScalingAndTranslation(getRealBounds(), frameSize);
     tempCanvas.width = width;
@@ -558,6 +559,10 @@ function getDotArray() {
     return dotArray;
 }
 
+/**
+ * set the transformation matrix of the given canvas contexts. 
+ * Note that scaling is not set here because it may not provide a high-res image. Instead, it is applied in the `calculateLocations` function. 
+ */
 function setTransform(cxts: CanvasRenderingContext2D[]) {
     const sx = +dxParam.value;
     const sy = +dyParam.value;
@@ -567,15 +572,15 @@ function setTransform(cxts: CanvasRenderingContext2D[]) {
 function drawPreview() {
     if (clearBeforeDrawingCheck.checked) clear();
 
-    const topCxt = topCanvas.getContext("2d");
-    const bottomCxt = bottomCanvas.getContext("2d");
-    const funcCxt = funcCanvas.getContext("2d");
+    const topCxt = topCanvas.getContext("2d")!;
+    const bottomCxt = bottomCanvas.getContext("2d")!;
+    const funcCxt = funcCanvas.getContext("2d")!;
     setTransform([topCxt, bottomCxt, funcCxt]);
 
     funcCxt.beginPath();
     funcCxt.strokeStyle = "#000000";
     funcCxt.moveTo(locArray[0][0], locArray[0][1]);
-    
+
     for (let i = 1; i < locArray.length; i++) if (!isNaN(locArray[i][0])) funcCxt.lineTo(locArray[i][0], locArray[i][1]);
     funcCxt.stroke();
 
@@ -586,7 +591,7 @@ function drawPreview() {
     while (locArray[i][0] > cutPoints[j]) {
         j++;
     }
-    const initialSigns = getSign(document.getElementById("c" + j));
+    const initialSigns = getSign(document.getElementById("c" + j)!);
     const ruler = new Ruler(
         new Circle(
             initialSigns * locArray[i][2] + locArray[i][0],
@@ -608,9 +613,9 @@ function previewRuler() {
 }
 
 function clear() {
-    clearCxt(topCanvas.getContext('2d'));
-    clearCxt(bottomCanvas.getContext('2d'));
-    clearCxt(funcCanvas.getContext('2d'));
+    clearCxt(topCanvas.getContext('2d')!);
+    clearCxt(bottomCanvas.getContext('2d')!);
+    clearCxt(funcCanvas.getContext('2d')!);
 }
 
 function clearCxt(cxt: CanvasRenderingContext2D) {
@@ -619,7 +624,11 @@ function clearCxt(cxt: CanvasRenderingContext2D) {
     cxt.clearRect(0, 0, cxt.canvas.width, cxt.canvas.height)
     cxt.restore();
 }
-
+/**
+ * computes the parametric functions'
+ * [x(t), y(t), x'(t), y'(t), arcLenth(t), curvature(t)]
+ * all as JavaScript function of one variable
+ */
 function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Expression) {
     const dx = nerdamer.diff(xExp, "t");
     const dy = nerdamer.diff(yExp, "t");
@@ -768,7 +777,7 @@ function calculateLocations() {
         lastNormal = normal;
     }
 
-    const signRow = document.getElementById("sign-adjust");
+    const signRow = document.getElementById("sign-adjust")!;
     signRow.innerHTML = "";
     for (let i = 0; i < newCutPoints.length; i++) signRow.appendChild(createSignElement(
         i,
@@ -777,7 +786,7 @@ function calculateLocations() {
         (newCutPoints[i + 1] || [t2])[0]
     ));
 
-    const rotRow = document.getElementById("rot-adjust");
+    const rotRow = document.getElementById("rot-adjust")!;
     rotRow.innerHTML = "";
     for (let i = 0; i < newCuspPoints.length; i++) rotRow.appendChild(createRotElement(
         i,
@@ -855,9 +864,9 @@ function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { 
 
     if (_locArray.length < 1) return alert("You must first click 'preview' to calculate drawing path");
 
-    const topCxt = topCanvas.getContext("2d");
-    const bottomCxt = bottomCanvas.getContext("2d");
-    const funcCxt = funcCanvas.getContext("2d");
+    const topCxt = topCanvas.getContext("2d")!;
+    const bottomCxt = bottomCanvas.getContext("2d")!;
+    const funcCxt = funcCanvas.getContext("2d")!;
 
     const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * +circleParam.value), getDotArray());
     ruler.showSkeleton = skeletonCheck.checked;
@@ -879,17 +888,17 @@ function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { 
         let i = 0,
         cut = 0,
         cusp = 0,
-        sign = getSign(document.getElementById("c0")),
-        rot = getSign(document.getElementById("r0"));
+        sign = getSign(document.getElementById("c0")!),
+        rot = getSign(document.getElementById("r0")!);
         i < _locArray.length;
         i++
     ) {
         if (cut < _cutPoints.length && _locArray[i][5] >= _cutPoints[cut])
-            sign = getSign(document.getElementById("c" + cut++));
+            sign = getSign(document.getElementById("c" + cut++)!);
 
         let changeRot = false;
         if (cusp < _cuspPoints.length && _locArray[i][5] >= _cuspPoints[cusp]) {
-            rot = getSign(document.getElementById("r" + cusp++));
+            rot = getSign(document.getElementById("r" + cusp++)!);
             changeRot = true;
         }
 
