@@ -44,7 +44,6 @@ const mDotID = document.getElementById("m-dotID") as HTMLInputElement;
 
 const gifSizeParam = document.getElementById("f-size") as HTMLInputElement;
 const gifIntervalParam = document.getElementById("f-interval") as HTMLInputElement;
-const gifCropCheck = document.getElementById("f-crop") as HTMLInputElement;
 const gifTransparentCheck = document.getElementById("f-transparent") as HTMLInputElement;
 const gifBgColorParam = document.getElementById("f-bgcolor") as HTMLInputElement;
 const gifFrameDelayParam = document.getElementById("f-delay") as HTMLInputElement;
@@ -52,7 +51,6 @@ const gifQualityParam = document.getElementById("f-quality") as HTMLInputElement
 const gifLastFrameDelayParam = document.getElementById("f-lastdelay") as HTMLInputElement;
 
 const pngWidthParam = document.getElementById("p-width") as HTMLInputElement;
-const pngCropCheck = document.getElementById("p-crop") as HTMLInputElement;
 const pngTransparentCheck = document.getElementById("p-transparent") as HTMLInputElement;
 const pngBgColorParam = document.getElementById("p-bgcolor") as HTMLInputElement;
 
@@ -288,7 +286,6 @@ function getConfigJSON() {
 
         frameSize: +gifSizeParam.value,
         frameDelay: +gifFrameDelayParam.value,
-        frameCrop: gifCropCheck.checked,
         frameTransparent: gifTransparentCheck.checked,
         frameBgColor: gifBgColorParam.value,
         frameQuality: +gifQualityParam.value,
@@ -297,7 +294,6 @@ function getConfigJSON() {
 
         pngWidth: +pngWidthParam.value,
         pngTransparent: pngTransparentCheck.checked,
-        pngCrop: pngCropCheck.checked,
         pngBgColor: pngBgColorParam.value,
     };
     return JSON.stringify(config);
@@ -333,7 +329,6 @@ function parseConfigJSON(json: string) {
 
         gifSizeParam.value = obj.frameSize === undefined ? 320 : obj.frameSize;
         gifFrameDelayParam.value = obj.frameDelay === undefined ? 25 : obj.frameDelay;
-        gifCropCheck.checked = obj.frameCrop === undefined ? false : obj.frameCrop;
         gifTransparentCheck.checked = obj.frameTransparent === undefined ? false : obj.frameTransparent;
         gifBgColorParam.value = obj.frameBgColor === undefined ? "#FFFFFF" : obj.frameBgColor;
 
@@ -345,7 +340,6 @@ function parseConfigJSON(json: string) {
 
         pngWidthParam.value = obj.pngWidth === undefined ? 640 : obj.pngWidth;
         pngTransparentCheck.checked = obj.pngTransparent === undefined ? false : obj.pngTransparent;
-        pngCropCheck.checked = obj.pngCrop === undefined ? false : obj.pngCrop;
         pngBgColorParam.value = obj.pngBgColor === undefined ? "#FFFFFF" : obj.pngBgColor;
 
         if (pngTransparentCheck.checked) pngBgColorParam.disabled = true;
@@ -385,7 +379,7 @@ function loadConfig(files: Blob[]) {
     }
 }
 
-function getRealBounds(canvasBounded: boolean) {
+function getRealBounds() {
     let maxDotRatio = 0;
     for (const key in dots) {
         const dotRatio = Math.abs(dots[key].ratio);
@@ -394,65 +388,45 @@ function getRealBounds(canvasBounded: boolean) {
         }
     }
     const radius = +circleParam.value * +scaleParam.value;
-    maxDotRatio = (maxDotRatio / 100) * radius + radius;
-    if (maxDotRatio < radius * 2) maxDotRatio = radius * 2;
+    maxDotRatio = Math.max(radius, maxDotRatio / 100 * radius + 1) * 2;
 
     let minX = Infinity,
         maxX = -Infinity;
     let minY = Infinity,
         maxY = -Infinity;
     for (let i = 0; i < locArray.length; i++) {
-        if (locArray[i][0] < minX) minX = locArray[i][0];
-        if (locArray[i][0] > maxX) maxX = locArray[i][0];
-        if (locArray[i][1] < minY) minY = locArray[i][1];
-        if (locArray[i][1] > maxY) maxY = locArray[i][1];
+        const [x, y] = locArray[i];
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
     }
-    minX = minX - maxDotRatio * 2 + +dxParam.value;
-    maxX = maxX + maxDotRatio * 2 + +dxParam.value;
-    minY = minY - maxDotRatio * 2 + +dyParam.value;
-    maxY = maxY + maxDotRatio * 2 + +dyParam.value;
-    if (canvasBounded) return [Math.max(-320, minX), Math.min(320, maxX), Math.max(-320, minY), Math.min(320, maxY)];
-    else return [minX, maxX, minY, maxY];
+    minX = minX - maxDotRatio
+    maxX = maxX + maxDotRatio
+    minY = minY - maxDotRatio
+    maxY = maxY + maxDotRatio
+    return [minX, maxX, minY, maxY] as const;
 }
 
 /**
  * 
  */
-function getScalingAndTranslation(realBounds: number[], width: number, convention: boolean) {
-    const realWidth = realBounds[1] - realBounds[0];
-    const realHeight = realBounds[3] - realBounds[2];
+function getScalingAndTranslation(realBounds: ReturnType<typeof getRealBounds>, maxSize = 640) {
+    const [minX, maxX, minY, maxY] = realBounds;
 
-    const scaling = convention
-        ? Math.min(width / realWidth, width / realHeight)
-        : realWidth > realHeight
-            ? width / realWidth
-            : width / realHeight;
-    let height;
-    if (realWidth > realHeight) height = (width * realHeight) / realWidth;
-    else {
-        height = width;
-        width = (width * realWidth) / realHeight;
-    }
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const scaling = Math.min(maxSize / width, maxSize / height);
 
-    let wTranslation, hTranslation;
-    if (convention) {
-        wTranslation = -320 + (640 - realWidth * scaling) / 2 - realBounds[0] * scaling;
-        hTranslation = 320 - (640 - realHeight * scaling) / 2 - realBounds[3] * scaling;
-        // wTranslation = Math.abs(realBounds[0] * scaling - (640 - realWidth * 2 * scaling));
-        // hTranslation = Math.abs(realBounds[3] * scaling - (640 - realHeight * 2 * scaling));
-    } else {
-        wTranslation = -(realBounds[0] + 320);
-        hTranslation = -(320 - realBounds[3]);
-    }
-    return [height, scaling, wTranslation, hTranslation, width];
+    return [scaling, (-width / 2 - minX) * scaling, (-height / 2 - minY) * scaling, scaling * width, scaling * height] as const;
 }
 
 function autoAdjustScalingAndTranslation() {
     if (locArray.length > 0 && locArray[0].length >= 6) {
-        const result = getScalingAndTranslation(getRealBounds(false), 640, true);
-        scaleParam.value = (+scaleParam.value * result[1]).toFixed(1);
-        dxParam.value = (+dxParam.value + result[2]).toFixed(1);
-        dyParam.value = (+dyParam.value + result[3]).toFixed(1);
+        const result = getScalingAndTranslation(getRealBounds(), 640);
+        scaleParam.value = (+scaleParam.value * result[0]).toString();
+        dxParam.value = result[1].toString();
+        dyParam.value = result[2].toString();
         previewRuler();
     } else {
         previewRuler();
@@ -461,44 +435,22 @@ function autoAdjustScalingAndTranslation() {
 }
 
 function saveToPNG() {
-    const circleRadius = +circleParam.value;
-
-    const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
-    ruler.showSkeleton = skeletonCheck.checked;
-
     stopDrawing();
 
-    draw(ruler, +drawingDelayParam.value, () => {
-        const pngWidth = +pngWidthParam.value;
-        const transparent = pngTransparentCheck.checked;
-        const bgColor = pngBgColorParam.value;
-
-        tempCanvas.width = pngWidth;
+    draw(+drawingDelayParam.value, () => {
         const tempCxt = tempCanvas.getContext("2d");
+        const [, , , width, height] = getScalingAndTranslation(getRealBounds(), +pngWidthParam.value);
+        tempCanvas.width = width;
+        tempCanvas.height = height;
 
-        if (pngCropCheck.checked) {
-            const parameters = getScalingAndTranslation(getRealBounds(true), tempCanvas.width, false);
-            tempCanvas.width = parameters[4];
-            tempCanvas.height = parameters[0];
-            if (!transparent) {
-                tempCxt.fillStyle = bgColor;
-                tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            }
-            tempCxt.scale(parameters[1], parameters[1]);
-            tempCxt.translate(parameters[2], parameters[3]);
-        } else {
-            // noinspection JSSuspiciousNameCombination
-            tempCanvas.height = pngWidth;
-            if (!transparent) {
-                tempCxt.fillStyle = bgColor;
-                tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-            }
-            tempCxt.scale(pngWidth / topCanvas.width, pngWidth / topCanvas.height);
+        if (!pngTransparentCheck.checked) {
+            tempCxt.fillStyle = pngBgColorParam.value;
+            tempCxt.fillRect(0, 0, width, height);
         }
 
-        tempCxt.drawImage(funcCanvas, 0, 0);
-        tempCxt.drawImage(bottomCanvas, 0, 0);
-        tempCxt.drawImage(topCanvas, 0, 0);
+        tempCxt.drawImage(funcCanvas, 0, 0, width, height);
+        tempCxt.drawImage(bottomCanvas, 0, 0, width, height);
+        tempCxt.drawImage(topCanvas, 0, 0, width, height);
 
         tempCanvas.toBlob(blob => {
             saveAs(blob, "parametric-roulette.png");
@@ -516,83 +468,42 @@ function getSign(element: HTMLElement) {
 }
 
 function saveToGIF() {
-    const frameSize = +gifSizeParam.value;
-    const transparent = gifTransparentCheck.checked;
-    const frameInterval = +gifIntervalParam.value;
-    const frameDelay = +gifFrameDelayParam.value;
-
-    const circleRadius = +circleParam.value;
-
-    const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
-    ruler.showSkeleton = skeletonCheck.checked;
-
     stopDrawing();
 
-    const topCxt = topCanvas.getContext("2d");
-    const bottomCxt = bottomCanvas.getContext("2d");
-    const funcCxt = funcCanvas.getContext("2d");
+    const frameSize = +gifSizeParam.value;
+    const transparent = gifTransparentCheck.checked;
+    const frameDelay = +gifFrameDelayParam.value;
     const tempCxt = tempCanvas.getContext("2d");
 
-    tempCanvas.width = frameSize;
+    const [, , , width, height] = getScalingAndTranslation(getRealBounds(), frameSize);
+    tempCanvas.width = width;
+    tempCanvas.height = height;
 
-    let gif: any;
+    const gif = new GIF({
+        workers: 4,
+        quality: +gifQualityParam.value,
+        workerScript: "./gif.worker.min.js",
+        width,
+        height
+    });
 
-    if (gifCropCheck.checked) {
-        const parameters = getScalingAndTranslation(getRealBounds(true), tempCanvas.width, false);
-        tempCanvas.width = parameters[4];
-        tempCanvas.height = parameters[0];
-        if (!transparent) {
-            tempCxt.fillStyle = gifBgColorParam.value;
-            tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-        }
-        tempCxt.scale(parameters[1], parameters[1]);
-        tempCxt.translate(parameters[2], parameters[3]);
-
-        gif = new GIF({
-            workers: 4,
-            quality: +gifQualityParam.value,
-            workerScript: "./gif.worker.min.js",
-            width: parameters[4],
-            height: parameters[0]
-        });
-    } else {
-        tempCanvas.height = frameSize;
-        if (!transparent) {
-            tempCxt.fillStyle = gifBgColorParam.value;
-            tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-        }
-        tempCxt.scale(frameSize / topCanvas.width, frameSize / topCanvas.height);
-        gif = new GIF({
-            workers: 4,
-            quality: +gifQualityParam.value,
-            workerScript: "./gif.worker.min.js",
-            width: frameSize,
-            height: frameSize
-        });
+    if (!transparent) {
+        tempCxt.fillStyle = gifBgColorParam.value;
+        tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
     }
-
-    ruler.showSkeleton = skeletonCheck.checked;
-
-    if (clearBeforeDrawingCheck.checked || !ruler.showSkeleton) {
-        clearBottom();
-        clearTop();
-    }
-
-    if (!functionCheck.checked) clearFunc();
-
-    setTransform([topCxt, bottomCxt, funcCxt]);
 
     const progressLabel = $("#progressLabel");
     const progressbar = $("#progressbar");
     progressbar.width("0%");
 
-    draw(ruler, +drawingDelayParam.value, () => {
-        if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
-        else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
+    draw(+drawingDelayParam.value, () => {
+        if (transparent) tempCxt.clearRect(0, 0, width, height);
+        else tempCxt.fillRect(0, 0, width, height);
 
-        tempCxt.drawImage(funcCanvas, 0, 0);
-        tempCxt.drawImage(bottomCanvas, 0, 0);
-        tempCxt.drawImage(topCanvas, 0, 0);
+        tempCxt.drawImage(funcCanvas, 0, 0, width, height);
+        tempCxt.drawImage(bottomCanvas, 0, 0, width, height);
+        tempCxt.drawImage(topCanvas, 0, 0, width, height);
+
         gif.addFrame(tempCxt, {
             copy: true,
             delay: +gifLastFrameDelayParam.value
@@ -618,13 +529,13 @@ function saveToGIF() {
 
         gif.render();
 
-    }, frameInterval, () => {
-        if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
-        else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
+    }, +gifIntervalParam.value, () => {
+        if (transparent) tempCxt.clearRect(0, 0, width, height);
+        else tempCxt.fillRect(0, 0, width, height);
 
-        tempCxt.drawImage(funcCanvas, 0, 0);
-        tempCxt.drawImage(bottomCanvas, 0, 0);
-        tempCxt.drawImage(topCanvas, 0, 0);
+        tempCxt.drawImage(funcCanvas, 0, 0, width, height);
+        tempCxt.drawImage(bottomCanvas, 0, 0, width, height);
+        tempCxt.drawImage(topCanvas, 0, 0, width, height);
 
         gif.addFrame(tempCxt, {
             copy: true,
@@ -711,14 +622,8 @@ function clearFunc() {
 }
 
 function caller() {
-    const circleRadius = +circleParam.value;
-
-    const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * circleRadius), getDotArray());
-    ruler.showSkeleton = skeletonCheck.checked;
-
     stopDrawing();
-
-    draw(ruler, +drawingDelayParam.value);
+    draw(+drawingDelayParam.value);
 }
 
 function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Expression) {
@@ -814,7 +719,7 @@ function calculateLocations(
                         while (isNaN(cuspX)) {
                             [cuspX, cuspY, , , rotAngle] = locations[idx + --i];
                         }
-                        
+
                         // console.log(cuspX, t);
                         for (i = 0; i < radians; i += step * 4) {
                             locations[idx++] = [
@@ -868,7 +773,6 @@ function calculateLocations(
                 locations[idx++] = [xFunc(t) * scale, yFunc(t) * scale, delX * scale, delY * scale, rotAngle, t];
             else {
                 locations[idx++] = [NaN, NaN, NaN, NaN, NaN, NaN];
-                console.log(normal, arcLength)
             }
         }
 
@@ -978,7 +882,7 @@ function generateRadius() {
     previewRuler();
 }
 
-function draw(ruler: Ruler, drawingInterval: number, doneCallback = () => { }, stepInterval = 16, stepAction = () => { }) {
+function draw(drawingInterval: number, doneCallback = () => { }, stepInterval = 16, stepAction = () => { }) {
     // storing the reference to global locArray for efficiency
     const _locArray = locArray;
     const _cuspPoints = cuspPoints;
@@ -990,6 +894,7 @@ function draw(ruler: Ruler, drawingInterval: number, doneCallback = () => { }, s
     const bottomCxt = bottomCanvas.getContext("2d");
     const funcCxt = funcCanvas.getContext("2d");
 
+    const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * +circleParam.value), getDotArray());
     ruler.showSkeleton = skeletonCheck.checked;
 
     if (clearBeforeDrawingCheck.checked || !ruler.showSkeleton) {
@@ -1071,17 +976,6 @@ function integrate(f: (x: number) => number, a: number, b: number, n: number) {
     let sum = f(a);
     for (let i = 1; i < n - 1; i++) sum += 2 * f(a + i * step);
     return (sum + f(b)) * 0.5 * step;
-}
-
-function lcm(x: number, y: number) {
-    let a = x,
-        b = y;
-    while (a % b !== 0) {
-        const c = a % b;
-        a = b;
-        b = c;
-    }
-    return (x * y) / b;
 }
 
 function rad2cor(x: number, y: number, radius: number, rad: number) {
