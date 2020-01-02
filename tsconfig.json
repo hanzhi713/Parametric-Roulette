@@ -8,5 +8,9 @@
         "baseUrl": ".",
         "lib": ["esnext", "dom", "dom.iterable"]
     },
-    "exclude": ["node_modules"]
+    "files": [
+        "parametric.ts",
+        "utils.ts",
+        "index.d.ts"
+    ]
 }

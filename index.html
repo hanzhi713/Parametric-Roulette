@@ -377,7 +377,7 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-primary" data-dismiss="modal"
-                                                onclick="stopDrawing();locArray = [];disableDrawing();generateRadius();">
+                                                onclick="generateRadius();">
                                             Generate
                                         </button>
                                     </div>
@@ -441,7 +441,7 @@
             <table id="button-group" style="width: 200px; margin: auto auto; text-align: center;">
                 <tr>
                     <td>
-                        <button id="draw" class="btn btn-warning" onclick="caller(undefined)" style="width:75px;"
+                        <button id="draw" class="btn btn-warning" onclick="stopDrawing();draw();" style="width:75px;"
                                 disabled>Draw
                         </button>
                     </td>

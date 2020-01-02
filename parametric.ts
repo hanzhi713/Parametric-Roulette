@@ -2,6 +2,14 @@ import { saveAs } from 'file-saver';
 import * as nerdamer from 'nerdamer'
 import 'bootstrap';
 
+declare global {
+    const GIF: any;
+
+    interface Window {
+        GIF: any;
+    }
+}
+
 if (typeof Math.sign !== "function") {
     Math.sign = x => {
         return x === 0 ? 0 : x > 0 ? 1 : -1;
@@ -437,7 +445,7 @@ function autoAdjustScalingAndTranslation() {
 function saveToPNG() {
     stopDrawing();
 
-    draw(+drawingSpeedParam.value, () => {
+    draw(() => {
         const tempCxt = tempCanvas.getContext("2d");
         const [, , , width, height] = getScalingAndTranslation(getRealBounds(), +pngWidthParam.value);
         tempCanvas.width = width;
@@ -496,7 +504,7 @@ function saveToGIF() {
     const progressbar = $("#progressbar");
     progressbar.width("0%");
 
-    draw(+drawingSpeedParam.value, () => {
+    draw(() => {
         if (transparent) tempCxt.clearRect(0, 0, width, height);
         else tempCxt.fillRect(0, 0, width, height);
 
@@ -556,7 +564,7 @@ function setTransform(cxts: CanvasRenderingContext2D[]) {
     for (let i = 0; i < cxts.length; i++) cxts[i].setTransform(1, 0, 0, -1, sx + 320, 320 - sy);
 }
 
-function drawPreview(radius: number, scale: number) {
+function drawPreview() {
     if (clearBeforeDrawingCheck.checked) clear();
 
     const topCxt = topCanvas.getContext("2d");
@@ -564,17 +572,26 @@ function drawPreview(radius: number, scale: number) {
     const funcCxt = funcCanvas.getContext("2d");
     setTransform([topCxt, bottomCxt, funcCxt]);
 
+    funcCxt.beginPath();
     funcCxt.strokeStyle = "#000000";
     funcCxt.moveTo(locArray[0][0], locArray[0][1]);
-    for (let i = 1; i < locArray.length; i++) if (!locArray[i][6]) funcCxt.lineTo(locArray[i][0], locArray[i][1]);
+    
+    for (let i = 1; i < locArray.length; i++) if (!isNaN(locArray[i][0])) funcCxt.lineTo(locArray[i][0], locArray[i][1]);
     funcCxt.stroke();
 
-    const initialSigns = getSign(document.getElementById("c0"));
+    let i = 0, j = 0;
+    while (isNaN(locArray[i][0])) {
+        i++;
+    }
+    while (locArray[i][0] > cutPoints[j]) {
+        j++;
+    }
+    const initialSigns = getSign(document.getElementById("c" + j));
     const ruler = new Ruler(
         new Circle(
-            initialSigns * locArray[0][2] + locArray[0][0],
-            initialSigns * locArray[0][3] + locArray[0][1],
-            radius * scale
+            initialSigns * locArray[i][2] + locArray[i][0],
+            initialSigns * locArray[i][3] + locArray[i][1],
+            +circleParam.value * +scaleParam.value
         ),
         getDotArray()
     );
@@ -585,18 +602,8 @@ function drawPreview(radius: number, scale: number) {
 
 function previewRuler() {
     stopDrawing();
-    const radius = +circleParam.value;
-    const scale = +scaleParam.value;
-    locArray = calculateLocations(
-        +t1Param.value,
-        +t2Param.value,
-        nerdamer(xParam.value),
-        nerdamer(yParam.value),
-        +drawingStepParam.value,
-        radius,
-        scale
-    );
-    drawPreview(radius, scale);
+    calculateLocations();
+    drawPreview();
     saveConfigToBrowser();
 }
 
@@ -606,17 +613,11 @@ function clear() {
     clearCxt(funcCanvas.getContext('2d'));
 }
 
-
 function clearCxt(cxt: CanvasRenderingContext2D) {
     cxt.save();
     cxt.resetTransform();
     cxt.clearRect(0, 0, cxt.canvas.width, cxt.canvas.height)
     cxt.restore();
-}
-
-function caller() {
-    stopDrawing();
-    draw(+drawingSpeedParam.value);
 }
 
 function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Expression) {
@@ -644,6 +645,8 @@ function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Exp
 
     const arcLengthExp = nerdamer("sqrt((" + dx.text() + ")^2 + (" + dy.text() + ")^2)");
     return [
+        xExp.buildFunction(["t"]),
+        yExp.buildFunction(["t"]),
         dx.buildFunction(["t"]),
         dy.buildFunction(["t"]),
         arcLengthExp.buildFunction(["t"]),
@@ -651,30 +654,23 @@ function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Exp
     ] as const;
 }
 
-function calculateLocations(
-    t1: number,
-    t2: number,
-    xExp: nerdamer.Expression,
-    yExp: nerdamer.Expression,
-    step: number,
-    radius: number,
-    scale: number
-): number[][] {
-    const [dx, dy, arcLengthExp, curvature] = buildNecessaryExpressions(xExp, yExp);
+function calculateLocations() {
+    const [xFunc, yFunc, dx, dy, arcLengthExp, curvature] = buildNecessaryExpressions(nerdamer(xParam.value), nerdamer(yParam.value));
 
-    const locations: number[][] = [];
-
-    const xFunc = xExp.buildFunction(["t"]);
-    const yFunc = yExp.buildFunction(["t"]);
+    const t1 = +t1Param.value,
+        t2 = +t2Param.value;
 
     let previousArcLength = 0;
     let previousLower = t1;
-
-    // longer slice length will result in better accuracy of numerical integration
     let sign = 1, lastNormal = 0, lastCuspIdx = 1;
 
     const newCuspPoints: [number, number, number][] = [[t1, 0, 0]];
     const newCutPoints: [number, number][] = [[t1, sign]];
+
+    const step = +drawingStepParam.value,
+        radius = +circleParam.value,
+        scale = +scaleParam.value;
+    const locations: number[][] = [];
     for (let t = t1, idx = 0; t < t2; t += step) {
         const normal = -dx(t) / dy(t);
         if (Math.sign(normal * lastNormal) === -1) { // normal changes sign
@@ -794,27 +790,9 @@ function calculateLocations(
     cuspPoints = newCuspPoints.map(x => x[0]);
     $('[data-toggle="tooltip"]').tooltip();
 
-    return locations;
+    locArray = locations;
 }
 
-/**
- * find a zero by Newton's method
- * @param f the function to find zero
- * @param fp function's first derivative
- * @param x0 initial guess
- * @param err the error bound
- */
-function findZero(f: (x: number) => number, fp: (x: number) => number, x0: number, err: number) {
-    let x_n = x0,
-        x_n1: number;
-    err /= 2;
-    for (let i = 0; i < 16; i++) {
-        x_n1 = x_n - f(x_n) / fp(x_n);
-        if (Math.abs(x_n1 - x_n) < err) return x_n1;
-        x_n = x_n1;
-    }
-    return NaN;
-}
 
 /**
  * a template for sign element (the button for changing the sign)
@@ -828,10 +806,7 @@ function createSignElement(index: number, sign: string, lower: number, upper: nu
     e.setAttribute("data-toggle", "tooltip");
     e.title = "Change the sign for t between " + lower.toFixed(3) + " and " + upper.toFixed(3);
     e.disabled = revolve.checked;
-
-    e.onclick = ev => {
-        reverseSign([ev.target as HTMLElement]);
-    };
+    e.onclick = ev => reverseSign([ev.target as HTMLElement]);
     return e;
 }
 
@@ -858,24 +833,21 @@ function createRotElement(index: number, sign: string, lower: number, upper: num
     e.setAttribute("data-toggle", "tooltip");
     e.title = "Change the direction of rotation for t between " + lower.toFixed(3) + " and " + upper.toFixed(3);
     e.disabled = revolve.checked;
-
-    e.onclick = ev => {
-        reverseSign([ev.target as HTMLElement]);
-    };
+    e.onclick = ev => reverseSign([ev.target as HTMLElement]);
     return e;
 }
 
 function generateRadius() {
-    const multiple = +radiusMultipleParam.value;
+    stopDrawing();
     const exps = buildNecessaryExpressions(nerdamer(xParam.value), nerdamer(yParam.value));
     const t1 = +t1Param.value,
         t2 = +t2Param.value;
-    const arcLength = integrate(exps[2], t1, t2, Math.round((t2 - t1) / +drawingStepParam.value) + 10);
-    circleParam.value = (arcLength / (multiple * 2 * Math.PI)).toString();
+    const arcLength = integrate(exps[4], t1, t2, Math.round((t2 - t1) / +drawingStepParam.value) + 10);
+    circleParam.value = (arcLength / (+radiusMultipleParam.value * 2 * Math.PI)).toString();
     previewRuler();
 }
 
-function draw(drawingInterval: number, doneCallback = () => { }, stepInterval = 16, stepAction = () => { }) {
+function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { }) {
     // storing the reference to global locArray for efficiency
     const _locArray = locArray;
     const _cuspPoints = cuspPoints;
