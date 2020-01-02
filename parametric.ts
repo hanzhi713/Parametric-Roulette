@@ -516,15 +516,10 @@ function getSign(element: HTMLElement) {
 }
 
 function saveToGIF() {
-    const _locArray = locArray;
-    const _cuspPoints = cuspPoints;
-    const _cutPoints = cutPoints;
-
     const frameSize = +gifSizeParam.value;
     const transparent = gifTransparentCheck.checked;
     const frameInterval = +gifIntervalParam.value;
     const frameDelay = +gifFrameDelayParam.value;
-    const drawingInterval = +drawingDelayParam.value;
 
     const circleRadius = +circleParam.value;
 
@@ -556,7 +551,7 @@ function saveToGIF() {
         gif = new GIF({
             workers: 4,
             quality: +gifQualityParam.value,
-            workerScript: "./gif.worker.js",
+            workerScript: "./gif.worker.min.js",
             width: parameters[4],
             height: parameters[0]
         });
@@ -570,7 +565,7 @@ function saveToGIF() {
         gif = new GIF({
             workers: 4,
             quality: +gifQualityParam.value,
-            workerScript: "./gif.worker.js",
+            workerScript: "./gif.worker.min.js",
             width: frameSize,
             height: frameSize
         });
@@ -589,103 +584,53 @@ function saveToGIF() {
 
     const progressLabel = $("#progressLabel");
     const progressbar = $("#progressbar");
-    const epsilon = 0.0001;
     progressbar.width("0%");
 
-    let delay = 0;
-    for (
-        let i = 0,
-        counter = 0,
-        cut = 0,
-        cusp = 0,
-        sign = getSign(document.getElementById("c0")),
-        rot = getSign(document.getElementById("r0"));
-        i < _locArray.length;
-        i++ , delay += drawingInterval, counter++
-    ) {
-        let changeRot = i === 0;
-        if (cut < _cutPoints.length) {
-            if (_locArray[i][5] - _cutPoints[cut] > epsilon) sign = getSign(document.getElementById("c" + ++cut));
-        }
-        if (cusp < _cuspPoints.length) {
-            if (_locArray[i][5] - _cuspPoints[cusp] > epsilon) {
-                rot = getSign(document.getElementById("r" + ++cusp));
-                changeRot = true;
+    draw(ruler, +drawingDelayParam.value, () => {
+        if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
+        else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
+
+        tempCxt.drawImage(funcCanvas, 0, 0);
+        tempCxt.drawImage(bottomCanvas, 0, 0);
+        tempCxt.drawImage(topCanvas, 0, 0);
+        gif.addFrame(tempCxt, {
+            copy: true,
+            delay: +gifLastFrameDelayParam.value
+        });
+
+        progressbar.width("0%");
+
+        // start render after drawing is completed
+        gif.on("progress", (p: number) => {
+            if (Math.abs(1 - p) < 0.0001) {
+                progressbar.width("100%");
+                progressLabel.text("Save as GIF: Finished");
+            } else {
+                p = p * 100;
+                progressbar.width(p + "%");
+                progressLabel.text("Save as GIF: " + p.toFixed(1) + "%");
             }
-        }
-        currentJobs.push(
-            setTimeout(() => {
+        });
 
-                ruler.erase(bottomCxt);
-                if (_locArray[i][6] === 1)
-                    ruler.moveTo(_locArray[i][0] + _locArray[i][2], _locArray[i][1] + _locArray[i][3]);
-                else if (_locArray[i][6] !== 2)
-                    ruler.moveTo(
-                        _locArray[i][0] + sign * _locArray[i][2],
-                        _locArray[i][1] + sign * _locArray[i][3]
-                    );
-                ruler.angle = _locArray[i][4];
-                if (changeRot) ruler.changeDirection(rot);
+        gif.on("finished", (blob: Blob) => {
+            saveAs(blob, "parametric-roulette.gif");
+        });
 
-                ruler.draw(topCxt, bottomCxt);
+        gif.render();
 
-                if (counter % frameInterval === 0) {
-                    if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
-                    else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
+    }, frameInterval, () => {
+        if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
+        else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
 
-                    tempCxt.drawImage(funcCanvas, 0, 0);
-                    tempCxt.drawImage(bottomCanvas, 0, 0);
-                    tempCxt.drawImage(topCanvas, 0, 0);
+        tempCxt.drawImage(funcCanvas, 0, 0);
+        tempCxt.drawImage(bottomCanvas, 0, 0);
+        tempCxt.drawImage(topCanvas, 0, 0);
 
-                    gif.addFrame(tempCxt, {
-                        copy: true,
-                        delay: frameDelay
-                    });
-
-                    const progress = (i / _locArray.length) * 100;
-                    progressbar.width(progress + "%");
-                    progressLabel.text(
-                        "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%"
-                    );
-                }
-
-            }, delay)
-        );
-    }
-    currentJobs.push(
-        setTimeout(() => {
-            if (transparent) tempCxt.clearRect(0, 0, topCanvas.width, topCanvas.height);
-            else tempCxt.fillRect(0, 0, topCanvas.width, topCanvas.height);
-
-            tempCxt.drawImage(funcCanvas, 0, 0);
-            tempCxt.drawImage(bottomCanvas, 0, 0);
-            tempCxt.drawImage(topCanvas, 0, 0);
-            gif.addFrame(tempCxt, {
-                copy: true,
-                delay: +gifLastFrameDelayParam.value
-            });
-
-            progressbar.width("0%");
-
-            gif.on("progress", (p: number) => {
-                if (Math.abs(1 - p) < 0.0001) {
-                    progressbar.width("100%");
-                    progressLabel.text("Save as GIF: Finished");
-                } else {
-                    p = p * 100;
-                    progressbar.width(p + "%");
-                    progressLabel.text("Save as GIF: " + p.toFixed(1) + "%");
-                }
-            });
-
-            gif.on("finished", (blob: Blob) => {
-                saveAs(blob, "parametric-roulette.gif");
-            });
-
-            gif.render();
-
-        }, delay)
-    );
+        gif.addFrame(tempCxt, {
+            copy: true,
+            delay: frameDelay
+        });
+    });
 }
 
 function getDotArray() {
@@ -841,7 +786,7 @@ function calculateLocations(
         }
 
         const cv = Math.abs(curvature(t))
-        if (cv > 25) {        // large curvature -> cusp
+        if (cv > 50) {        // large curvature -> cusp
             const lastCusp = newCuspPoints[lastCuspIdx];
             if (!lastCusp) {
                 newCuspPoints.push([t, cv, 0]);
@@ -859,10 +804,19 @@ function calculateLocations(
 
                         // change sign? vertical or horizontal cusp
                         const temp = Math.abs(r2 - r1);
+
                         const radians = temp < Math.PI / 2 ? Math.PI - temp : temp;
 
-                        const [cuspX, cuspY, , , rotAngle] = locations[idx - 1];
-                        for (let i = 0; i < radians; i += step * 4) {
+
+                        // find the last non NaN value
+                        let i = -1;
+                        let [cuspX, cuspY, , , rotAngle] = locations[idx + i];
+                        while (isNaN(cuspX)) {
+                            [cuspX, cuspY, , , rotAngle] = locations[idx + --i];
+                        }
+                        
+                        // console.log(cuspX, t);
+                        for (i = 0; i < radians; i += step * 4) {
                             locations[idx++] = [
                                 cuspX,
                                 cuspY,
@@ -907,10 +861,15 @@ function calculateLocations(
         const rotAngle = arcLength / radius;
         const delX = radius / Math.sqrt(normal * normal + 1);
         const delY = delX * normal;
-        if (isFinite(delY) && isFinite(rotAngle))
-            locations[idx++] = [xFunc(t) * scale, yFunc(t) * scale, delX * scale, delY * scale, rotAngle, t];
-        else {
-            locations[idx++] = [NaN, NaN, NaN, NaN, NaN, NaN];
+        if (Math.abs(normal) > 10e100) { // special case to handle: normal is +/- infinity
+            locations[idx++] = [xFunc(t) * scale, yFunc(t) * scale, radius * scale, 0, rotAngle, t];
+        } else {
+            if (isFinite(rotAngle) && isFinite(normal))
+                locations[idx++] = [xFunc(t) * scale, yFunc(t) * scale, delX * scale, delY * scale, rotAngle, t];
+            else {
+                locations[idx++] = [NaN, NaN, NaN, NaN, NaN, NaN];
+                console.log(normal, arcLength)
+            }
         }
 
         lastNormal = normal;
@@ -929,7 +888,7 @@ function calculateLocations(
     rotRow.innerHTML = "";
     for (let i = 0; i < newCuspPoints.length; i++) rotRow.appendChild(createRotElement(
         i,
-        i % 2 === 0 && !revolve.checked ? "-" : "+",
+        i % 2 === 0 && !revolve.checked ? "+" : "-",
         newCuspPoints[i][0],
         (newCuspPoints[i + 1] || [t2])[0]
     ));
@@ -972,10 +931,10 @@ function createSignElement(index: number, sign: string, lower: number, upper: nu
     e.setAttribute("data-toggle", "tooltip");
     e.title = "Change the sign for t between " + lower.toFixed(3) + " and " + upper.toFixed(3);
     e.disabled = revolve.checked;
-    if (!revolve.checked)
-        e.onclick = ev => {
-            reverseSign([ev.target as HTMLElement]);
-        };
+
+    e.onclick = ev => {
+        reverseSign([ev.target as HTMLElement]);
+    };
     return e;
 }
 
@@ -987,8 +946,7 @@ function reverseSign(targets: HTMLElement[]) {
         if (sign === "+") t.innerHTML = ih.substring(0, ih.length - 1) + "-";
         else t.innerHTML = ih.substring(0, ih.length - 1) + "+";
     }
-    if (revolve.checked) previewRuler();
-    else saveConfigToBrowser();
+    saveConfigToBrowser();
 }
 
 /**
@@ -1003,10 +961,10 @@ function createRotElement(index: number, sign: string, lower: number, upper: num
     e.setAttribute("data-toggle", "tooltip");
     e.title = "Change the direction of rotation for t between " + lower.toFixed(3) + " and " + upper.toFixed(3);
     e.disabled = revolve.checked;
-    if (!revolve.checked)
-        e.onclick = ev => {
-            reverseSign([ev.target as HTMLElement]);
-        };
+
+    e.onclick = ev => {
+        reverseSign([ev.target as HTMLElement]);
+    };
     return e;
 }
 
@@ -1020,7 +978,7 @@ function generateRadius() {
     previewRuler();
 }
 
-function draw(ruler: Ruler, drawingInterval: number, callback?: Function) {
+function draw(ruler: Ruler, drawingInterval: number, doneCallback = () => { }, stepInterval = 16, stepAction = () => { }) {
     // storing the reference to global locArray for efficiency
     const _locArray = locArray;
     const _cuspPoints = cuspPoints;
@@ -1065,6 +1023,7 @@ function draw(ruler: Ruler, drawingInterval: number, callback?: Function) {
             rot = getSign(document.getElementById("r" + cusp++));
             changeRot = true;
         }
+
         currentJobs.push(
             setTimeout(() => {
                 if (isNaN(locArray[i][0])) return;
@@ -1083,7 +1042,9 @@ function draw(ruler: Ruler, drawingInterval: number, callback?: Function) {
                 // draw
                 ruler.draw(topCxt, bottomCxt);
 
-                if (i % 16 === 0) {
+                if (i % stepInterval === 0) {
+                    stepAction();
+
                     const progress = (i / _locArray.length) * 100;
                     progressbar.width(progress + "%");
                     progressLabel.text(
@@ -1096,7 +1057,7 @@ function draw(ruler: Ruler, drawingInterval: number, callback?: Function) {
         setTimeout(() => {
             progressbar.width("100%");
             progressLabel.text("Drawing: Finished");
-            if (typeof callback === "function") callback();
+            doneCallback();
         }, delay)
     );
 }
@@ -1105,7 +1066,7 @@ function draw(ruler: Ruler, drawingInterval: number, callback?: Function) {
  * Numerically integrate function f over [a, b] using the trapezoidal rule
  */
 function integrate(f: (x: number) => number, a: number, b: number, n: number) {
-    if (b === a) return 0;
+    if (Math.abs(b - a) < 1e-8) return 0;
     const step = (b - a) / n;
     let sum = f(a);
     for (let i = 1; i < n - 1; i++) sum += 2 * f(a + i * step);
