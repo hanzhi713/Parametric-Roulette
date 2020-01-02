@@ -22,7 +22,7 @@ const scaleParam = document.getElementById("scale") as HTMLInputElement;
 const circleParam = document.getElementById("circleRadius") as HTMLInputElement;
 const clearBeforeDrawingCheck = document.getElementById("clearBeforeDrawing") as HTMLInputElement;
 const drawingStepParam = document.getElementById("step") as HTMLInputElement;
-const drawingDelayParam = document.getElementById("delay") as HTMLInputElement;
+const drawingSpeedParam = document.getElementById("delay") as HTMLInputElement;
 const skeletonCheck = document.getElementById("showSk") as HTMLInputElement;
 const functionCheck = document.getElementById("showFunc") as HTMLInputElement;
 const revolve = document.getElementById("revolve") as HTMLInputElement;
@@ -270,7 +270,7 @@ function getConfigJSON() {
         scale: +scaleParam.value,
         clearBeforeDrawing: clearBeforeDrawingCheck.checked,
         drawingStep: +drawingStepParam.value,
-        drawingDelay: +drawingDelayParam.value,
+        drawingSpeed: +drawingSpeedParam.value,
         revolve: revolve.checked,
 
         radiusMultiple: +radiusMultipleParam.value,
@@ -315,7 +315,7 @@ function parseConfigJSON(json: string) {
         functionCheck.checked = obj.showFunction === undefined ? true : obj.showFunction;
         clearBeforeDrawingCheck.checked = obj.clearBeforeDrawing === undefined ? true : obj.clearBeforeDrawing;
         drawingStepParam.value = obj.drawingStep === undefined ? 0.005 : obj.drawingStep;
-        drawingDelayParam.value = obj.drawingDelay === undefined ? 2 : obj.drawingDelay;
+        drawingSpeedParam.value = obj.drawingSpeed === undefined ? 2 : obj.drawingSpeed;
         revolve.checked = obj.revolve === undefined ? false : obj.revolve;
 
         radiusMultipleParam.value = obj.radiusMultiple === undefined ? 10 : obj.radiusMultiple;
@@ -437,7 +437,7 @@ function autoAdjustScalingAndTranslation() {
 function saveToPNG() {
     stopDrawing();
 
-    draw(+drawingDelayParam.value, () => {
+    draw(+drawingSpeedParam.value, () => {
         const tempCxt = tempCanvas.getContext("2d");
         const [, , , width, height] = getScalingAndTranslation(getRealBounds(), +pngWidthParam.value);
         tempCanvas.width = width;
@@ -496,7 +496,7 @@ function saveToGIF() {
     const progressbar = $("#progressbar");
     progressbar.width("0%");
 
-    draw(+drawingDelayParam.value, () => {
+    draw(+drawingSpeedParam.value, () => {
         if (transparent) tempCxt.clearRect(0, 0, width, height);
         else tempCxt.fillRect(0, 0, width, height);
 
@@ -616,7 +616,7 @@ function clearCxt(cxt: CanvasRenderingContext2D) {
 
 function caller() {
     stopDrawing();
-    draw(+drawingDelayParam.value);
+    draw(+drawingSpeedParam.value);
 }
 
 function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Expression) {
@@ -871,7 +871,7 @@ function generateRadius() {
     const t1 = +t1Param.value,
         t2 = +t2Param.value;
     const arcLength = integrate(exps[2], t1, t2, Math.round((t2 - t1) / +drawingStepParam.value) + 10);
-    circleParam.value = (arcLength / multiple / (2 * Math.PI)).toString();
+    circleParam.value = (arcLength / (multiple * 2 * Math.PI)).toString();
     previewRuler();
 }
 
@@ -902,8 +902,7 @@ function draw(drawingInterval: number, doneCallback = () => { }, stepInterval = 
     const progressbar = $("#progressbar");
     progressbar.width("0%");
 
-    const start = performance.now();
-    let delay = 0;
+    const tasks: (() => void)[] = [];
     for (
         let i = 0,
         cut = 0,
@@ -911,7 +910,7 @@ function draw(drawingInterval: number, doneCallback = () => { }, stepInterval = 
         sign = getSign(document.getElementById("c0")),
         rot = getSign(document.getElementById("r0"));
         i < _locArray.length;
-        i++ , delay += drawingInterval
+        i++
     ) {
         if (cut < _cutPoints.length && _locArray[i][5] >= _cutPoints[cut])
             sign = getSign(document.getElementById("c" + cut++));
@@ -922,44 +921,49 @@ function draw(drawingInterval: number, doneCallback = () => { }, stepInterval = 
             changeRot = true;
         }
 
-        currentJobs.push(
-            setTimeout(() => {
-                if (isNaN(locArray[i][0])) return;
+        tasks.push(() => {
+            if (isNaN(locArray[i][0])) return;
 
-                // erase
-                ruler.erase(bottomCxt);
+            // erase
+            ruler.erase(bottomCxt);
 
-                // update parameters
-                ruler.moveTo(
-                    _locArray[i][0] + sign * _locArray[i][2],
-                    _locArray[i][1] + sign * _locArray[i][3]
+            // update parameters
+            ruler.moveTo(
+                _locArray[i][0] + sign * _locArray[i][2],
+                _locArray[i][1] + sign * _locArray[i][3]
+            );
+            ruler.angle = _locArray[i][4];
+            if (changeRot) ruler.changeDirection(rot);
+
+            // draw
+            ruler.draw(topCxt, bottomCxt);
+
+            if (i % stepInterval === 0) {
+                stepAction();
+
+                const progress = (i / _locArray.length) * 100;
+                progressbar.width(progress + "%");
+                progressLabel.text(
+                    "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%"
                 );
-                ruler.angle = _locArray[i][4];
-                if (changeRot) ruler.changeDirection(rot);
+            }
+        })
 
-                // draw
-                ruler.draw(topCxt, bottomCxt);
-
-                if (i % stepInterval === 0) {
-                    stepAction();
-
-                    const progress = (i / _locArray.length) * 100;
-                    progressbar.width(progress + "%");
-                    progressLabel.text(
-                        "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%"
-                    );
-                }
-            }, delay))
     }
-    currentJobs.push(
-        setTimeout(() => {
-            console.log(currentJobs.length / (performance.now() - start))
-            progressbar.width("100%");
-            progressLabel.text("Drawing: Finished");
-            doneCallback();
-            currentJobs = [];
-        }, delay)
-    );
+    tasks.push(() => {
+        progressbar.width("100%");
+        progressLabel.text("Drawing: Finished");
+        doneCallback();
+    })
+    const speed = +drawingSpeedParam.value
+    for (let i = 0; i < tasks.length; i += speed) {
+        currentJobs.push(setTimeout(() => {
+            const bound = Math.min(tasks.length, i + speed)
+            for (let j = i; j < bound; j++) {
+                tasks[j]();
+            }
+        }))
+    }
 }
 
 /**
