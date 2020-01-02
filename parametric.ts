@@ -601,24 +601,17 @@ function previewRuler() {
 }
 
 function clear() {
-    clearTop();
-    clearBottom();
-    clearFunc();
+    clearCxt(topCanvas.getContext('2d'));
+    clearCxt(bottomCanvas.getContext('2d'));
+    clearCxt(funcCanvas.getContext('2d'));
 }
 
-function clearTop() {
-    topCanvas.height++;
-    topCanvas.height--;
-}
 
-function clearBottom() {
-    bottomCanvas.height++;
-    bottomCanvas.height--;
-}
-
-function clearFunc() {
-    funcCanvas.height++;
-    funcCanvas.height--;
+function clearCxt(cxt: CanvasRenderingContext2D) {
+    cxt.save();
+    cxt.resetTransform();
+    cxt.clearRect(0, 0, cxt.canvas.width, cxt.canvas.height)
+    cxt.restore();
 }
 
 function caller() {
@@ -898,11 +891,10 @@ function draw(drawingInterval: number, doneCallback = () => { }, stepInterval = 
     ruler.showSkeleton = skeletonCheck.checked;
 
     if (clearBeforeDrawingCheck.checked || !ruler.showSkeleton) {
-        clearBottom();
-        clearTop();
+        clearCxt(bottomCxt);
+        clearCxt(topCxt);
     }
-
-    if (!functionCheck.checked) clearFunc();
+    if (!functionCheck.checked) clearCxt(funcCxt);
 
     setTransform([topCxt, bottomCxt, funcCxt]);
 
@@ -921,10 +913,10 @@ function draw(drawingInterval: number, doneCallback = () => { }, stepInterval = 
         i < _locArray.length;
         i++ , delay += drawingInterval
     ) {
-        let changeRot = false;
         if (cut < _cutPoints.length && _locArray[i][5] >= _cutPoints[cut])
             sign = getSign(document.getElementById("c" + cut++));
 
+        let changeRot = false;
         if (cusp < _cuspPoints.length && _locArray[i][5] >= _cuspPoints[cusp]) {
             rot = getSign(document.getElementById("r" + cusp++));
             changeRot = true;
@@ -1009,35 +1001,30 @@ class Ruler {
     changeDirection(sign: number) {
         // const a = this.calculateRotation(0);
         if (this.rotSign !== sign) // cancel out previous rotation offset
-            this.offset += (sign === -1 ? 2 * this.angle : -2 * this.angle);
+            this.offset += -sign * 2 * this.angle;
         this.rotSign = sign;
         // console.log((this.calculateRotation(0) - a) % (2*Math.PI), this.angle % (Math.PI * 2));
     }
 
     draw(topCxt: CanvasRenderingContext2D, bottomCxt: CanvasRenderingContext2D) {
+        bottomCxt.beginPath();
         this.drawCircle(bottomCxt);
-        this.drawDots(topCxt);
         this.drawSkeleton(bottomCxt);
+        bottomCxt.closePath();
+        bottomCxt.stroke(); // do the above operations in the save batch, improving performance
+
+        this.drawDots(topCxt);
     }
 
     erase(bottomCxt: CanvasRenderingContext2D) {
-        if (this.showSkeleton) {
-            const previousLineWidth = bottomCxt.lineWidth;
-            bottomCxt.lineWidth = previousLineWidth + 2;
-            bottomCxt.globalCompositeOperation = "destination-out";
-            this.eraseCircle(bottomCxt);
-            this.eraseSkeleton(bottomCxt);
-            bottomCxt.globalCompositeOperation = "source-over";
-            bottomCxt.lineWidth = previousLineWidth;
-        }
+        bottomCxt.save();
+        bottomCxt.resetTransform();
+        bottomCxt.clearRect(0, 0, bottomCxt.canvas.width, bottomCxt.canvas.height);
+        bottomCxt.restore();
     }
 
     drawCircle(bottomCxt: CanvasRenderingContext2D) {
         if (this.showSkeleton) this.circle.draw(bottomCxt);
-    }
-
-    eraseCircle(bottomCxt: CanvasRenderingContext2D) {
-        this.circle.draw(bottomCxt);
     }
 
     drawDots(topCxt: CanvasRenderingContext2D) {
@@ -1049,8 +1036,8 @@ class Ruler {
                 (this.dots[i].ratio / 100) * this.circle.radius,
                 this.calculateRotation(i)
             );
-            topCxt.fillStyle = this.dots[i].color;
             topCxt.beginPath();
+            topCxt.fillStyle = this.dots[i].color;
             topCxt.arc(dotPos[0], dotPos[1], this.dots[i].size, 0, 2 * Math.PI);
             topCxt.closePath();
             topCxt.fill();
@@ -1070,26 +1057,6 @@ class Ruler {
                 bottomCxt.moveTo(this.circle.x, this.circle.y);
                 bottomCxt.lineTo(dotPos[0], dotPos[1]);
             }
-            bottomCxt.stroke();
-        }
-    }
-    eraseSkeleton(bottomCxt: CanvasRenderingContext2D) {
-        if (this.showSkeleton) {
-            bottomCxt.beginPath();
-            for (let i = 0; i < this.dots.length; i++) {
-                const dotPos = rad2cor(
-                    this.circle.x,
-                    this.circle.y,
-                    (this.dots[i].ratio / 100) * this.circle.radius,
-                    this.calculateRotation(i)
-                );
-                bottomCxt.moveTo(this.circle.x, this.circle.y);
-                bottomCxt.lineTo(dotPos[0], dotPos[1]);
-                bottomCxt.arc(this.circle.x, this.circle.y, 2, 0, 2 * Math.PI);
-            }
-            bottomCxt.closePath();
-            bottomCxt.stroke();
-            bottomCxt.fill();
         }
     }
 
@@ -1121,19 +1088,8 @@ class Circle {
         this.y = y;
         this.radius = radius;
     }
-
     draw(cxt: CanvasRenderingContext2D) {
-        cxt.beginPath();
         cxt.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        cxt.closePath();
-        cxt.stroke();
-    }
-    erase(cxt: CanvasRenderingContext2D) {
-        cxt.globalCompositeOperation = "destination-out";
-        const previousLineWidth = cxt.lineWidth;
-        cxt.lineWidth = previousLineWidth + 2;
-        this.draw(cxt);
-        cxt.lineWidth = previousLineWidth;
     }
     moveTo(x: number, y: number) {
         this.x = x;
