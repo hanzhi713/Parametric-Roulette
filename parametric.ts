@@ -910,6 +910,7 @@ function draw(drawingInterval: number, doneCallback = () => { }, stepInterval = 
     const progressbar = $("#progressbar");
     progressbar.width("0%");
 
+    const start = performance.now();
     let delay = 0;
     for (
         let i = 0,
@@ -960,9 +961,11 @@ function draw(drawingInterval: number, doneCallback = () => { }, stepInterval = 
     }
     currentJobs.push(
         setTimeout(() => {
+            console.log(currentJobs.length / (performance.now() - start))
             progressbar.width("100%");
             progressLabel.text("Drawing: Finished");
             doneCallback();
+            currentJobs = [];
         }, delay)
     );
 }
