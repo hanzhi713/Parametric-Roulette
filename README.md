@@ -11,7 +11,7 @@ See [here](Mechanism.md)
 
 | Equation                                                                                           | JS-generated GIF                            |
 | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| <img src="https://rawgit.com/hanzhi713/Parametric-Roulette (fetch/refactor/svgs/0de7166ff457dc0836424fcd0d3f27a8.svg?invert_in_darkmode" align=middle width=229.263705pt height=47.67147000000001pt/> | <img src="doc/hyperbola.gif" width="300px"> |
+| <img src="svgs/0de7166ff457dc0836424fcd0d3f27a8.svg?invert_in_darkmode" align=middle width=229.263705pt height=47.67147000000001pt/> | <img src="doc/hyperbola.gif" width="300px"> |
 
 Config is available [here](doc/hyperbola.json)
 
@@ -19,14 +19,14 @@ Config is available [here](doc/hyperbola.json)
 
 | Equation                                                                                         | JS-generated GIF         |
 | ------------------------------------------------------------------------------------------------ | ------------------------ |
-| <img src="https://rawgit.com/hanzhi713/Parametric-Roulette (fetch/refactor/svgs/c44ead285ddd5254746f0b2b031fb3ba.svg?invert_in_darkmode" align=middle width=234.90835499999997pt height=47.67147000000001pt/> | <img src="doc/sine.gif"> |
+| <img src="svgs/c44ead285ddd5254746f0b2b031fb3ba.svg?invert_in_darkmode" align=middle width=234.90835499999997pt height=47.67147000000001pt/> | <img src="doc/sine.gif"> |
 Config is available [here](doc/sine.json)
 
 ## Example 3: Rolling along an ellipse
 
 | Equation                                                                                      | JS-generated GIF            |
 | --------------------------------------------------------------------------------------------- | --------------------------- |
-| <img src="https://rawgit.com/hanzhi713/Parametric-Roulette (fetch/refactor/svgs/8fde91d584867305280797f81ed79a11.svg?invert_in_darkmode" align=middle width=228.182955pt height=47.67147000000001pt/> | <img src="doc/ellipse.gif"> |
+| <img src="svgs/8fde91d584867305280797f81ed79a11.svg?invert_in_darkmode" align=middle width=228.182955pt height=47.67147000000001pt/> | <img src="doc/ellipse.gif"> |
 
 Config is available [here](doc/ellipse.json)
 
