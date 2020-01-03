@@ -330,11 +330,11 @@
                     <td colspan="2" style="text-align: center">
                         <button class="btn btn-info btn-sm reset-btn" title="reset all signs to default"
                                 data-toggle="tooltip"
-                                onclick="previewRuler();"><i class="fas fa-sync-alt fa-sm"></i>
+                                onclick="cutPoints=[];previewRuler();"><i class="fas fa-sync-alt fa-sm"></i>
                         </button>
                         <div id="sign-adjust" class="btn-group" role="group" style="display:inline;"></div>
                         <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs" data-toggle="tooltip"
-                                onclick="reverseSign(document.getElementById('sign-adjust').childNodes)">R
+                                onclick="reverseAllCutSigns()">R
                         </button>
                     </td>
                 </tr>
@@ -342,11 +342,11 @@
                     <td colspan="2" style="text-align: center">
                         <button class="btn btn-info btn-sm reset-btn" title="reset all signs to default"
                                 data-toggle="tooltip"
-                                onclick="previewRuler();"><i class="fas fa-sync-alt fa-sm"></i>
+                                onclick="cuspPoints=[];previewRuler();"><i class="fas fa-sync-alt fa-sm"></i>
                         </button>
                         <div id="rot-adjust" class="btn-group" role="group"></div>
                         <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs" data-toggle="tooltip"
-                                onclick="reverseSign(document.getElementById('rot-adjust').childNodes)">R
+                                onclick="reverseAllCuspSigns()">R
                         </button>
                     </td>
                 </tr>

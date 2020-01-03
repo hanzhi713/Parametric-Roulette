@@ -8,8 +8,6 @@
         "lib": ["esnext", "dom", "dom.iterable"]
     },
     "files": [
-        "parametric.ts",
-        "utils.ts",
-        "index.d.ts"
+        "parametric.ts"
     ]
 }
