@@ -671,6 +671,7 @@ function calculateLocations() {
     let previousLower = t1;
     let sign = 1, lastNormal = 0, lastCuspIdx = 1;
 
+    const rotDirec = cuspPoints[0]?.[1] || 1;
     const newCuspPoints: [number, number, number, number][] = [[t1, 0, 0, 1]];
     const newCutPoints: [number, number][] = [[t1, sign]];
 
@@ -684,14 +685,6 @@ function calculateLocations() {
             // for stationary points only
             if (Math.abs(normal - lastNormal) > 1)
                 newCutPoints.push([t, sign = -sign]);
-        }
-
-        // update arc length
-        const sliceIdx = idx % 256;
-        const arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2);
-        if (sliceIdx === 255) {
-            previousLower = t;
-            previousArcLength = arcLength;
         }
 
         const cv = Math.abs(curvature(t))
@@ -712,15 +705,14 @@ function calculateLocations() {
                     flag = revolve.checked && lastCusp[2] === 1; // cusp is available and has an increasing trend
                 }
             }
-            if (flag) { // also accept extremely large curvature
-
+            if (flag) {
                 let cuspX, cuspY, rotAngle, cuspT, r1, r2;
 
                 // this branch is problematic. abort.
                 if (false && cv > 100000) { // extremely large curvature: cusp at the current t
                     cuspX = xFunc(t);
                     cuspY = yFunc(t);
-                    rotAngle = arcLength / radius;
+                    // rotAngle = arcLength / radius;
                     cuspT = t;
                     r1 = lastNormal;
                     r2 = Math.atan(-dx(t + step) / dy(t + step));;
@@ -742,7 +734,6 @@ function calculateLocations() {
                 // change sign? vertical or horizontal cusp
                 const temp = Math.abs(r2 - r1);
                 const radians = temp < Math.PI / 2 ? Math.PI - temp : temp;
-                const rotDirec = Math.sign(r2 - r1)
                 for (let i = 0; i < radians; i += step * 4) {
                     locations[idx++] = [
                         cuspX,
@@ -775,6 +766,14 @@ function calculateLocations() {
             lastCuspIdx = newCuspPoints.length;
         }
 
+        // update arc length
+        const sliceIdx = idx % 256;
+        const arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2);
+        if (sliceIdx === 255) {
+            previousLower = t;
+            previousArcLength = arcLength;
+        }
+
         const rotAngle = arcLength / radius;
         const delX = radius / Math.sqrt(normal * normal + 1);
         const delY = delX * normal;
@@ -804,7 +803,14 @@ function calculateLocations() {
     const rotRow = document.getElementById("rot-adjust")!;
     rotRow.innerHTML = "";
     for (let i = 0; i < newCuspPoints.length; i++) {
-        const sign = cuspPoints[i]?.[1] !== 1 && (revolve.checked || cuspPoints[i]?.[1] === -1 || i % 2 === 0) ? -1 : 1;
+        let sign;
+        if (cuspPoints[i] && cuspPoints[i][1] !== 0) {
+            sign = cuspPoints[i][1]
+        } else if (revolve.checked) {
+            sign = -1;
+        } else {
+            sign = i % 2 === 0 ? -1 : 1;
+        }
         newCuspPoints[i][3] = sign;
         rotRow.appendChild(createRotElement(
             i,
@@ -863,6 +869,9 @@ function reverseAllCutSigns() {
 function reverseAllCuspSigns() {
     cuspPoints.forEach(p => p[1] = -p[1])
     reverseSign(document.getElementById('rot-adjust')!.children as any)
+    if (revolve.checked) { // revolve direction depends on the initial direction
+        previewRuler();
+    }
 }
 
 
@@ -881,6 +890,9 @@ function createRotElement(index: number, sign: string, lower: number, upper: num
     e.onclick = ev => {
         cuspPoints[index][1] = -cuspPoints[index][1];
         reverseSign([ev.target as HTMLElement]);
+        if (revolve.checked) {
+            previewRuler();
+        }
     }
     return e;
 }
