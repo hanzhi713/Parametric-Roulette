@@ -50,15 +50,13 @@ The coordinate of A' can be calculated by substituting t = t<sub>2</sub> into th
 
 Knowing the gradient of A'B', the coordinate of B' can be obtained using the coordinate of A':
 
-<img src="http://latex.codecogs.com/svg.latex?\begin{array}{l}&space;\textup{let}\&space;\Delta&space;x=&space;\textup{sgn(n)}\&space;r&space;\cos(\arctan(n))&space;=&space;r\frac{\textup{sgn(n)}}{\sqrt{n^2&plus;1}}&space;\\\\&space;\Delta&space;y&space;=&space;n\Delta&space;x&space;\\\\&space;B'(f(t_2)&plus;\Delta&space;x,\&space;g(t_2)&plus;\Delta&space;y)&space;\end{array}" title="\begin{array}{l} \textup{let}\ \Delta x= \textup{sgn(n)}\ r \cos(\arctan(n)) = r\frac{\textup{sgn(n)}}{\sqrt{n^2+1}} \\\\ \Delta y = n\Delta x \\\\ B'(f(t_2)+\Delta x,\ g(t_2)+\Delta y) \end{array}" />
-
-where sgn(n) is the sign of the gradient of the normal.
+<img src="http://latex.codecogs.com/svg.latex?\begin{array}{l}&space;\textup{let}\&space;\Delta&space;x=&space;\&space;r&space;\cos(\arctan(n))&space;=&space;\frac{r}{\sqrt{n^2&plus;1}}&space;\\\\&space;\Delta&space;y&space;=&space;n\Delta&space;x&space;\\\\&space;B'(f(t_2)&plus;\Delta&space;x,\&space;g(t_2)&plus;\Delta&space;y)&space;\end{array}" title="\begin{array}{l} \textup{let}\ \Delta x= \ r \cos(\arctan(n)) = \frac{r}{\sqrt{n^2+1}} \\\\ \Delta y = n\Delta x \\\\ B'(f(t_2)+\Delta x,\ g(t_2)+\Delta y) \end{array}" />
 
 ---
 
 ## Sign adjustment
 
-By the above method of computation, the circle will always appear above the graph, which may cause weird "jumps" at the point where the gradient is undefined. Example:
+By the above method of computation, the roulette will be broken at stationary points where the normal is vertical. For example,
 
 <img src="http://latex.codecogs.com/svg.latex?&space;&space;\left\{&space;\begin{array}{lr}&space;x=&space;16\sin^3(t)&space;&&space;\\&space;y=&space;13\cos(t)&space;-&space;5\cos(2t)&space;-&space;2\cos(3t)&space;-&space;\cos(4t)&space;\end{array}&space;\right.&space;t\in(-\pi,\pi]" title="\left\{ \begin{array}{lr} x= 16\sin^3(t) & \\ y= 13\cos(t) - 5\cos(2t) - 2\cos(3t) - \cos(4t) \end{array} \right. t\in(-\pi,\pi]" />
 
