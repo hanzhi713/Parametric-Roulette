@@ -10,7 +10,15 @@ The rolling circle doesn't have a collision box. It will keep rolling even if th
 
 Suppose there is a circle with radius r is rolling on the parametric equation defined by
 
-<img src="http://latex.codecogs.com/svg.latex?\inline&space;&space;\left\{&space;\begin{array}{lr}&space;x=&space;f(t)&space;&&space;\\&space;y=&space;g(t)&space;\end{array}&space;\right.&space;a\leq&space;t\leq&space;b" title=" \left\{ \begin{array}{lr} x= f(t) & \\ y= g(t) \end{array} \right. a\leq t\leq b" />
+$$
+\left\{ 
+    \begin{array}{ll} 
+        x= f(t)& \\ 
+        y= g(t)& 
+    \end{array} 
+    \right. 
+    a\leq t\leq b
+$$
 
 <img src="doc/demo.svg" width="780px">
 
@@ -87,7 +95,6 @@ $
 
 I keep the roulette continuous by changing both the sign of &Delta;x at vertical cusp and changing the rotation direction of the circle at all cusps:
 
-<img src="http://latex.codecogs.com/svg.latex?\begin{array}{l}&space;\textup{vertical&space;cusp&space;at}\&space;t&space;=&space;t_{vc}\\\\&space;\left\{&space;\begin{array}{lr}&space;f'(t_{vc})=0&space;&&space;\\&space;g'(t_{vc})=0&space;\\&space;\lim\limits_{t\to&space;t_{vc}^&plus;}\frac{g'(t)}{f'(t)}=\infty\&space;\textup{and}&space;\lim\limits_{t\to&space;t_{vc}^-}\frac{g'(t)}{f'(t)}=-\infty\&space;\textup{or}\&space;\lim\limits_{t\to&space;t_{vc}^&plus;}\frac{g'(t)}{f'(t)}=-\infty\&space;\textup{and}&space;\lim\limits_{t\to&space;t_{vc}^-}\frac{g'(t)}{f'(t)}=\infty\&space;\end{array}\right.&space;\end{array}" title="\begin{array}{l} \textup{vertical cusp at}\ t = t_{vc}\\\\ \left\{ \begin{array}{lr} f'(t_{vc})=0 & \\ g'(t_{vc})=0 \\ \lim\limits_{t\to t_{vc}^+}\frac{g'(t)}{f'(t)}=\infty\ \textup{and} \lim\limits_{t\to t_{vc}^-}\frac{g'(t)}{f'(t)}=-\infty\ \textup{or}\ \lim\limits_{t\to t_{vc}^+}\frac{g'(t)}{f'(t)}=-\infty\ \textup{and} \lim\limits_{t\to t_{vc}^-}\frac{g'(t)}{f'(t)}=\infty\ \end{array}\right. \end{array}" />
 
 The effect is shown in the following table.
 
@@ -106,7 +113,6 @@ Some considered the first method to be unnatural as the roulette doesn't appear 
 
 The roulette is kept consistently inside or outside the parametric curve by switching signs of &Delta;x at horizontal cusp rather than vertical cusp. The rotation direction of the circle is consistent throughout.
 
-<img src="http://latex.codecogs.com/svg.latex?\begin{array}{l}&space;\textup{horizontal&space;cusp&space;at}\&space;t&space;=&space;t_{hc}\\\\&space;\left\{&space;\begin{array}{lr}&space;f'(t_{hc})=0&space;&&space;\\&space;g'(t_{hc})=0&space;\\&space;\frac{g'(t)}{f'(t)}\to0^&plus;\&space;\textup{as}\&space;t\to&space;t_{hc}^&plus;\&space;\textup{and}\&space;\frac{g'(t)}{f'(t)}\to&space;0^-\&space;\textup{as}\&space;t\to&space;t_{hc}^-\&space;\&space;\textup{or}\&space;\&space;\frac{g'(t)}{f'(t)}\to0^-\&space;\textup{as}\&space;t\to&space;t_{hc}^&plus;\&space;\textup{and}\&space;\frac{g'(t)}{f'(t)}\to&space;0^&plus;\&space;\textup{as}\&space;t\to&space;t_{hc}^-\&space;\end{array}&space;\right.&space;\end{array}" title="\begin{array}{l} \textup{horizontal cusp at}\ t = t_{hc}\\\\ \left\{ \begin{array}{lr} f'(t_{hc})=0 & \\ g'(t_{hc})=0 \\ \frac{g'(t)}{f'(t)}\to0^+\ \textup{as}\ t\to t_{hc}^+\ \textup{and}\ \frac{g'(t)}{f'(t)}\to 0^-\ \textup{as}\ t\to t_{hc}^-\ \ \textup{or}\ \ \frac{g'(t)}{f'(t)}\to0^-\ \textup{as}\ t\to t_{hc}^+\ \textup{and}\ \frac{g'(t)}{f'(t)}\to 0^+\ \textup{as}\ t\to t_{hc}^-\ \end{array} \right. \end{array}" />
 
 Additionally, when a vertical or horizontal cusp is met, the circle will revolve around the cusp. The drawback of this method is that the path of revolution and the previous roulette may appear to be not contiguous. This is mainly caused by inaccuracies in floating point arithmetic. The effect of this method is shown below, in comparison with the previous method.
 
