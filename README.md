@@ -11,7 +11,7 @@ See [here](Mechanism.md)
 
 | Equation                                                                                           | JS-generated GIF                            |
 | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| <img src="svgs/0de7166ff457dc0836424fcd0d3f27a8.svg?invert_in_darkmode" align=middle width=229.263705pt height=47.67147000000001pt/> | <img src="doc/hyperbola.gif" width="300px"> |
+| <img alt="$\left\{ \begin{array}{lr} x=2\cosh{t} &amp; \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi$" src="svgs/0de7166ff457dc0836424fcd0d3f27a8.svg" align="middle" width="229.263705pt" height="47.67147000000001pt"/> | <img src="doc/hyperbola.gif" width="300px"> |
 
 Config is available [here](doc/hyperbola.json)
 
@@ -19,14 +19,14 @@ Config is available [here](doc/hyperbola.json)
 
 | Equation                                                                                         | JS-generated GIF         |
 | ------------------------------------------------------------------------------------------------ | ------------------------ |
-| <img src="svgs/c44ead285ddd5254746f0b2b031fb3ba.svg?invert_in_darkmode" align=middle width=234.90835499999997pt height=47.67147000000001pt/> | <img src="doc/sine.gif"> |
+| <img alt="$\left\{ \begin{array}{lr} x= t &amp; \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30$" src="svgs/c44ead285ddd5254746f0b2b031fb3ba.svg" align="middle" width="234.90835499999997pt" height="47.67147000000001pt"/> | <img src="doc/sine.gif"> |
 Config is available [here](doc/sine.json)
 
 ## Example 3: Rolling along an ellipse
 
 | Equation                                                                                      | JS-generated GIF            |
 | --------------------------------------------------------------------------------------------- | --------------------------- |
-| <img src="svgs/8fde91d584867305280797f81ed79a11.svg?invert_in_darkmode" align=middle width=228.182955pt height=47.67147000000001pt/> | <img src="doc/ellipse.gif"> |
+| <img alt="$\left\{ \begin{array}{lr} x= 10\cos(t) &amp; \\ y= 6\sin(t) \end{array} \right. -\pi&lt; t\leq \pi$" src="svgs/8fde91d584867305280797f81ed79a11.svg" align="middle" width="228.182955pt" height="47.67147000000001pt"/> | <img src="doc/ellipse.gif"> |
 
 Config is available [here](doc/ellipse.json)
 
