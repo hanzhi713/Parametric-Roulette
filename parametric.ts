@@ -715,7 +715,7 @@ function calculateLocations() {
             if (flag) { // also accept extremely large curvature
 
                 let cuspX, cuspY, rotAngle, cuspT, r1, r2;
-                
+
                 // this branch is problematic. abort.
                 if (false && cv > 100000) { // extremely large curvature: cusp at the current t
                     cuspX = xFunc(t);
@@ -742,13 +742,13 @@ function calculateLocations() {
                 // change sign? vertical or horizontal cusp
                 const temp = Math.abs(r2 - r1);
                 const radians = temp < Math.PI / 2 ? Math.PI - temp : temp;
-
+                const rotDirec = Math.sign(r2 - r1)
                 for (let i = 0; i < radians; i += step * 4) {
                     locations[idx++] = [
                         cuspX,
                         cuspY,
-                        radius * Math.cos(r1 + i) * scale,
-                        radius * Math.sin(r1 + i) * scale,
+                        radius * Math.cos(r1 + rotDirec * i) * scale,
+                        radius * Math.sin(r1 + rotDirec * i) * scale,
                         rotAngle + i,
                         cuspT
                     ];
@@ -756,8 +756,8 @@ function calculateLocations() {
                 locations[idx++] = [
                     cuspX,
                     cuspY,
-                    radius * Math.cos(r1 + radians) * scale,
-                    radius * Math.sin(r1 + radians) * scale,
+                    radius * Math.cos(r1 + rotDirec * radians) * scale,
+                    radius * Math.sin(r1 + rotDirec * radians) * scale,
                     rotAngle + radians,
                     cuspT
                 ];
