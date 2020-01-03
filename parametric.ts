@@ -671,7 +671,7 @@ function calculateLocations() {
     let previousLower = t1;
     let sign = 1, lastNormal = 0, lastCuspIdx = 1;
 
-    const rotDirec = cuspPoints[0]?.[1] || 1;
+    const rotDirec = cuspPoints[0]?.[1] || (revolve.checked ? -1 : 1);
     const newCuspPoints: [number, number, number, number][] = [[t1, 0, 0, 1]];
     const newCutPoints: [number, number][] = [[t1, sign]];
 
@@ -789,6 +789,14 @@ function calculateLocations() {
 
         lastNormal = normal;
     }
+
+    // do not reuse old sign if inconsistent
+    // if (newCutPoints.length !== cutPoints.length) {
+    //     cutPoints = [];
+    // }
+    // if (newCuspPoints.length !== cuspPoints.length) {
+    //     cuspPoints = [];
+    // }
 
     const signRow = document.getElementById("sign-adjust")!;
     signRow.innerHTML = "";
