@@ -52,8 +52,6 @@ Knowing the gradient of <img alt="$A'B'$" src="svgs/8f99074256828640ef7420713750
 
 <p align="center"><img alt="$$&#10;\begin{array}{ll}&#10;&amp;\Delta x= \ r \cos(\arctan(\hat{n})) = \frac{r}{\sqrt{\hat{n}^2+1}} \\\\&#10;&amp;B'(f(t_2)+\Delta x,\ g(t_2) + \hat{n}\Delta x) &#10;\end{array}&#10;$$" src="svgs/ed69ef7e3960f2fd8846843064f9f2d8.svg" align="middle" width="230.13375pt" height="58.9149pt"/></p>
 
----
-
 ## Sign adjustment
 
 By the above method of computation, the roulette will be broken at stationary points where the normal is vertical. For example,
@@ -64,20 +62,22 @@ By the above method of computation, the roulette will be broken at stationary po
 
 <img src="doc/heart.png" width="400px">
 
-This problem could be resolved to some extent by adjusting the sign of &Delta;x, which could be achieved automatically in my JavaScript drawer (not available in Geogebra implementation though). There are two ways to do this.
+This problem could be resolved to some extent by adjusting the sign of <img alt="$\Delta x$" src="svgs/3919bbc84b8079e27194efe99a1f6a80.svg" align="middle" width="23.09373pt" height="22.46574pt"/>, which could be achieved automatically in my JavaScript drawer (not available in Geogebra implementation though). The sign adjustment methods are described below.
 
-## Common adjustment required
+### Common adjustment required
 
-It is found that regardless of the sign-changing method used, sign needs to always be adjusted at stationary points. One can see that at the point where the normal changes sign, the gradient must be either zero or infinity. We only want the case 
+It is found that regardless of the sign-changing method used, sign needs to always be adjusted at stationary points. One can see that at the point where the normal changes sign, the gradient must be either zero or infinity. We only want to adjust the sign the case where the gradient is zero. Therefore, we changed the sign at <img alt="$(x(t), y(t))$" src="svgs/9fbe43fbcb89520ba4025e55a5ce7a2e.svg" align="middle" width="75.57857999999999pt" height="24.65759999999998pt"/> iff
 
+<p align="center"><img alt="$$&#10;\text{sgn}(\hat{n_{t^-}}) = - \text{sgn}(\hat{n_{t^+}}) \text{ and } &#10;|\hat{n_{t^-}} - \hat{n_{t^+}}| \le \epsilon&#10;$$" src="svgs/54d87def0fef5708d309e292fcee5c0e.svg" align="middle" width="303.8112pt" height="16.438356pt"/></p>
 
-<img alt="$&#10;\begin{array}{l} \textup{vertical tangent at}\ t = t_{vt}\\\\ \left\{ \begin{array}{lr} f'(t_{vt})\ne 0 &amp; \\ g'(t_{vt})=0 \end{array} \right.\end{array}&#10;$" src="svgs/b7651dd91993206cef76defcd3f18964.svg" align="middle" width="184.14561pt" height="82.33829999999998pt"/>
+where <img alt="$\hat{n_{t^-}}$" src="svgs/86658f47f487f0023e50149906c0e1d4.svg" align="middle" width="23.736900000000002pt" height="22.831379999999992pt"/> is the gradient of the normal at <img alt="$t^-$" src="svgs/9bf9252ccb5fb8814379d38eae960418.svg" align="middle" width="16.21026pt" height="26.177579999999978pt"/>, <img alt="$\hat{n_{t^+}}$" src="svgs/a5836f91021c93a484c4f6b2b0a6613b.svg" align="middle" width="23.280345pt" height="22.831379999999992pt"/> is the gradient of the normal at <img alt="$t^+$" src="svgs/7e94ba42f89d8bcbab69742be5a10f69.svg" align="middle" width="16.027605000000005pt" height="26.177579999999978pt"/>, <img alt="$t^- &lt; t &lt; t^+$" src="svgs/5bbc1b1bfaa1f01c0c4cdfefb01ec8f1.svg" align="middle" width="82.830825pt" height="26.177579999999978pt"/>, and for some any small <img alt="$\epsilon, \delta$" src="svgs/53b1075e90e35778d668349fa892f611.svg" align="middle" width="21.906390000000002pt" height="22.831379999999992pt"/>, 
+<img alt="$|t^- - t| = |t - t^+ | \le \delta$" src="svgs/1057f56cd2e4757183a9f0c40a2f41b6.svg" align="middle" width="155.96426999999997pt" height="26.177579999999978pt"/>.
 
+### 1. Auto sign-changing by switching sides
 
-## 1. Auto sign-changing by switching sides
+I keep the roulette continuous by changing both the sign of <img alt="$\Delta x$" src="svgs/3919bbc84b8079e27194efe99a1f6a80.svg" align="middle" width="23.09373pt" height="22.46574pt"/> at vertical cusp and changing the rotation direction of the circle at all cusps. Cusps are the points where the curvature is infinity. I record the sequence of increasing curvatures which are above 50 and pick and maximum (and assume it is the cusp). The (unsigned) curvature formula is shown below.
 
-I keep the roulette continuous by changing both the sign of &Delta;x at vertical cusp and changing the rotation direction of the circle at all cusps:
-
+<p align="center"><img alt="$$&#10;\kappa ={\frac {|x'y''-y'x''|}{\left({x'}^{2}+{y'}^{2}\right)^{\frac {3}{2}}}}.&#10;$$" src="svgs/62da3a2f3332300c34eef2c86ff5f55a.svg" align="middle" width="131.239515pt" height="47.56752pt"/></p>
 
 The effect is shown in the following table.
 
@@ -88,22 +88,19 @@ The effect is shown in the following table.
 
 Currently there's no way to perfectly deal with parametric curve with three cusps because the roulette will always be broken at one cusp.
 
-<img src="doc/three-cusps.png" width="400px"/>
+<img src="doc/three-cusps.png" width="300px"/>
 
-## 2. Revolving around cusps 
+### 2. Revolving around cusps 
 
 Some considered the first method to be unnatural as the roulette doesn't appear consistently inside or outside the parametric curve. Therefore, I came up with this method in order to correct that issue.
 
-The roulette is kept consistently inside or outside the parametric curve by switching signs of &Delta;x at horizontal cusp rather than vertical cusp. The rotation direction of the circle is consistent throughout.
+The roulette is kept consistently inside or outside the parametric curve by switching signs of <img alt="$\Delta x$" src="svgs/3919bbc84b8079e27194efe99a1f6a80.svg" align="middle" width="23.09373pt" height="22.46574pt"/> at all cusps except horizontal cusps. The rotation direction of the circle is consistent throughout.
 
-
-Additionally, when a vertical or horizontal cusp is met, the circle will revolve around the cusp. The drawback of this method is that the path of revolution and the previous roulette may appear to be not contiguous. This is mainly caused by inaccuracies in floating point arithmetic. The effect of this method is shown below, in comparison with the previous method.
+Additionally, a cusp is met, the circle will revolve around the cusp. The drawback of this method is that the path of revolution and the previous roulette may appear to be not contiguous. This is mainly caused by inaccuracies in floating point arithmetic. The effect of this method is shown below.
 
 | Heart                                              | Astroid                                              |
 | -------------------------------------------------- | ---------------------------------------------------- |
 | <img src="doc/heart-revolve.gif">                  | <img src="doc/astroid-revolve.gif">                  |
 | config is available [here](doc/heart-revolve.json) | config is available [here](doc/astroid-revolve.json) |
 
-However, the direction of rotation and the sign (whether the half-circle at the cusp should point upward or downward) depend on the original rotation direction, dy/dt, dx/dt and (maybe) some other unknown factors. Up to now, I am unable to find an algorithm that can correctly generate the path of revolution around the cusp for ALL CASES, so you may found the direction of revolution incorrect for some parametric curves. Moreover, current method does not consider oblique cusps, which can be seen in a previous picture.
-
-I will add buttons for you to manually adjust the path of revolution around cusps later.
+Sometimes cusps may not be detected due to the numerical nature of my method. In such cases, try to decrease the drawing step so better numerical accuracy can be achieved.
