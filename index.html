@@ -82,15 +82,11 @@
         }
 
         .reverse-btn {
-            padding: 3px 5px;
-            margin-top: 3px;
-            float: right;
+            padding: 1px 5px;
         }
 
         .reset-btn {
             padding: 1px 3px;
-            margin-top: 5px;
-            float: left;
         }
 
         .color-blk {
@@ -501,7 +497,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2" style="text-align: center">
+                        <td colspan="2">
                             <button class="btn btn-info btn-sm reset-btn" title="reset all signs to default"
                                 data-toggle="tooltip" onclick="cutPoints=[];previewRuler();"><i
                                     class="fas fa-sync-alt fa-sm"></i>
@@ -509,12 +505,12 @@
                             <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs"
                                 data-toggle="tooltip" onclick="reverseAllCutSigns()">R
                             </button>
-                            <div id="sign-adjust" style="display: inherit;" class="btn-group flex-wrap" role="group">
+                            <div id="sign-adjust" class="d-inline btn-group flex-wrap" role="group">
                             </div>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2" style="text-align: center">
+                        <td colspan="2">
                             <button class="btn btn-info btn-sm reset-btn" title="reset all signs to default"
                                 data-toggle="tooltip" onclick="cuspPoints=[];previewRuler();"><i
                                     class="fas fa-sync-alt fa-sm"></i>
@@ -522,7 +518,7 @@
                             <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs"
                                 data-toggle="tooltip" onclick="reverseAllCuspSigns()">R
                             </button>
-                            <div id="rot-adjust" style="display: inherit;" class="btn-group flex-wrap" role="group">
+                            <div id="rot-adjust" class="d-inline btn-group flex-wrap" role="group">
                             </div>
                         </td>
                     </tr>
@@ -553,7 +549,7 @@
                                 Revolve around cusp
                             </label>
                         </td>
-                        <td><input type="checkbox" id="revolve" class="checkbox" onchange="previewRuler();" /></td>
+                        <td><input type="checkbox" id="revolve" class="checkbox" onchange="cutPoints=[];cuspPoints=[];previewRuler();" /></td>
                     </tr>
                     <tr>
                         <td><label for="showSk" data-toggle="tooltip"

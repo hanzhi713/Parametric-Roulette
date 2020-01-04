@@ -12,27 +12,28 @@ See [here](Mechanism.md)
 | Equation                                                                                           | JS-generated GIF                            |
 | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | $\left\{ \begin{array}{lr} x=2\cosh{t} & \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi$ | <img src="doc/hyperbola.gif" width="300px"> |
-| Config is available [here](doc/hyperbola.json) |
+| Config is available [here](doc/hyperbola.json)                                                     |
 
 ### Example 2: Rolling on the sine function
 
 | Equation                                                                                         | JS-generated GIF         |
 | ------------------------------------------------------------------------------------------------ | ------------------------ |
 | $\left\{ \begin{array}{lr} x= t & \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30$ | <img src="doc/sine.gif"> |
-| Config is available [here](doc/sine.json) |
+| Config is available [here](doc/sine.json)                                                        |
 
 ### Example 3: Rolling along an ellipse
 
 | Equation                                                                                      | JS-generated GIF            |
 | --------------------------------------------------------------------------------------------- | --------------------------- |
 | $\left\{ \begin{array}{lr} x= 10\cos(t) & \\ y= 6\sin(t) \end{array} \right. -\pi< t\leq \pi$ | <img src="doc/ellipse.gif"> |
-| Config is available [here](doc/ellipse.json) |
+| Config is available [here](doc/ellipse.json)                                                  |
 
 ### and many others
 
-| Heart                               | Astroid                               | Hypocycloid (k=4)                       | Rose (p=3)                          |
-| ----------------------------------- | ------------------------------------- | --------------------------------------- | ----------------------------------- |
-| <img src="./doc/heart-revolve.gif"> | <img src="./doc/astroid-revolve.gif"> | <img src="./doc/others/five-cusps.gif"> | <img src="./doc/others/rose-3.gif"> |
+| Heart                                     | Astroid                                     | Hypocycloid (k=4)                       | Rose (p=3)                                  |
+| ----------------------------------------- | ------------------------------------------- | --------------------------------------- | ------------------------------------------- |
+| <img src="./doc/heart-revolve.gif">       | <img src="./doc/astroid-revolve.gif">       | <img src="./doc/others/five-cusps.gif"> | <img src="./doc/others/rose-3.gif">         |
+| [download config](doc/heart-revolve.json) | [download config](doc/astroid-revolve.json) | [download config](doc/five-cusps.json)  | [download config](doc/others/rose-3.json) |
 
 ## How to use
 
@@ -50,6 +51,12 @@ See [here](Mechanism.md)
    5. Change signs and rotation directions
    6. Change other settings
 6. Finally, export your customized parametric roulette by clicking "save", "save to PNG" or "save to GIF" (on the dropdown)
+
+Alternatively, you can start from a config given in any examples above and tweak settings. 
+
+### What are "signs"?
+
+Signs are a series of buttons for determining at which side of the curve the circle should appear. 🔄 is the button for resetting them and **R** is button to reverse all of them. Each time you change settings except for a few (like the parametric equation, t range, etc.), signs are preserved. If you find the curve is strange, please try to use 🔄 to reset signs and rotation directions. In most cases, the default-generated signs are optimal and you only need to use the **R** button rather than changing them individually.
 
 ## Implementation notes
 

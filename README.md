@@ -12,31 +12,32 @@ See [here](Mechanism.md)
 | Equation                                                                                           | JS-generated GIF                            |
 | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | <img alt="$\left\{ \begin{array}{lr} x=2\cosh{t} &amp; \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi$" src="svgs/0de7166ff457dc0836424fcd0d3f27a8.svg" align="middle" width="229.263705pt" height="47.67147000000001pt"/> | <img src="doc/hyperbola.gif" width="300px"> |
-| Config is available [here](doc/hyperbola.json) |
+| Config is available [here](doc/hyperbola.json)                                                     |
 
 ### Example 2: Rolling on the sine function
 
 | Equation                                                                                         | JS-generated GIF         |
 | ------------------------------------------------------------------------------------------------ | ------------------------ |
 | <img alt="$\left\{ \begin{array}{lr} x= t &amp; \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30$" src="svgs/c44ead285ddd5254746f0b2b031fb3ba.svg" align="middle" width="234.90835499999997pt" height="47.67147000000001pt"/> | <img src="doc/sine.gif"> |
-| Config is available [here](doc/sine.json) |
+| Config is available [here](doc/sine.json)                                                        |
 
 ### Example 3: Rolling along an ellipse
 
 | Equation                                                                                      | JS-generated GIF            |
 | --------------------------------------------------------------------------------------------- | --------------------------- |
 | <img alt="$\left\{ \begin{array}{lr} x= 10\cos(t) &amp; \\ y= 6\sin(t) \end{array} \right. -\pi&lt; t\leq \pi$" src="svgs/8fde91d584867305280797f81ed79a11.svg" align="middle" width="228.182955pt" height="47.67147000000001pt"/> | <img src="doc/ellipse.gif"> |
-| Config is available [here](doc/ellipse.json) |
+| Config is available [here](doc/ellipse.json)                                                  |
 
 ### and many others
 
-| Heart                               | Astroid                               | Hypocycloid (k=4)                       | Rose (p=3)                          |
-| ----------------------------------- | ------------------------------------- | --------------------------------------- | ----------------------------------- |
-| <img src="./doc/heart-revolve.gif"> | <img src="./doc/astroid-revolve.gif"> | <img src="./doc/others/five-cusps.gif"> | <img src="./doc/others/rose-3.gif"> |
+| Heart                                     | Astroid                                     | Hypocycloid (k=4)                       | Rose (p=3)                                  |
+| ----------------------------------------- | ------------------------------------------- | --------------------------------------- | ------------------------------------------- |
+| <img src="./doc/heart-revolve.gif">       | <img src="./doc/astroid-revolve.gif">       | <img src="./doc/others/five-cusps.gif"> | <img src="./doc/others/rose-3.gif">         |
+| [download config](doc/heart-revolve.json) | [download config](doc/astroid-revolve.json) | [download config](doc/five-cusps.json)  | [download config](doc/others/rose-3.json) |
 
 ## How to use
 
-> Note: most 
+> Note: most settings have tooltips which explain their function. Hover your mouse over too see the tooltip.
 
 1. On the right side, enter your parametric equation, <img alt="$x(t), y(t)$" src="svgs/dfaef9f8b0bff868e16efe818c483fc9.svg" align="middle" width="62.793225pt" height="24.65759999999998pt"/>, both as functions of <img alt="$t$" src="svgs/4f4f4e395762a3af4575de74c019ebb5.svg" align="middle" width="5.936155500000004pt" height="20.222069999999988pt"/>. 
 2. Enter the lower/upper limit of <img alt="$t$" src="svgs/4f4f4e395762a3af4575de74c019ebb5.svg" align="middle" width="5.936155500000004pt" height="20.222069999999988pt"/>. 
@@ -50,6 +51,12 @@ See [here](Mechanism.md)
    5. Change signs and rotation directions
    6. Change other settings
 6. Finally, export your customized parametric roulette by clicking "save", "save to PNG" or "save to GIF" (on the dropdown)
+
+Alternatively, you can start from a config given in any examples above and tweak settings. 
+
+### What are "signs"?
+
+Signs are a series of buttons for determining at which side of the curve the circle should appear. 🔄 is the button for resetting them and **R** is button to reverse all of them. Each time you change settings except for a few (like the parametric equation, t range, etc.), signs are preserved. If you find the curve is strange, please try to use 🔄 to reset signs and rotation directions. In most cases, the default-generated signs are optimal and you only need to use the **R** button rather than changing them individually.
 
 ## Implementation notes
 
