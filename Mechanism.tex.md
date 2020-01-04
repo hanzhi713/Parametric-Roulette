@@ -79,17 +79,16 @@ $$
 
 This problem could be resolved to some extent by adjusting the sign of $\Delta x$, which could be achieved automatically in my JavaScript drawer (not available in Geogebra implementation though). The sign adjustment methods are described below.
 
-### Common adjustment required
+### Common adjustments required
 
-It is found that regardless of the sign-changing method used, sign needs to always be adjusted at stationary points. One can see that at the point where the normal changes sign, the gradient must be either zero or infinity. We only want to adjust the sign the case where the gradient is zero. Therefore, we changed the sign at $(x(t), y(t))$ iff
+It is found that regardless of the sign-changing method used, sign needs to always be adjusted at stationary points. One can see that at the point where the normal changes sign, the gradient must be either zero or infinity. We only want to adjust the sign the case where the gradient is zero. Hence, we should change the sign at $(f(t), g(t))$ iff
 
 $$
 \text{sgn}(\hat{n_{t^-}}) = - \text{sgn}(\hat{n_{t^+}}) \text{ and } 
 |\hat{n_{t^-}} - \hat{n_{t^+}}| \le \epsilon
 $$
 
-where $\hat{n_{t^-}}$ is the gradient of the normal at $t^-$, $\hat{n_{t^+}}$ is the gradient of the normal at $t^+$, $t^- < t < t^+$, and for some any small $\epsilon, \delta$, 
-$|t^- - t| = |t - t^+ | \le \delta$.
+where $\epsilon$ is some small number, $\hat{n_{t^-}}$ is the gradient of the normal at $t^-$, $\hat{n_{t^+}}$ is the gradient of the normal at $t^+$, $t^- < t < t^+$, and for some any small $\delta$, $|t^- - t| = |t - t^+ | \le \delta$.
 
 ### 1. Auto sign-changing by switching sides
 
