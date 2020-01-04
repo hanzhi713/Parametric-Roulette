@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Parametric Roulette</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -13,7 +14,7 @@
         crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-    crossorigin="anonymous"></script>
+        crossorigin="anonymous"></script>
     <link href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.1/nerdamer.core.min.js"></script>
@@ -70,12 +71,14 @@
             padding-left: 4px;
             padding-right: 4px;
             font-size: 12px;
+            border-radius: 0;
         }
 
         .rot-ele {
             padding-left: 5px;
             padding-right: 5px;
             font-size: 13px;
+            border-radius: 0;
         }
 
         .reverse-btn {
@@ -91,566 +94,570 @@
         }
 
         .color-blk {
-            width: 15px; height: 15px; display: inline-block
+            width: 15px;
+            height: 15px;
+            display: inline-block
         }
     </style>
 </head>
-<body style="margin: auto auto; width: 1200px">
-<table>
-    <tr style="text-align: center; margin-bottom: 0;padding-bottom: 0;">
-        <td style="text-align: center; margin-bottom: 0;padding-bottom: 0;">
-            <h4>Dots Setting</h4>
-        </td>
-        <td style="text-align: center; margin-bottom: 0;padding-bottom: 0">
-            <h4>Canvas</h4>
-        </td>
-        <td style="text-align: center; margin-bottom: 0;padding-bottom: 0">
-            <h4>Parameters</h4>
-        </td>
-    </tr>
-    <tr>
-        <td style="width: 250px;vertical-align: top;text-align: center">
-            <table class="table table-striped table-sm" style="text-align: left;">
-                <tr style="text-align: center">
-                    <td colspan="2"><h5>Dots</h5></td>
-                </tr>
-                <tr>
-                    <td><label for="dotSize">Size</label></td>
-                    <td>
-                        <input type="number" id="dotSize" style="width: 50px" value="2" step="1" max="200" min="1">
-                    </td>
-                </tr>
-                <tr>
-                    <td><label for="dotColor">Color</label></td>
-                    <td><input type="color" id="dotColor" style="width: 60px;"/></td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="dotRatio"
-                               title="The proportion of the dot's distance to the center of the circle relative to the circle's radius"
-                               data-toggle="tooltip">
-                            Ratio of radius
-                        </label>
-                    </td>
-                    <td><input type="number" id="dotRatio" style="width: 50px" value="80" step="0.1" max="800" min="0">%
-                    </td>
-                </tr>
-                <tr>
-                    <td><label for="dotRotOffset">Rotation</label></td>
-                    <td><input type="number" id="dotRotOffset" style="width: 50px" value="0" step="1" max="360" min="0">°
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="text-align: center">
-                        <button type="button" class="btn btn-primary" onclick="addDot();">Add</button>&nbsp;&nbsp;&nbsp;
-                        <button type="button" class="btn btn-secondary" onclick="randomDot();">Random
-                        </button>&nbsp;&nbsp;&nbsp;
-                        <button type="button" class="btn" data-toggle="modal" data-target="#RangeModalCenter">
-                            <i class="fas fa-cog" aria-hidden="true"></i>
-                        </button>
-                        <div class="modal fade" id="RangeModalCenter" tabindex="-1" role="dialog"
-                             aria-labelledby="RangeModalCenterTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="RangeModalLongTitle">Adjust Random Range</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <table class="table">
-                                            <thead class="thead-dark">
-                                            <tr>
-                                                <th>Items</th>
-                                                <th>Min</th>
-                                                <th>Max</th>
-                                            </tr>
-                                            </thead>
-                                            <tr>
-                                                <td>Dot Size</td>
-                                                <td><input id="dotSizeMin" style="width: 50px;" type="number" min="1"
-                                                           max="10" value="1"></td>
-                                                <td><input id="dotSizeMax" style="width: 50px;" type="number" min="1"
-                                                           max="10" value="3"></td>
-                                            </tr>
-                                            <tr>
-                                                <td>Distance Ratio</td>
-                                                <td><input id="dotRatioMin" style="width: 50px;" type="number"
-                                                           min="0" max="800" value="50" step="0.1">%
-                                                </td>
-                                                <td><input id="dotRatioMax" style="width: 50px;" type="number"
-                                                           min="0" max="800" value="100" step="0.1">%
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Dot Rotation</td>
-                                                <td><input id="dotRotMin" style="width: 50px;" type="number" min="0"
-                                                           max="359" value="0"></td>
-                                                <td><input id="dotRotMax" style="width: 50px;" type="number" min="0"
-                                                           max="359" value="359"></td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Save
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <label for="configloader">Load Config</label>
-                        <input type="file" id="configloader" onchange="loadConfig(this.files)" style="width:220px;"/>
-                    </td>
-                </tr>
-                <tr></tr>
-            </table>
-            <table class="table table-striped table-sm table-hover text-left">
-                <tbody id="settings">
-                    <tr>
-                        <th colspan="2" style="text-align: center"><h5>Dot List</h5></th>
+
+<body>
+    <div class="modal fade" id="DotModalCenter" tabindex="-1" role="dialog" aria-labelledby="DotModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="DotModalLongTitle">Modify dot parameters</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-bordered"
+                        style="text-align: left; width: 360px; margin: auto auto; font-size: 16px;">
+                        <tr>
+                            <th><label for="m-dotSize">Size</label></th>
+                            <td>
+                                <input type="hidden" id="m-dotID" value="">
+                                <input type="number" id="m-dotSize" style="width: 60px" value="6" step="1" max="200"
+                                    min="1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="m-dotColor">Color</label></th>
+                            <td><input type="color" id="m-dotColor" style="width: 60px;" /></td>
+                        </tr>
+                        <tr>
+                            <th><label for="m-dotRatio">Ratio</label></th>
+                            <td><input type="number" id="m-dotRatio" style="width: 60px" value="80" step="0.1" max="800"
+                                    min="0">%
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="m-dotRot">Rotation</label></th>
+                            <td><input type="number" id="m-dotRot" style="width: 60px" value="0" step="1" max="360"
+                                    min="0">°
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="postModify()">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="RangeModalCenter" tabindex="-1" role="dialog" aria-labelledby="RangeModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="RangeModalLongTitle">Adjust Random Range</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Items</th>
+                                <th>Min</th>
+                                <th>Max</th>
+                            </tr>
+                        </thead>
+                        <tr>
+                            <td>Dot Size</td>
+                            <td><input id="dotSizeMin" style="width: 50px;" type="number" min="1" max="10" value="1">
+                            </td>
+                            <td><input id="dotSizeMax" style="width: 50px;" type="number" min="1" max="10" value="3">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Distance Ratio</td>
+                            <td><input id="dotRatioMin" style="width: 50px;" type="number" min="0" max="800" value="50"
+                                    step="0.1">%
+                            </td>
+                            <td><input id="dotRatioMax" style="width: 50px;" type="number" min="0" max="800" value="100"
+                                    step="0.1">%
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Dot Rotation</td>
+                            <td><input id="dotRotMin" style="width: 50px;" type="number" min="0" max="359" value="0">
+                            </td>
+                            <td><input id="dotRotMax" style="width: 50px;" type="number" min="0" max="359" value="359">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="radiusSetter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="width: 400px" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="setterTitle">Generate a suitable radius</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table" style="font-size: large; width: 320px; margin: auto auto">
+                        <tr>
+                            <td><label for="radiusMultiple"
+                                    title="How many times should the total arc length greater than the perimeter">Multiples</label>
+                            </td>
+                            <td>
+                                <input id="radiusMultiple" type="number" step="0.5" min="0" max="100" value="10" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="generateRadius();">
+                        Generate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="GIFModalCenter" tabindex="-1" role="dialog" aria-labelledby="GIFModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="GIFModalLongTitle">GIF parameters</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-bordered table-sm"
+                        style="text-align: left; width: 360px; margin: auto auto; font-size: 16px;">
+                        <tr>
+                            <th><label for="f-size">Frame size</label></th>
+                            <td>
+                                <input type="number" id="f-size" style="width: 75px" value="320" step="1" max="640"
+                                    min="1"> px
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <label for="f-interval" data-toggle="tooltip"
+                                    title="Indicates how frequently should frames be taken. 40 means 1 frame per 40 drawing steps">
+                                    Frame interval
+                                </label>
+                            </th>
+                            <td>
+                                <input type="number" id="f-interval" style="width: 60px" value="40" step="1" max="200"
+                                    min="1"> ms
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <label for="f-delay" data-toggle="tooltip"
+                                    title="A number in milliseconds that indicates how long a single frame should stay">
+                                    Frame delay
+                                </label>
+                            </th>
+                            <td><input type="number" id="f-delay" style="width: 60px" value="20" step="1" max="1000"
+                                    min="1"> ms
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="f-transparent">Transparent</label></th>
+                            <td><input type="checkbox" id="f-transparent" style="width: 20px; height: 20px"
+                                    onchange="$('#f-bgcolor').attr('disabled', this.checked)">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="f-bgcolor">Background color</label></th>
+                            <td><input type="color" id="f-bgcolor" value="#FFFFFF" style="width: 60px;" /></td>
+                        </tr>
+                        <tr>
+                            <th><label for="f-quality" data-toggle="tooltip"
+                                    title="The lower the number, the better the GIF quality will be">Quality</label>
+                            </th>
+                            <td><input type="number" id="f-quality" style="width: 60px" value="10" step="1" max="20"
+                                    min="1">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <label for="f-lastdelay"
+                                    title="A number in milliseconds that defines how long should the last frame stay">
+                                    Last frame delay
+                                </label>
+                            </th>
+                            <td>
+                                <input type="number" id="f-lastdelay" style="width: 75px" value="1000" step="1"
+                                    max="5000" min="1"> ms
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveToGIF()">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="PNGModalCenter" tabindex="-1" role="dialog" aria-labelledby="GIFModalCenterTitle"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="PNGModalLongTitle">PNG parameters</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-bordered"
+                        style="text-align: left; width: 360px; margin: auto auto; font-size: 16px;">
+                        <tr>
+                            <th><label for="p-width">PNG width</label></th>
+                            <td>
+                                <input type="number" id="p-width" style="width: 75px" value="320" step="1" max="640"
+                                    min="1"> px
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="p-transparent">Transparent</label></th>
+                            <td><input type="checkbox" id="p-transparent" style="width: 20px; height: 20px"
+                                    onchange="$('#p-bgcolor').attr('disabled', this.checked)">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><label for="p-bgcolor">Background color</label></th>
+                            <td><input type="color" id="p-bgcolor" value="#FFFFFF" style="width: 60px;" /></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="saveToPNG()">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row justify-content-center flex-nowrap">
+            <div class="col-md-auto" style="width: 280px">
+                <h3 class="text-center">Dot Settings</h3>
+                <table class="table table-striped table-sm" style="text-align: left;">
+                    <tr style="text-align: center">
+                        <td colspan="2">
+                            <h5>Dots</h5>
+                        </td>
                     </tr>
-                </tbody>
-            </table>
-            <div class="modal fade" id="DotModalCenter" tabindex="-1" role="dialog"
-                 aria-labelledby="DotModalCenterTitle" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="DotModalLongTitle">Modify dot parameters</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                    <tr>
+                        <td><label for="dotSize">Size</label></td>
+                        <td>
+                            <input type="number" id="dotSize" style="width: 50px" value="2" step="1" max="200" min="1">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="dotColor">Color</label></td>
+                        <td><input type="color" id="dotColor" style="width: 60px;" /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="dotRatio"
+                                title="The proportion of the dot's distance to the center of the circle relative to the circle's radius"
+                                data-toggle="tooltip">
+                                Ratio of radius
+                            </label>
+                        </td>
+                        <td><input type="number" id="dotRatio" style="width: 50px" value="80" step="0.1" max="800"
+                                min="0">%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="dotRotOffset">Rotation</label></td>
+                        <td><input type="number" id="dotRotOffset" style="width: 50px" value="0" step="1" max="360"
+                                min="0">°
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center">
+                            <button type="button" class="btn btn-primary"
+                                onclick="addDot();">Add</button>&nbsp;&nbsp;&nbsp;
+                            <button type="button" class="btn btn-secondary" onclick="randomDot();">Random
+                            </button>&nbsp;&nbsp;&nbsp;
+                            <button type="button" class="btn" data-toggle="modal" data-target="#RangeModalCenter">
+                                <i class="fas fa-cog" aria-hidden="true"></i>
                             </button>
-                        </div>
-                        <div class="modal-body">
-                            <table class="table table-striped table-bordered"
-                                   style="text-align: left; width: 360px; margin: auto auto; font-size: 16px;">
-                                <tr>
-                                    <th><label for="m-dotSize">Size</label></th>
-                                    <td>
-                                        <input type="hidden" id="m-dotID" value="">
-                                        <input type="number" id="m-dotSize" style="width: 60px" value="6" step="1"
-                                               max="200" min="1">
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th><label for="m-dotColor">Color</label></th>
-                                    <td><input type="color" id="m-dotColor" style="width: 60px;"/></td>
-                                </tr>
-                                <tr>
-                                    <th><label for="m-dotRatio">Ratio</label></th>
-                                    <td><input type="number" id="m-dotRatio" style="width: 60px" value="80" step="0.1"
-                                               max="800" min="0">%
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th><label for="m-dotRot">Rotation</label></th>
-                                    <td><input type="number" id="m-dotRot" style="width: 60px" value="0" step="1"
-                                               max="360" min="0">°
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="postModify()">
-                                Save
-                            </button>
-                        </div>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="configloader"
+                                    onchange="loadConfig(this.files)">
+                                <label class="custom-file-label" for="configloader">Load config...</label>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <table class="table table-striped table-sm table-hover text-left">
+                    <tbody id="settings">
+                        <tr>
+                            <th colspan="2" style="text-align: center">
+                                <h5>Dot List</h5>
+                            </th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-auto">
+                <h3 class="text-center">Canvas</h3>
+                <div style="position: relative; width: 640px; height: 640px">
+                    <canvas id="canvas-top" width="640px" height="640px" class="c-default" style="z-index: 1"></canvas>
+                    <canvas id="canvas-bottom" width="640px" height="640px" class="c-default"
+                        style="z-index: 0"></canvas>
+                    <canvas id="canvas-func" width="640px" height="640px" class="c-default"
+                        style="z-index: -1;"></canvas>
+                    <canvas id="canvas-temp" width="640px" height="640px" class="c-default"
+                        style="z-index: -2;display: none"></canvas>
+                </div>
+                <div id="progressdiv" class="progress"
+                    style="width: 600px; height: 25px; margin: auto auto; text-align: center; position: relative">
+                    <div id="progressbar" class="progress-bar progress-bar-striped progress-bar-animated no-animation"
+                        role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    </div>
+                    <div
+                        style="position: absolute; left: 0; width: 600px; text-align: center; height:25px; line-height:25px;">
+                        <div id="progressLabel" style="display: inline-block; font-size: 18px;"></div>
                     </div>
                 </div>
-            </div>
-        </td>
-        <td style="text-align: center">
-            <div style="position: relative; width: 640px; height: 640px">
-                <canvas id="canvas-top" width="640px" height="640px" class="c-default" style="z-index: 1"></canvas>
-                <canvas id="canvas-bottom" width="640px" height="640px" class="c-default" style="z-index: 0"></canvas>
-                <canvas id="canvas-func" width="640px" height="640px" class="c-default" style="z-index: -1;"></canvas>
-                <canvas id="canvas-temp" width="640px" height="640px" class="c-default"
-                        style="z-index: -2;display: none"></canvas>
-            </div>
-            <div id="progressdiv" class="progress"
-                 style="width: 600px; height: 25px; margin: auto auto; text-align: center; position: relative">
-                <div id="progressbar" class="progress-bar progress-bar-striped progress-bar-animated no-animation"
-                     role="progressbar" style="width: 0%;"
-                     aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                <div style="position: absolute; left: 0; width: 600px; text-align: center; height:25px; line-height:25px;">
-                    <div id="progressLabel" style="display: inline-block; font-size: 18px;"></div>
+                <div style="font-size:18px; text-align: center;">
+                    Developed by <a href="https://github.com/hanzhi713" target="_blank">Hanzhi Zhou</a>
                 </div>
             </div>
-        </td>
-        <td style="width: 270px;vertical-align: top;text-align: center">
-            <table class="table table-striped table-sm" style="text-align: left;">
-                <tr>
-                    <td colspan="2">
-                        <label for="x=">x = f(t)</label>&nbsp;&nbsp;&nbsp;
-                        <input type="text" id="x=" style="width: 170px"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <label for="y=">y = g(t)</label>&nbsp;&nbsp;
-                        <input type="text" id="y=" style="width: 170px"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="text-align: center; font-weight: bold">
-                        <label for="t1" title="Lower limit of the parameter t" data-toggle="tooltip">t<sub>1</sub>:
-                        </label>&nbsp;&nbsp;
-                        <input type="number" id="t1" style="width: 80px" value="-10" step="0.01"/>&nbsp;&nbsp;&nbsp;&nbsp;
-                        <label for="t2" title="Upper limit of the parameter t" data-toggle="tooltip">t<sub>2</sub>:
-                        </label>&nbsp;&nbsp;
-                        <input type="number" id="t2" style="width: 80px" value="10" step="0.01"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="text-align: center; font-weight: bold; margin: 0 0 0 0">
-                        <label for="dx" title="Horizontal translation of the graph. Click to automatically adjust."
-                               data-toggle="tooltip" onclick="autoAdjustScalingAndTranslation()"
-                               style="cursor: pointer">
-                            dx:
-                        </label>
-                        <input type="number" id="dx" style="width: 57px" value="0" step="1"/>
-                        <label for="dy" title="Vertical translation of the graph. Click to automatically adjust."
-                               data-toggle="tooltip" onclick="autoAdjustScalingAndTranslation()"
-                               style="cursor: pointer">
-                            dy: </label>
-                        <input type="number" id="dy" style="width: 57px" value="0" step="1"/>
-                        <label for="scale" style="cursor: pointer"
-                               title="Scaling factor of the graph, applied horizontally and vertically. Click to automatically adjust."
-                               data-toggle="tooltip" onclick="autoAdjustScalingAndTranslation()">s: </label>
-                        <input type="number" id="scale" style="width: 56px" value="1" step="0.1"
-                               onchange="adjustDotRatioCap(this)"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="text-align: center">
-                        <button class="btn btn-info btn-sm reset-btn" title="reset all signs to default"
-                                data-toggle="tooltip"
-                                onclick="cutPoints=[];previewRuler();"><i class="fas fa-sync-alt fa-sm"></i>
-                        </button>
-                        <div id="sign-adjust" class="btn-group" role="group" style="display:inline;"></div>
-                        <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs" data-toggle="tooltip"
-                                onclick="reverseAllCutSigns()">R
-                        </button>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="text-align: center">
-                        <button class="btn btn-info btn-sm reset-btn" title="reset all signs to default"
-                                data-toggle="tooltip"
-                                onclick="cuspPoints=[];previewRuler();"><i class="fas fa-sync-alt fa-sm"></i>
-                        </button>
-                        <div id="rot-adjust" class="btn-group" role="group"></div>
-                        <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs" data-toggle="tooltip"
-                                onclick="reverseAllCuspSigns()">R
-                        </button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="circleRadius">Circle radius</label>
-                        <button type="button" class="btn btn-sm" data-toggle="modal" data-target="#radiusSetter">
-                            <i class="fas fa-hand-point-left"
-                               title="Generate a radius such that the perimeter of the circle divides the total arc length of your given parametric curve"
-                               data-toggle="tooltip"></i>
-                        </button>
-                        <div class="modal fade" id="radiusSetter" tabindex="-1" role="dialog"
-                             aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" style="width: 400px" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="setterTitle">Generate a suitable radius</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <table class="table" style="font-size: large; width: 320px; margin: auto auto">
-                                            <tr>
-                                                <td><label for="radiusMultiple"
-                                                           title="How many times should the total arc length greater than the perimeter">Multiples</label>
-                                                </td>
-                                                <td>
-                                                    <input id="radiusMultiple" type="number" step="0.5" min="0"
-                                                           max="100" value="10"/>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" data-dismiss="modal"
-                                                onclick="generateRadius();">
-                                            Generate
-                                        </button>
-                                    </div>
-                                </div>
+            <div class="col-md-auto" style="width: 320px">
+                <h3 class="text-center">Parameters</h3>
+                <table class="table table-striped table-sm" style="text-align: left;">
+                    <tr>
+                        <td colspan="2">
+                            <label for="x=">x = f(t)</label>:&nbsp;&nbsp;
+                            <input type="text" id="x=" style="width: 200px" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <label for="y=">y = g(t)</label>:&nbsp;&nbsp;
+                            <input type="text" id="y=" style="width: 200px" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center; font-weight: bold">
+                            <label for="t1" title="Lower limit of the parameter t" data-toggle="tooltip">t<sub>1</sub>:
+                            </label>&nbsp;&nbsp;
+                            <input type="number" id="t1" style="width: 80px" value="-10"
+                                step="0.01" />&nbsp;&nbsp;&nbsp;&nbsp;
+                            <label for="t2" title="Upper limit of the parameter t" data-toggle="tooltip">t<sub>2</sub>:
+                            </label>&nbsp;&nbsp;
+                            <input type="number" id="t2" style="width: 80px" value="10" step="0.01" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center; font-weight: bold; margin: 0 0 0 0">
+                            <label for="dx" title="Horizontal translation of the graph. Click to automatically adjust."
+                                data-toggle="tooltip" onclick="autoAdjustScalingAndTranslation()"
+                                style="cursor: pointer">
+                                dx:
+                            </label>
+                            <input type="number" id="dx" style="width: 60px" value="0" step="1" />
+                            <label for="dy" title="Vertical translation of the graph. Click to automatically adjust."
+                                data-toggle="tooltip" onclick="autoAdjustScalingAndTranslation()"
+                                style="cursor: pointer">
+                                dy: </label>
+                            <input type="number" id="dy" style="width: 60px" value="0" step="1" />
+                            <label for="scale" style="cursor: pointer"
+                                title="Scaling factor of the graph, applied horizontally and vertically. Click to automatically adjust."
+                                data-toggle="tooltip" onclick="autoAdjustScalingAndTranslation()">s: </label>
+                            <input type="number" id="scale" style="width: 60px" value="1" step="0.1"
+                                onchange="adjustDotRatioCap(this)" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center">
+                            <button class="btn btn-info btn-sm reset-btn" title="reset all signs to default"
+                                data-toggle="tooltip" onclick="cutPoints=[];previewRuler();"><i
+                                    class="fas fa-sync-alt fa-sm"></i>
+                            </button>
+                            <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs"
+                                data-toggle="tooltip" onclick="reverseAllCutSigns()">R
+                            </button>
+                            <div id="sign-adjust" style="display: inherit;" class="btn-group flex-wrap" role="group">
                             </div>
-                        </div>
-                    </td>
-                    <td>
-                        <input type="number" id="circleRadius" style="width: 70px" value="10" step="0.01" max="600"
-                               min="0.01" onchange="adjustDotRatioCap(this)">
-                    </td>
-                </tr>
-                <tr>
-                    <td><label for="showFunc" data-toggle="tooltip" title="Show the sketch of the parametric curve">Show
-                        p-curve</label></td>
-                    <td><input type="checkbox" id="showFunc" class="checkbox" checked/></td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="revolve" data-toggle="tooltip"
-                               title="Keep circle always inside/outside the parametric curve. Make the circle to revolve around cusp to keep the roulette continuous. This is an experimental feature, which may have many bugs">
-                            Revolve around cusp
-                        </label>
-                    </td>
-                    <td><input type="checkbox" id="revolve" class="checkbox" onchange="previewRuler();"/></td>
-                </tr>
-                <tr>
-                    <td><label for="showSk" data-toggle="tooltip"
-                               title="lines connecting the center of the inner circle and the dots">Show
-                        skeleton</label></td>
-                    <td><input type="checkbox" id="showSk" class="checkbox" checked/></td>
-                </tr>
-                <tr>
-                    <td><label for="clearBeforeDrawing">Clear before drawing</label></td>
-                    <td><input type="checkbox" id="clearBeforeDrawing" class="checkbox" checked/></td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="step" data-toggle="tooltip"
-                               title="The increment of the parameter t. The smaller this value, the greater the fineness and accuracy of the drawing will be, but the cost is longer drawing time">
-                            Drawing step
-                        </label>
-                    </td>
-                    <td>
-                        <input type="number" id="step" style="width: 75px;"
-                               value="0.01" step="0.001" max="0.5" min="0.001">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="delay" data-toggle="tooltip"
-                               title="Drawing speed">
-                            Drawing speed
-                        </label>
-                    </td>
-                    <td>
-                        <input type="number" id="delay" style="width: 50px" value="1" step="1" max="10" min="1">
-                    </td>
-                </tr>
-            </table>
-            <table id="button-group" style="width: 200px; margin: auto auto; text-align: center;">
-                <tr>
-                    <td>
-                        <button id="draw" class="btn btn-warning" onclick="stopDrawing();draw();" style="width:75px;"
-                                disabled>Draw
-                        </button>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-info" onclick="previewRuler()"
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center">
+                            <button class="btn btn-info btn-sm reset-btn" title="reset all signs to default"
+                                data-toggle="tooltip" onclick="cuspPoints=[];previewRuler();"><i
+                                    class="fas fa-sync-alt fa-sm"></i>
+                            </button>
+                            <button class="btn btn-info btn-sm reverse-btn" title="reverse all signs"
+                                data-toggle="tooltip" onclick="reverseAllCuspSigns()">R
+                            </button>
+                            <div id="rot-adjust" style="display: inherit;" class="btn-group flex-wrap" role="group">
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="circleRadius">Circle radius</label>
+                            <button type="button" class="btn btn-sm" data-toggle="modal" data-target="#radiusSetter">
+                                <i class="fas fa-hand-point-left"
+                                    title="Generate a radius such that the perimeter of the circle divides the total arc length of your given parametric curve"
+                                    data-toggle="tooltip"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <input type="number" id="circleRadius" style="width: 70px" value="10" step="0.01" max="600"
+                                min="0.01" onchange="adjustDotRatioCap(this)">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="showFunc" data-toggle="tooltip"
+                                title="Show the sketch of the parametric curve">Show
+                                p-curve</label></td>
+                        <td><input type="checkbox" id="showFunc" class="checkbox" checked /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="revolve" data-toggle="tooltip"
+                                title="Keep circle always inside/outside the parametric curve. Make the circle to revolve around cusp to keep the roulette continuous. This is an experimental feature, which may have many bugs">
+                                Revolve around cusp
+                            </label>
+                        </td>
+                        <td><input type="checkbox" id="revolve" class="checkbox" onchange="previewRuler();" /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="showSk" data-toggle="tooltip"
+                                title="lines connecting the center of the inner circle and the dots">Show
+                                skeleton</label></td>
+                        <td><input type="checkbox" id="showSk" class="checkbox" checked /></td>
+                    </tr>
+                    <tr>
+                        <td><label for="clearBeforeDrawing">Clear before drawing</label></td>
+                        <td><input type="checkbox" id="clearBeforeDrawing" class="checkbox" checked /></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="step" data-toggle="tooltip"
+                                title="The increment of the parameter t. The smaller this value, the greater the fineness and accuracy of the drawing will be, but the cost is longer drawing time">
+                                Drawing step
+                            </label>
+                        </td>
+                        <td>
+                            <input type="number" id="step" style="width: 75px;" value="0.01" step="0.001" max="0.5"
+                                min="0.001">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="delay" data-toggle="tooltip" title="Drawing speed">
+                                Drawing speed
+                            </label>
+                        </td>
+                        <td>
+                            <input type="number" id="delay" style="width: 50px" value="1" step="1" max="10" min="1">
+                        </td>
+                    </tr>
+                </table>
+                <table id="button-group" style="width: 200px; margin: auto auto; text-align: center;">
+                    <tr>
+                        <td>
+                            <button id="draw" class="btn btn-warning" onclick="stopDrawing();draw();"
+                                style="width:75px;" disabled>Draw
+                            </button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-info" onclick="previewRuler()"
                                 title="pre-calculate the path of the circle and preview dots and parametric curve"
                                 data-toggle="tooltip">Preview
-                        </button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-danger" onclick="stopDrawing()" style="width:50px;">
-                                Stop
                             </button>
-                            <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split"
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-danger" onclick="stopDrawing()"
+                                    style="width:50px;">
+                                    Stop
+                                </button>
+                                <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split"
                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="javascript:clear()">Clear</a>
-                                <a class="dropdown-item" onclick="clearBottom()">Erase skeleton</a>
-                                <a class="dropdown-item" onclick="clearFunc()">Erase parametric curve</a>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-info" onclick="saveConfig()" style="width:50px;">Save
-                            </button>
-                            <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split"
-                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <div class="dropdown-menu">
-                                <a style="cursor: pointer" class="dropdown-item" id="savepng" data-toggle="modal"
-                                   data-target="#PNGModalCenter">Save as
-                                    PNG</a>
-                                <a style="cursor: pointer" class="dropdown-item" id="savegif" data-toggle="modal"
-                                   data-target="#GIFModalCenter">Save as
-                                    GIF</a>
-                            </div>
-                        </div>
-                        <div class="modal fade" id="GIFModalCenter" tabindex="-1" role="dialog"
-                             aria-labelledby="GIFModalCenterTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="GIFModalLongTitle">GIF parameters</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <table class="table table-striped table-bordered table-sm"
-                                               style="text-align: left; width: 360px; margin: auto auto; font-size: 16px;">
-                                            <tr>
-                                                <th><label for="f-size">Frame size</label></th>
-                                                <td>
-                                                    <input type="number" id="f-size" style="width: 75px" value="320"
-                                                           step="1" max="640" min="1"> px
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <label for="f-interval" data-toggle="tooltip"
-                                                           title="Indicates how frequently should frames be taken. 40 means 1 frame per 40 drawing steps">
-                                                        Frame interval
-                                                    </label>
-                                                </th>
-                                                <td>
-                                                    <input type="number" id="f-interval" style="width: 60px" value="40"
-                                                           step="1" max="200" min="1"> ms
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <label for="f-delay" data-toggle="tooltip"
-                                                           title="A number in milliseconds that indicates how long a single frame should stay">
-                                                        Frame delay
-                                                    </label>
-                                                </th>
-                                                <td><input type="number" id="f-delay" style="width: 60px" value="20"
-                                                           step="1" max="1000" min="1"> ms
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th><label for="f-transparent">Transparent</label></th>
-                                                <td><input type="checkbox" id="f-transparent"
-                                                           style="width: 20px; height: 20px"
-                                                           onchange="$('#f-bgcolor').attr('disabled', this.checked)">
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th><label for="f-bgcolor">Background color</label></th>
-                                                <td><input type="color" id="f-bgcolor" value="#FFFFFF"
-                                                           style="width: 60px;"/></td>
-                                            </tr>
-                                            <tr>
-                                                <th><label for="f-quality" data-toggle="tooltip"
-                                                           title="The lower the number, the better the GIF quality will be">Quality</label>
-                                                </th>
-                                                <td><input type="number" id="f-quality" style="width: 60px" value="10"
-                                                           step="1" max="20" min="1">
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <label for="f-lastdelay"
-                                                           title="A number in milliseconds that defines how long should the last frame stay">
-                                                        Last frame delay
-                                                    </label>
-                                                </th>
-                                                <td>
-                                                    <input type="number" id="f-lastdelay" style="width: 75px"
-                                                           value="1000" step="1"
-                                                           max="5000" min="1"> ms
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                            Close
-                                        </button>
-                                        <button type="button" class="btn btn-primary" data-dismiss="modal"
-                                                onclick="saveToGIF()">
-                                            Save
-                                        </button>
-                                    </div>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="javascript:clear()">Clear</a>
+                                    <a class="dropdown-item" onclick="clearBottom()">Erase skeleton</a>
+                                    <a class="dropdown-item" onclick="clearFunc()">Erase parametric curve</a>
                                 </div>
                             </div>
-                        </div>
-                        <div class="modal fade" id="PNGModalCenter" tabindex="-1" role="dialog"
-                             aria-labelledby="GIFModalCenterTitle" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="PNGModalLongTitle">PNG parameters</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <table class="table table-striped table-bordered"
-                                               style="text-align: left; width: 360px; margin: auto auto; font-size: 16px;">
-                                            <tr>
-                                                <th><label for="p-width">PNG width</label></th>
-                                                <td>
-                                                    <input type="number" id="p-width" style="width: 75px" value="320"
-                                                           step="1" max="640" min="1"> px
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th><label for="p-transparent">Transparent</label></th>
-                                                <td><input type="checkbox" id="p-transparent"
-                                                           style="width: 20px; height: 20px"
-                                                           onchange="$('#p-bgcolor').attr('disabled', this.checked)">
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th><label for="p-bgcolor">Background color</label></th>
-                                                <td><input type="color" id="p-bgcolor" value="#FFFFFF"
-                                                           style="width: 60px;"/></td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                            Close
-                                        </button>
-                                        <button type="button" class="btn btn-primary" data-dismiss="modal"
-                                                onclick="saveToPNG()">
-                                            Save
-                                        </button>
-                                    </div>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-info" onclick="saveConfig()"
+                                    style="width:50px;">Save
+                                </button>
+                                <button type="button" class="btn btn-info dropdown-toggle dropdown-toggle-split"
+                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a style="cursor: pointer" class="dropdown-item" id="savepng" data-toggle="modal"
+                                        data-target="#PNGModalCenter">Save as
+                                        PNG</a>
+                                    <a style="cursor: pointer" class="dropdown-item" id="savegif" data-toggle="modal"
+                                        data-target="#GIFModalCenter">Save as
+                                        GIF</a>
                                 </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-<script>
-    var lan = {
-        'Save as GIF: ': 'Save as GIF: ',
-        'Save as GIF: Finished': 'Save as GIF: Finished',
-        'Drawing: Finished': 'Drawing: Finished',
-        'Drawing: ': 'Drawing: '
-    };
-</script>
-<script id="sc-1"></script>
-<script>
-    const s = document.getElementById('sc-1');
-    s.src = './parametric.js?ver=' + Math.random();
-</script>
-<div style="width: 300px; margin: auto auto">
-    <span style="font-size:18px;">
-        Developed by <a href="https://github.com/hanzhi713" target="_blank">Hanzhi Zhou</a>
-    </span>
-</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var lan = {
+            'Save as GIF: ': 'Save as GIF: ',
+            'Save as GIF: Finished': 'Save as GIF: Finished',
+            'Drawing: Finished': 'Drawing: Finished',
+            'Drawing: ': 'Drawing: '
+        };
+    </script>
+    <script id="sc-1"></script>
+    <script>
+        const s = document.getElementById('sc-1');
+        s.src = './parametric.js?ver=' + Math.random();
+    </script>
 </body>
+
 </html>
