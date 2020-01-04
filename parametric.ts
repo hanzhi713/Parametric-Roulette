@@ -363,6 +363,7 @@ function parseConfigJSON(json?: string | null) {
         previewRuler();
     } catch (e) {
         alert(e);
+        console.error(e);
     }
 }
 
@@ -586,7 +587,7 @@ function drawPreview() {
     while (isNaN(locArray[i][0])) {
         i++;
     }
-    while (locArray[i][0] > cutPoints[j][0]) {
+    while (locArray[i][5] > cutPoints[j][0]) {
         j++;
     }
     const initialSigns = cutPoints[j][1];

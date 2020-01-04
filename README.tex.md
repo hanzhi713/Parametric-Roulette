@@ -30,6 +30,12 @@ Config is available [here](doc/sine.json)
 
 Config is available [here](doc/ellipse.json)
 
+## And many others
+
+| Heart                               | Astroid                               | Hypocycloid (k=4)                       | Rose (p=3)                          |
+| ----------------------------------- | ------------------------------------- | --------------------------------------- | ----------------------------------- |
+| <img src="./doc/heart-revolve.gif"> | <img src="./doc/astroid-revolve.gif"> | <img src="./doc/others/five-cusps.gif"> | <img src="./doc/others/rose-3.gif"> |
+
 ## Implementation notes
 
 Originally I planned to implement this using JavaScript as an extension and generalization to my "[Flowers-curve](https://github.com/hanzhi713/Flowers-Curve)" repository (which is about drawing the locus of a point on circle rolling along another circle). However, I was unable to find a JavaScript library that can evaluate the definite integral for the arc length function accurately and efficiently. Therefore, I initially made the prototype with Geogebra. The geogebra file could be found in the [doc](https://github.com/hanzhi713/Parametric-Roulette/tree/master/doc) folder.
