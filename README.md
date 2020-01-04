@@ -7,34 +7,49 @@
 
 See [here](Mechanism.md)
 
-## Example 1: Rolling on a hyperbola
+### Example 1: Rolling on a hyperbola
 
 | Equation                                                                                           | JS-generated GIF                            |
 | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | <img alt="$\left\{ \begin{array}{lr} x=2\cosh{t} &amp; \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi$" src="svgs/0de7166ff457dc0836424fcd0d3f27a8.svg" align="middle" width="229.263705pt" height="47.67147000000001pt"/> | <img src="doc/hyperbola.gif" width="300px"> |
+| Config is available [here](doc/hyperbola.json) |
 
-Config is available [here](doc/hyperbola.json)
-
-## Example 2: Rolling on the sine function
+### Example 2: Rolling on the sine function
 
 | Equation                                                                                         | JS-generated GIF         |
 | ------------------------------------------------------------------------------------------------ | ------------------------ |
 | <img alt="$\left\{ \begin{array}{lr} x= t &amp; \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30$" src="svgs/c44ead285ddd5254746f0b2b031fb3ba.svg" align="middle" width="234.90835499999997pt" height="47.67147000000001pt"/> | <img src="doc/sine.gif"> |
-Config is available [here](doc/sine.json)
+| Config is available [here](doc/sine.json) |
 
-## Example 3: Rolling along an ellipse
+### Example 3: Rolling along an ellipse
 
 | Equation                                                                                      | JS-generated GIF            |
 | --------------------------------------------------------------------------------------------- | --------------------------- |
 | <img alt="$\left\{ \begin{array}{lr} x= 10\cos(t) &amp; \\ y= 6\sin(t) \end{array} \right. -\pi&lt; t\leq \pi$" src="svgs/8fde91d584867305280797f81ed79a11.svg" align="middle" width="228.182955pt" height="47.67147000000001pt"/> | <img src="doc/ellipse.gif"> |
+| Config is available [here](doc/ellipse.json) |
 
-Config is available [here](doc/ellipse.json)
-
-## And many others
+### and many others
 
 | Heart                               | Astroid                               | Hypocycloid (k=4)                       | Rose (p=3)                          |
 | ----------------------------------- | ------------------------------------- | --------------------------------------- | ----------------------------------- |
 | <img src="./doc/heart-revolve.gif"> | <img src="./doc/astroid-revolve.gif"> | <img src="./doc/others/five-cusps.gif"> | <img src="./doc/others/rose-3.gif"> |
+
+## How to use
+
+> Note: most 
+
+1. On the right side, enter your parametric equation, <img alt="$x(t), y(t)$" src="svgs/dfaef9f8b0bff868e16efe818c483fc9.svg" align="middle" width="62.793225pt" height="24.65759999999998pt"/>, both as functions of <img alt="$t$" src="svgs/4f4f4e395762a3af4575de74c019ebb5.svg" align="middle" width="5.936155500000004pt" height="20.222069999999988pt"/>. 
+2. Enter the lower/upper limit of <img alt="$t$" src="svgs/4f4f4e395762a3af4575de74c019ebb5.svg" align="middle" width="5.936155500000004pt" height="20.222069999999988pt"/>. 
+3. Add some dots, manually or randomly generate
+4. Hit "preview" and then "draw"
+5. while not satisfied:
+   1. Auto-adjust or manually change the scaling/translation (dx/dy/s) 
+   2. Adjust the circle radius or use 👈 button to generate a radius
+   3. Adjust the drawing step to gain more accuracy
+   4. Tweak the dot parameters
+   5. Change signs and rotation directions
+   6. Change other settings
+6. Finally, export your customized parametric roulette by clicking "save", "save to PNG" or "save to GIF" (on the dropdown)
 
 ## Implementation notes
 
