@@ -500,11 +500,11 @@ function saveToGIF() {
         tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
     }
 
-    const progressLabel = $("#progressLabel");
-    const progressbar = $("#progressbar");
-    progressbar.width("0%");
+    const progressLabel = document.getElementById('progressLabel')!;
+    const progressbar = document.getElementById('progressbar')!;
+    progressbar.style.width = "0%";
 
-    draw(() => {
+    draw(() => { // start render after drawing is completed
         if (transparent) tempCxt.clearRect(0, 0, width, height);
         else tempCxt.fillRect(0, 0, width, height);
 
@@ -517,17 +517,16 @@ function saveToGIF() {
             delay: +gifLastFrameDelayParam.value
         });
 
-        progressbar.width("0%");
+        progressbar.style.width = "0%";
 
-        // start render after drawing is completed
         gif.on("progress", (p: number) => {
-            if (Math.abs(1 - p) < 0.0001) {
-                progressbar.width("100%");
-                progressLabel.text("Save as GIF: Finished");
+            if (Math.abs(1 - p) < 0.001) {
+                progressbar.style.width = "100%";
+                progressLabel.innerHTML = "Save as GIF: Finished";
             } else {
                 p = p * 100;
-                progressbar.width(p + "%");
-                progressLabel.text("Save as GIF: " + p.toFixed(1) + "%");
+                progressbar.style.width = p + "%";
+                progressLabel.innerHTML = "Save as GIF: " + p.toFixed(1) + "%";
             }
         });
 
@@ -668,19 +667,24 @@ function calculateLocations() {
     const t1 = +t1Param.value,
         t2 = +t2Param.value;
 
-    let previousArcLength = 0;
-    let previousLower = t1;
-    let sign = 1, lastNormal = 0, lastCuspIdx = 1;
-
+    let sign = 1;
     const rotDirec = cuspPoints[0]?.[1] || (revolve.checked ? -1 : 1);
     const newCuspPoints: [number, number, number, number][] = [[t1, 0, 0, 1]];
-    const newCutPoints: [number, number][] = [[t1, sign]];
+    const newCutPoints: [number, number][] = [[t1, 1]];
 
     const step = +drawingStepParam.value,
         radius = +circleParam.value,
         scale = +scaleParam.value;
     const locations: number[][] = [];
-    outer: for (let t = t1, idx = 0; t < t2; t += step) {
+
+    // pre-compute the arcLength for every t
+    const arcLengths = new Float64Array(Math.ceil((t2 - t1) / step));
+    // trapezoidal rule numerical integration
+    for (let i = 1, sum = arcLengthExp(t1) * 0.5, lastV = 0; i < arcLengths.length; i++) {
+        sum += lastV;
+        arcLengths[i] = (sum + arcLengthExp(lastV = arcLengthExp(t1 + i * step)) * 0.5) * step;
+    }
+    outer: for (let t = t1, i = 0, idx = 0, lastNormal = 0, lastCuspIdx = 1, offset = 0; t < t2; t += step, i++) {
         const normal = -dx(t) / dy(t);
         if (Math.sign(normal * lastNormal) === -1) { // normal changes sign
             // for stationary points only
@@ -754,7 +758,7 @@ function calculateLocations() {
                     cuspT
                 ];
 
-                previousArcLength += radius * radians; // 
+                offset += radius * radians; // 
 
                 const lastCut = newCutPoints[newCutPoints.length - 1]
                 if (!lastCut || Math.abs(lastCut[0] - t) >= 2 * step) // if the t-value of the lastCut is not the same as this cusp
@@ -767,30 +771,20 @@ function calculateLocations() {
             lastCuspIdx = newCuspPoints.length;
         }
 
-        // update arc length
-        const sliceIdx = idx % 256;
-        const arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2);
-        if (sliceIdx === 255) {
-            previousLower = t;
-            previousArcLength = arcLength;
-        }
-
-        const rotAngle = arcLength / radius;
+        const rotAngle = (arcLengths[i] + offset) / radius;
         const delX = radius / Math.sqrt(normal * normal + 1);
         const delY = delX * normal;
         if (Math.abs(normal) > 10e100) { // special case to handle: normal is +/- infinity
             locations[idx++] = [xFunc(t) * scale, yFunc(t) * scale, radius * scale, 0, rotAngle, t];
         } else {
-            if (isFinite(rotAngle) && isFinite(normal))
+            if (isFinite(normal) && isFinite(rotAngle)) {
                 locations[idx++] = [xFunc(t) * scale, yFunc(t) * scale, delX * scale, delY * scale, rotAngle, t];
-            else {
+            } else {
                 locations[idx++] = [NaN, NaN, NaN, NaN, NaN, NaN];
             }
         }
-
         lastNormal = normal;
     }
-
     // do not reuse old sign if inconsistent
     // if (newCutPoints.length !== cutPoints.length) {
     //     cutPoints = [];
@@ -916,7 +910,12 @@ function generateRadius() {
     previewRuler();
 }
 
-function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { }) {
+/**
+ * @param doneCallback function to call after drawing is done
+ * @param stepInterval interval to update the progressbar and execute stepAction
+ * @param stepAction function to call when drawingStep % stepInterval === 0
+ */
+function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { }) {
     // storing the reference to global locArray for efficiency
     const _locArray = locArray;
     const _cuspPoints = cuspPoints;
@@ -939,9 +938,9 @@ function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { 
 
     setTransform([topCxt, bottomCxt, funcCxt]);
 
-    const progressLabel = $("#progressLabel");
-    const progressbar = $("#progressbar");
-    progressbar.width("0%");
+    const progressLabel = document.getElementById('progressLabel')!;
+    const progressbar = document.getElementById('progressbar')!;
+    progressbar.style.width = "0%";
 
     const tasks: (() => void)[] = [];
     for (
@@ -982,18 +981,16 @@ function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { 
             if (i % stepInterval === 0) {
                 stepAction();
 
-                const progress = (i / _locArray.length) * 100;
-                progressbar.width(progress + "%");
-                progressLabel.text(
-                    "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%"
-                );
+                const progress = ((i / _locArray.length) * 100).toFixed(1);
+                progressbar.style.width = progress + "%";
+                progressLabel.innerHTML = "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress + "%";
             }
         })
 
     }
     tasks.push(() => {
-        progressbar.width("100%");
-        progressLabel.text("Drawing: Finished");
+        progressbar.style.width = "100%";
+        progressLabel.innerHTML = "Drawing: Finished";
         doneCallback();
     })
     const speed = +drawingSpeedParam.value
@@ -1013,9 +1010,9 @@ function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { 
 function integrate(f: (x: number) => number, a: number, b: number, n: number) {
     if (Math.abs(b - a) < 1e-8) return 0;
     const step = (b - a) / n;
-    let sum = f(a);
-    for (let i = 1; i < n - 1; i++) sum += 2 * f(a + i * step);
-    return (sum + f(b)) * 0.5 * step;
+    let sum = (f(a) + f(b)) * 0.5;
+    for (let i = 1; i < n - 1; i++) sum += f(a + i * step);
+    return sum * step;
 }
 
 function rad2cor(x: number, y: number, radius: number, rad: number) {
