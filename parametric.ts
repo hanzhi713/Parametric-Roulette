@@ -591,11 +591,9 @@ function drawPreview() {
     }
     const initialSigns = cutPoints[j][1];
     const ruler = new Ruler(
-        new Circle(
-            initialSigns * locArray[i][2] + locArray[i][0],
-            initialSigns * locArray[i][3] + locArray[i][1],
-            +circleParam.value * +scaleParam.value
-        ),
+        initialSigns * locArray[i][2] + locArray[i][0],
+        initialSigns * locArray[i][3] + locArray[i][1],
+        +circleParam.value * +scaleParam.value,
         getDotArray()
     );
     ruler.showSkeleton = true;
@@ -927,7 +925,7 @@ function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { 
     const bottomCxt = bottomCanvas.getContext("2d")!;
     const funcCxt = funcCanvas.getContext("2d")!;
 
-    const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * +circleParam.value), getDotArray());
+    const ruler = new Ruler(320, 320, +scaleParam.value * +circleParam.value, getDotArray());
     ruler.showSkeleton = skeletonCheck.checked;
 
     if (clearBeforeDrawingCheck.checked || !ruler.showSkeleton) {
@@ -1015,29 +1013,19 @@ function integrate(f: (x: number) => number, a: number, b: number, n: number) {
     return sum * step;
 }
 
-function rad2cor(x: number, y: number, radius: number, rad: number) {
-    return [x + radius * Math.cos(rad), y + radius * Math.sin(rad)];
-}
-
 class Ruler {
-    showSkeleton: boolean;
     angle: number;
-    circle: Circle;
-    dots: Dot[];
     offset: number;
     rotSign: number;
-    constructor(circle: Circle, dots: Dot[]) {
+    showSkeleton: boolean;
+
+    constructor(public x: number, public y: number, public radius: number, public dots: Dot[]) {
         this.angle = 0;
         this.offset = 0;
         this.rotSign = 1;
         this.showSkeleton = true;
 
-        this.circle = circle;
         this.dots = dots;
-    }
-
-    calculateRotation(i: number) {
-        return this.rotSign * this.angle - this.dots[i].rotOffset + this.offset;
     }
 
     changeDirection(sign: number) {
@@ -1051,11 +1039,8 @@ class Ruler {
     draw(topCxt: CanvasRenderingContext2D, bottomCxt: CanvasRenderingContext2D) {
         bottomCxt.beginPath();
         this.drawCircle(bottomCxt);
-        this.drawSkeleton(bottomCxt);
-        bottomCxt.closePath();
+        this.drawDots(topCxt, bottomCxt);
         bottomCxt.stroke(); // do the above operations in the save batch, improving performance
-
-        this.drawDots(topCxt);
     }
 
     erase(bottomCxt: CanvasRenderingContext2D) {
@@ -1065,45 +1050,31 @@ class Ruler {
         bottomCxt.restore();
     }
 
-    drawCircle(bottomCxt: CanvasRenderingContext2D) {
-        if (this.showSkeleton) this.circle.draw(bottomCxt);
+    private drawCircle(bottomCxt: CanvasRenderingContext2D) {
+        if (this.showSkeleton) bottomCxt.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
     }
 
-    drawDots(topCxt: CanvasRenderingContext2D) {
-        // const previousStyle = topCxt.fillStyle;
-        for (let i = 0; i < this.dots.length; i++) {
-            const dotPos = rad2cor(
-                this.circle.x,
-                this.circle.y,
-                (this.dots[i].ratio / 100) * this.circle.radius,
-                this.calculateRotation(i)
-            );
-            topCxt.beginPath();
-            topCxt.fillStyle = this.dots[i].color;
-            topCxt.arc(dotPos[0], dotPos[1], this.dots[i].size, 0, 2 * Math.PI);
-            topCxt.closePath();
+    private drawDots(topCxt: CanvasRenderingContext2D, bottomCxt: CanvasRenderingContext2D) {
+        topCxt.beginPath();
+        for (const dot of this.dots) {
+            const radius = (dot.ratio / 100) * this.radius;
+            const rad = this.rotSign * this.angle - dot.rotOffset + this.offset;
+            const x = this.x + radius * Math.cos(rad), y = this.y + radius * Math.sin(rad);
+
+            topCxt.fillStyle = dot.color;
+            topCxt.arc(x, y, dot.size, 0, 2 * Math.PI);
             topCxt.fill();
-        }
-        // topCxt.fillStyle = previousStyle;
-    }
 
-    drawSkeleton(bottomCxt: CanvasRenderingContext2D) {
-        if (this.showSkeleton) {
-            for (let i = 0; i < this.dots.length; i++) {
-                const dotPos = rad2cor(
-                    this.circle.x,
-                    this.circle.y,
-                    (this.dots[i].ratio / 100) * this.circle.radius,
-                    this.calculateRotation(i)
-                );
-                bottomCxt.moveTo(this.circle.x, this.circle.y);
-                bottomCxt.lineTo(dotPos[0], dotPos[1]);
+            if (this.showSkeleton) {
+                bottomCxt.moveTo(this.x, this.y);
+                bottomCxt.lineTo(x, y);
             }
         }
     }
 
     moveTo(x: number, y: number) {
-        this.circle.moveTo(x, y);
+        this.x = x;
+        this.y = y;
     }
 }
 
@@ -1118,23 +1089,5 @@ class Dot {
         this.color = color;
         this.ratio = ratio;
         this.rotOffset = (rotOffset / 180) * Math.PI;
-    }
-}
-
-class Circle {
-    public x: number;
-    public y: number;
-    public radius: number;
-    constructor(x: number, y: number, radius: number) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-    }
-    draw(cxt: CanvasRenderingContext2D) {
-        cxt.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-    }
-    moveTo(x: number, y: number) {
-        this.x = x;
-        this.y = y;
     }
 }
