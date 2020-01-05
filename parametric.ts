@@ -980,7 +980,7 @@ function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { 
                 stepAction();
 
                 const progress = ((i / _locArray.length) * 100).toFixed(1);
-                progressbar.style.width = progress + "%";
+                progressbar.style.width = progress + "%"; // note: this is actually the slowest line because it causes reflow
                 progressLabel.innerHTML = "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress + "%";
             }
         })
@@ -1024,8 +1024,6 @@ class Ruler {
         this.offset = 0;
         this.rotSign = 1;
         this.showSkeleton = true;
-
-        this.dots = dots;
     }
 
     changeDirection(sign: number) {
@@ -1036,13 +1034,6 @@ class Ruler {
         // console.log((this.calculateRotation(0) - a) % (2*Math.PI), this.angle % (Math.PI * 2));
     }
 
-    draw(topCxt: CanvasRenderingContext2D, bottomCxt: CanvasRenderingContext2D) {
-        bottomCxt.beginPath();
-        this.drawCircle(bottomCxt);
-        this.drawDots(topCxt, bottomCxt);
-        bottomCxt.stroke(); // do the above operations in the save batch, improving performance
-    }
-
     erase(bottomCxt: CanvasRenderingContext2D) {
         bottomCxt.save();
         bottomCxt.resetTransform();
@@ -1050,16 +1041,16 @@ class Ruler {
         bottomCxt.restore();
     }
 
-    private drawCircle(bottomCxt: CanvasRenderingContext2D) {
+    draw(topCxt: CanvasRenderingContext2D, bottomCxt: CanvasRenderingContext2D) {
+        bottomCxt.beginPath();
         if (this.showSkeleton) bottomCxt.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-    }
 
-    private drawDots(topCxt: CanvasRenderingContext2D, bottomCxt: CanvasRenderingContext2D) {
         topCxt.beginPath();
         for (const dot of this.dots) {
             const radius = (dot.ratio / 100) * this.radius;
             const rad = this.rotSign * this.angle - dot.rotOffset + this.offset;
-            const x = this.x + radius * Math.cos(rad), y = this.y + radius * Math.sin(rad);
+            const x = this.x + radius * Math.cos(rad);
+            const y = this.y + radius * Math.sin(rad);
 
             topCxt.fillStyle = dot.color;
             topCxt.arc(x, y, dot.size, 0, 2 * Math.PI);
@@ -1070,6 +1061,7 @@ class Ruler {
                 bottomCxt.lineTo(x, y);
             }
         }
+        bottomCxt.stroke(); // do the bottomCxt operations in the save batch, improving performance
     }
 
     moveTo(x: number, y: number) {

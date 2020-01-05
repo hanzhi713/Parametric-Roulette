@@ -415,9 +415,9 @@ function saveToGIF() {
         tempCxt.fillStyle = gifBgColorParam.value;
         tempCxt.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
     }
-    const progressLabel = $("#progressLabel");
-    const progressbar = $("#progressbar");
-    progressbar.width("0%");
+    const progressLabel = document.getElementById('progressLabel');
+    const progressbar = document.getElementById('progressbar');
+    progressbar.style.width = "0%";
     draw(() => {
         if (transparent)
             tempCxt.clearRect(0, 0, width, height);
@@ -430,17 +430,16 @@ function saveToGIF() {
             copy: true,
             delay: +gifLastFrameDelayParam.value
         });
-        progressbar.width("0%");
-        // start render after drawing is completed
+        progressbar.style.width = "0%";
         gif.on("progress", (p) => {
-            if (Math.abs(1 - p) < 0.0001) {
-                progressbar.width("100%");
-                progressLabel.text("Save as GIF: Finished");
+            if (Math.abs(1 - p) < 0.001) {
+                progressbar.style.width = "100%";
+                progressLabel.innerHTML = "Save as GIF: Finished";
             }
             else {
                 p = p * 100;
-                progressbar.width(p + "%");
-                progressLabel.text("Save as GIF: " + p.toFixed(1) + "%");
+                progressbar.style.width = p + "%";
+                progressLabel.innerHTML = "Save as GIF: " + p.toFixed(1) + "%";
             }
         });
         gif.on("finished", (blob) => {
@@ -499,7 +498,7 @@ function drawPreview() {
         j++;
     }
     const initialSigns = cutPoints[j][1];
-    const ruler = new Ruler(new Circle(initialSigns * locArray[i][2] + locArray[i][0], initialSigns * locArray[i][3] + locArray[i][1], +circleParam.value * +scaleParam.value), getDotArray());
+    const ruler = new Ruler(initialSigns * locArray[i][2] + locArray[i][0], initialSigns * locArray[i][3] + locArray[i][1], +circleParam.value * +scaleParam.value, getDotArray());
     ruler.showSkeleton = true;
     ruler.draw(topCxt, bottomCxt);
     enableDrawing();
@@ -559,15 +558,20 @@ function calculateLocations() {
     var _a, _b;
     const [xFunc, yFunc, dx, dy, arcLengthExp, curvature] = buildNecessaryExpressions(nerdamer(xParam.value), nerdamer(yParam.value));
     const t1 = +t1Param.value, t2 = +t2Param.value;
-    let previousArcLength = 0;
-    let previousLower = t1;
-    let sign = 1, lastNormal = 0, lastCuspIdx = 1;
+    let sign = 1;
     const rotDirec = ((_a = cuspPoints[0]) === null || _a === void 0 ? void 0 : _a[1]) || (revolve.checked ? -1 : 1);
     const newCuspPoints = [[t1, 0, 0, 1]];
-    const newCutPoints = [[t1, sign]];
+    const newCutPoints = [[t1, 1]];
     const step = +drawingStepParam.value, radius = +circleParam.value, scale = +scaleParam.value;
     const locations = [];
-    outer: for (let t = t1, idx = 0; t < t2; t += step) {
+    // pre-compute the arcLength for every t
+    const arcLengths = new Float64Array(Math.ceil((t2 - t1) / step));
+    // trapezoidal rule numerical integration
+    for (let i = 1, sum = arcLengthExp(t1) * 0.5, lastV = 0; i < arcLengths.length; i++) {
+        sum += lastV;
+        arcLengths[i] = (sum + arcLengthExp(lastV = arcLengthExp(t1 + i * step)) * 0.5) * step;
+    }
+    outer: for (let t = t1, i = 0, idx = 0, lastNormal = 0, lastCuspIdx = 1, offset = 0; t < t2; t += step, i++) {
         const normal = -dx(t) / dy(t);
         if (Math.sign(normal * lastNormal) === -1) { // normal changes sign
             // for stationary points only
@@ -640,7 +644,7 @@ function calculateLocations() {
                     rotAngle + radians,
                     cuspT
                 ];
-                previousArcLength += radius * radians; // 
+                offset += radius * radians; // 
                 const lastCut = newCutPoints[newCutPoints.length - 1];
                 if (!lastCut || Math.abs(lastCut[0] - t) >= 2 * step) // if the t-value of the lastCut is not the same as this cusp
                     newCutPoints.push([cuspT + step, sign = -sign]); // add a new cut corresponding to this cusp
@@ -652,22 +656,16 @@ function calculateLocations() {
         else { // curvature falls below threshold: set last cusp to undefined
             lastCuspIdx = newCuspPoints.length;
         }
-        // update arc length
-        const sliceIdx = idx % 256;
-        const arcLength = previousArcLength + integrate(arcLengthExp, previousLower, t, sliceIdx * 2);
-        if (sliceIdx === 255) {
-            previousLower = t;
-            previousArcLength = arcLength;
-        }
-        const rotAngle = arcLength / radius;
+        const rotAngle = (arcLengths[i] + offset) / radius;
         const delX = radius / Math.sqrt(normal * normal + 1);
         const delY = delX * normal;
         if (Math.abs(normal) > 10e100) { // special case to handle: normal is +/- infinity
             locations[idx++] = [xFunc(t) * scale, yFunc(t) * scale, radius * scale, 0, rotAngle, t];
         }
         else {
-            if (isFinite(rotAngle) && isFinite(normal))
+            if (isFinite(normal) && isFinite(rotAngle)) {
                 locations[idx++] = [xFunc(t) * scale, yFunc(t) * scale, delX * scale, delY * scale, rotAngle, t];
+            }
             else {
                 locations[idx++] = [NaN, NaN, NaN, NaN, NaN, NaN];
             }
@@ -782,7 +780,12 @@ function generateRadius() {
     circleParam.value = (arcLength / (+radiusMultipleParam.value * 2 * Math.PI)).toString();
     previewRuler();
 }
-function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { }) {
+/**
+ * @param doneCallback function to call after drawing is done
+ * @param stepInterval interval to update the progressbar and execute stepAction
+ * @param stepAction function to call when drawingStep % stepInterval === 0
+ */
+function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { }) {
     // storing the reference to global locArray for efficiency
     const _locArray = locArray;
     const _cuspPoints = cuspPoints;
@@ -792,7 +795,7 @@ function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { 
     const topCxt = topCanvas.getContext("2d");
     const bottomCxt = bottomCanvas.getContext("2d");
     const funcCxt = funcCanvas.getContext("2d");
-    const ruler = new Ruler(new Circle(320, 320, +scaleParam.value * +circleParam.value), getDotArray());
+    const ruler = new Ruler(320, 320, +scaleParam.value * +circleParam.value, getDotArray());
     ruler.showSkeleton = skeletonCheck.checked;
     if (clearBeforeDrawingCheck.checked || !ruler.showSkeleton) {
         clearCxt(bottomCxt);
@@ -801,9 +804,9 @@ function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { 
     if (!functionCheck.checked)
         clearCxt(funcCxt);
     setTransform([topCxt, bottomCxt, funcCxt]);
-    const progressLabel = $("#progressLabel");
-    const progressbar = $("#progressbar");
-    progressbar.width("0%");
+    const progressLabel = document.getElementById('progressLabel');
+    const progressbar = document.getElementById('progressbar');
+    progressbar.style.width = "0%";
     const tasks = [];
     for (let i = 0, cut = 0, cusp = 0, sign = _cutPoints[0][0], rot = _cuspPoints[0][0]; i < _locArray.length; i++) {
         if (cut < _cutPoints.length && _locArray[i][5] >= _cutPoints[cut][0])
@@ -827,15 +830,15 @@ function draw(doneCallback = () => { }, stepInterval = 16, stepAction = () => { 
             ruler.draw(topCxt, bottomCxt);
             if (i % stepInterval === 0) {
                 stepAction();
-                const progress = (i / _locArray.length) * 100;
-                progressbar.width(progress + "%");
-                progressLabel.text("Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress.toFixed(1) + "%");
+                const progress = ((i / _locArray.length) * 100).toFixed(1);
+                progressbar.style.width = progress + "%"; // note: this is actually the slowest line because it causes reflow
+                progressLabel.innerHTML = "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress + "%";
             }
         });
     }
     tasks.push(() => {
-        progressbar.width("100%");
-        progressLabel.text("Drawing: Finished");
+        progressbar.style.width = "100%";
+        progressLabel.innerHTML = "Drawing: Finished";
         doneCallback();
     });
     const speed = +drawingSpeedParam.value;
@@ -855,25 +858,21 @@ function integrate(f, a, b, n) {
     if (Math.abs(b - a) < 1e-8)
         return 0;
     const step = (b - a) / n;
-    let sum = f(a);
+    let sum = (f(a) + f(b)) * 0.5;
     for (let i = 1; i < n - 1; i++)
-        sum += 2 * f(a + i * step);
-    return (sum + f(b)) * 0.5 * step;
-}
-function rad2cor(x, y, radius, rad) {
-    return [x + radius * Math.cos(rad), y + radius * Math.sin(rad)];
+        sum += f(a + i * step);
+    return sum * step;
 }
 class Ruler {
-    constructor(circle, dots) {
+    constructor(x, y, radius, dots) {
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.dots = dots;
         this.angle = 0;
         this.offset = 0;
         this.rotSign = 1;
         this.showSkeleton = true;
-        this.circle = circle;
-        this.dots = dots;
-    }
-    calculateRotation(i) {
-        return this.rotSign * this.angle - this.dots[i].rotOffset + this.offset;
     }
     changeDirection(sign) {
         // const a = this.calculateRotation(0);
@@ -882,47 +881,35 @@ class Ruler {
         this.rotSign = sign;
         // console.log((this.calculateRotation(0) - a) % (2*Math.PI), this.angle % (Math.PI * 2));
     }
-    draw(topCxt, bottomCxt) {
-        bottomCxt.beginPath();
-        this.drawCircle(bottomCxt);
-        this.drawSkeleton(bottomCxt);
-        bottomCxt.closePath();
-        bottomCxt.stroke(); // do the above operations in the save batch, improving performance
-        this.drawDots(topCxt);
-    }
     erase(bottomCxt) {
         bottomCxt.save();
         bottomCxt.resetTransform();
         bottomCxt.clearRect(0, 0, bottomCxt.canvas.width, bottomCxt.canvas.height);
         bottomCxt.restore();
     }
-    drawCircle(bottomCxt) {
+    draw(topCxt, bottomCxt) {
+        bottomCxt.beginPath();
         if (this.showSkeleton)
-            this.circle.draw(bottomCxt);
-    }
-    drawDots(topCxt) {
-        // const previousStyle = topCxt.fillStyle;
-        for (let i = 0; i < this.dots.length; i++) {
-            const dotPos = rad2cor(this.circle.x, this.circle.y, (this.dots[i].ratio / 100) * this.circle.radius, this.calculateRotation(i));
-            topCxt.beginPath();
-            topCxt.fillStyle = this.dots[i].color;
-            topCxt.arc(dotPos[0], dotPos[1], this.dots[i].size, 0, 2 * Math.PI);
-            topCxt.closePath();
+            bottomCxt.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        topCxt.beginPath();
+        for (const dot of this.dots) {
+            const radius = (dot.ratio / 100) * this.radius;
+            const rad = this.rotSign * this.angle - dot.rotOffset + this.offset;
+            const x = this.x + radius * Math.cos(rad);
+            const y = this.y + radius * Math.sin(rad);
+            topCxt.fillStyle = dot.color;
+            topCxt.arc(x, y, dot.size, 0, 2 * Math.PI);
             topCxt.fill();
-        }
-        // topCxt.fillStyle = previousStyle;
-    }
-    drawSkeleton(bottomCxt) {
-        if (this.showSkeleton) {
-            for (let i = 0; i < this.dots.length; i++) {
-                const dotPos = rad2cor(this.circle.x, this.circle.y, (this.dots[i].ratio / 100) * this.circle.radius, this.calculateRotation(i));
-                bottomCxt.moveTo(this.circle.x, this.circle.y);
-                bottomCxt.lineTo(dotPos[0], dotPos[1]);
+            if (this.showSkeleton) {
+                bottomCxt.moveTo(this.x, this.y);
+                bottomCxt.lineTo(x, y);
             }
         }
+        bottomCxt.stroke(); // do the bottomCxt operations in the save batch, improving performance
     }
     moveTo(x, y) {
-        this.circle.moveTo(x, y);
+        this.x = x;
+        this.y = y;
     }
 }
 class Dot {
@@ -931,20 +918,6 @@ class Dot {
         this.color = color;
         this.ratio = ratio;
         this.rotOffset = (rotOffset / 180) * Math.PI;
-    }
-}
-class Circle {
-    constructor(x, y, radius) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-    }
-    draw(cxt) {
-        cxt.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-    }
-    moveTo(x, y) {
-        this.x = x;
-        this.y = y;
     }
 }
 //# sourceMappingURL=parametric.js.map
