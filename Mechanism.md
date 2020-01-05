@@ -66,11 +66,11 @@ This problem could be resolved to some extent by adjusting the sign of <img alt=
 
 ### Common adjustments required
 
-It is found that regardless of the sign-changing method used, sign needs to always be adjusted at stationary points. One can see that at the point where the normal changes sign, the gradient must be either zero or infinity. We only want to adjust the sign the case where the gradient is zero. Hence, we should change the sign at <img alt="$(f(t), g(t))$" src="svgs/27732120cfc70a4ee8e7da6c168b3260.svg" align="middle" width="75.78219pt" height="24.65759999999998pt"/> iff
+It is found that regardless of the sign-changing method used, sign needs to always be adjusted at stationary points. At the point where the normal changes sign, the gradient must be either zero or infinity. We only want to adjust the sign the case where the gradient is zero. Hence, we should change the sign at <img alt="$(f(t), g(t))$" src="svgs/27732120cfc70a4ee8e7da6c168b3260.svg" align="middle" width="75.78219pt" height="24.65759999999998pt"/> iff
 
 <p align="center"><img alt="$$&#10;\text{sgn}(\hat{n_{t^-}}) = - \text{sgn}(\hat{n_{t^+}}) \text{ and } &#10;|\hat{n_{t^-}} - \hat{n_{t^+}}| \le \epsilon&#10;$$" src="svgs/54d87def0fef5708d309e292fcee5c0e.svg" align="middle" width="303.8112pt" height="16.438356pt"/></p>
 
-where <img alt="$\epsilon$" src="svgs/7ccca27b5ccc533a2dd72dc6fa28ed84.svg" align="middle" width="6.672451500000003pt" height="14.155350000000013pt"/> is some small number, <img alt="$\hat{n_{t^-}}$" src="svgs/86658f47f487f0023e50149906c0e1d4.svg" align="middle" width="23.736900000000002pt" height="22.831379999999992pt"/> is the gradient of the normal at <img alt="$t^-$" src="svgs/9bf9252ccb5fb8814379d38eae960418.svg" align="middle" width="16.21026pt" height="26.177579999999978pt"/>, <img alt="$\hat{n_{t^+}}$" src="svgs/a5836f91021c93a484c4f6b2b0a6613b.svg" align="middle" width="23.280345pt" height="22.831379999999992pt"/> is the gradient of the normal at <img alt="$t^+$" src="svgs/7e94ba42f89d8bcbab69742be5a10f69.svg" align="middle" width="16.027605000000005pt" height="26.177579999999978pt"/>, <img alt="$t^- &lt; t &lt; t^+$" src="svgs/5bbc1b1bfaa1f01c0c4cdfefb01ec8f1.svg" align="middle" width="82.830825pt" height="26.177579999999978pt"/>, and for some any small <img alt="$\delta$" src="svgs/38f1e2a089e53d5c990a82f284948953.svg" align="middle" width="7.928134500000003pt" height="22.831379999999992pt"/>, <img alt="$|t^- - t| = |t - t^+ | \le \delta$" src="svgs/1057f56cd2e4757183a9f0c40a2f41b6.svg" align="middle" width="155.96426999999997pt" height="26.177579999999978pt"/>.
+where <img alt="$\epsilon$" src="svgs/7ccca27b5ccc533a2dd72dc6fa28ed84.svg" align="middle" width="6.672451500000003pt" height="14.155350000000013pt"/> is some small number, <img alt="$\hat{n_{t^-}}$" src="svgs/86658f47f487f0023e50149906c0e1d4.svg" align="middle" width="23.736900000000002pt" height="22.831379999999992pt"/> and <img alt="$\hat{n_{t^+}}$" src="svgs/a5836f91021c93a484c4f6b2b0a6613b.svg" align="middle" width="23.280345pt" height="22.831379999999992pt"/> are the gradient of the normal at <img alt="$t^-$" src="svgs/9bf9252ccb5fb8814379d38eae960418.svg" align="middle" width="16.21026pt" height="26.177579999999978pt"/> and <img alt="$t^+$" src="svgs/7e94ba42f89d8bcbab69742be5a10f69.svg" align="middle" width="16.027605000000005pt" height="26.177579999999978pt"/>, respectively. Additionally, <img alt="$t^- &lt; t &lt; t^+$" src="svgs/5bbc1b1bfaa1f01c0c4cdfefb01ec8f1.svg" align="middle" width="82.830825pt" height="26.177579999999978pt"/>, and for some any small <img alt="$\delta$" src="svgs/38f1e2a089e53d5c990a82f284948953.svg" align="middle" width="7.928134500000003pt" height="22.831379999999992pt"/>, <img alt="$|t^- - t| = |t - t^+ | \le \delta$" src="svgs/1057f56cd2e4757183a9f0c40a2f41b6.svg" align="middle" width="155.96426999999997pt" height="26.177579999999978pt"/>.
 
 ### 1. Auto sign-changing by switching sides
 
@@ -85,7 +85,7 @@ The effect is shown in the following table.
 | <img src="doc/heart.gif">                  | <img src="doc/astroid.gif">                  |
 | config is available [here](doc/heart.json) | config is available [here](doc/astroid.json) |
 
-Currently there's no way to perfectly deal with parametric curve with three cusps because the roulette will always be broken at one cusp.
+Currently, this method cannot perfectly deal with parametric curve with odd number of cusps, because the roulette will always be broken at one cusp.
 
 <img src="doc/three-cusps.png" width="300px"/>
 
@@ -93,13 +93,11 @@ Currently there's no way to perfectly deal with parametric curve with three cusp
 
 Some considered the first method to be unnatural as the roulette doesn't appear consistently inside or outside the parametric curve. Therefore, I came up with this method in order to correct that issue.
 
-The roulette is kept consistently inside or outside the parametric curve by switching signs of <img alt="$\Delta x$" src="svgs/3919bbc84b8079e27194efe99a1f6a80.svg" align="middle" width="23.09373pt" height="22.46574pt"/> at all cusps except horizontal cusps. The rotation direction of the circle is consistent throughout.
-
-Additionally, a cusp is met, the circle will revolve around the cusp. The drawback of this method is that the path of revolution and the previous roulette may appear to be not contiguous. This is mainly caused by inaccuracies in floating point arithmetic. The effect of this method is shown below.
+The roulette is kept consistently inside or outside the parametric curve by switching signs of <img alt="$\Delta x$" src="svgs/3919bbc84b8079e27194efe99a1f6a80.svg" align="middle" width="23.09373pt" height="22.46574pt"/> at all cusps except horizontal cusps. The rotation direction of the circle is consistent throughout. Additionally, when a cusp is met, the circle will revolve around the cusp. The effect of this method is shown below.
 
 | Heart                                              | Astroid                                              |
 | -------------------------------------------------- | ---------------------------------------------------- |
 | <img src="doc/heart-revolve.gif">                  | <img src="doc/astroid-revolve.gif">                  |
 | config is available [here](doc/heart-revolve.json) | config is available [here](doc/astroid-revolve.json) |
 
-Sometimes cusps may not be detected due to the numerical nature of my method. In such cases, try to decrease the drawing step so better numerical accuracy can be achieved.
+The drawback of this method is that the path of revolution and the previous roulette may appear to be not contiguous. This is mainly caused by inaccuracies in floating point arithmetic. Moreover, sometimes cusps may not be detected due to the numerical nature of my method. In such cases, try to decrease the drawing step so better numerical accuracy can be achieved.

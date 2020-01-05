@@ -81,14 +81,14 @@ This problem could be resolved to some extent by adjusting the sign of $\Delta x
 
 ### Common adjustments required
 
-It is found that regardless of the sign-changing method used, sign needs to always be adjusted at stationary points. One can see that at the point where the normal changes sign, the gradient must be either zero or infinity. We only want to adjust the sign the case where the gradient is zero. Hence, we should change the sign at $(f(t), g(t))$ iff
+It is found that regardless of the sign-changing method used, sign needs to always be adjusted at stationary points. At the point where the normal changes sign, the gradient must be either zero or infinity. We only want to adjust the sign the case where the gradient is zero. Hence, we should change the sign at $(f(t), g(t))$ iff
 
 $$
 \text{sgn}(\hat{n_{t^-}}) = - \text{sgn}(\hat{n_{t^+}}) \text{ and } 
 |\hat{n_{t^-}} - \hat{n_{t^+}}| \le \epsilon
 $$
 
-where $\epsilon$ is some small number, $\hat{n_{t^-}}$ is the gradient of the normal at $t^-$, $\hat{n_{t^+}}$ is the gradient of the normal at $t^+$, $t^- < t < t^+$, and for some any small $\delta$, $|t^- - t| = |t - t^+ | \le \delta$.
+where $\epsilon$ is some small number, $\hat{n_{t^-}}$ and $\hat{n_{t^+}}$ are the gradient of the normal at $t^-$ and $t^+$, respectively. Additionally, $t^- < t < t^+$, and for some any small $\delta$, $|t^- - t| = |t - t^+ | \le \delta$.
 
 ### 1. Auto sign-changing by switching sides
 
@@ -105,7 +105,7 @@ The effect is shown in the following table.
 | <img src="doc/heart.gif">                  | <img src="doc/astroid.gif">                  |
 | config is available [here](doc/heart.json) | config is available [here](doc/astroid.json) |
 
-Currently there's no way to perfectly deal with parametric curve with three cusps because the roulette will always be broken at one cusp.
+Currently, this method cannot perfectly deal with parametric curve with odd number of cusps, because the roulette will always be broken at one cusp.
 
 <img src="doc/three-cusps.png" width="300px"/>
 
@@ -113,13 +113,11 @@ Currently there's no way to perfectly deal with parametric curve with three cusp
 
 Some considered the first method to be unnatural as the roulette doesn't appear consistently inside or outside the parametric curve. Therefore, I came up with this method in order to correct that issue.
 
-The roulette is kept consistently inside or outside the parametric curve by switching signs of $\Delta x$ at all cusps except horizontal cusps. The rotation direction of the circle is consistent throughout.
-
-Additionally, a cusp is met, the circle will revolve around the cusp. The drawback of this method is that the path of revolution and the previous roulette may appear to be not contiguous. This is mainly caused by inaccuracies in floating point arithmetic. The effect of this method is shown below.
+The roulette is kept consistently inside or outside the parametric curve by switching signs of $\Delta x$ at all cusps except horizontal cusps. The rotation direction of the circle is consistent throughout. Additionally, when a cusp is met, the circle will revolve around the cusp. The effect of this method is shown below.
 
 | Heart                                              | Astroid                                              |
 | -------------------------------------------------- | ---------------------------------------------------- |
 | <img src="doc/heart-revolve.gif">                  | <img src="doc/astroid-revolve.gif">                  |
 | config is available [here](doc/heart-revolve.json) | config is available [here](doc/astroid-revolve.json) |
 
-Sometimes cusps may not be detected due to the numerical nature of my method. In such cases, try to decrease the drawing step so better numerical accuracy can be achieved.
+The drawback of this method is that the path of revolution and the previous roulette may appear to be not contiguous. This is mainly caused by inaccuracies in floating point arithmetic. Moreover, sometimes cusps may not be detected due to the numerical nature of my method. In such cases, try to decrease the drawing step so better numerical accuracy can be achieved.

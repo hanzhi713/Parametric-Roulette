@@ -37,6 +37,8 @@ See [here](Mechanism.md)
 
 ## How to use
 
+> Recent versions of Chrome/Firefox are recommended. Require ES6 support. Not tested on other browsers.
+
 > Note: most settings have tooltips which explain their function. Hover your mouse over too see the tooltip.
 
 1. On the right side, enter your parametric equation, <img alt="$x(t), y(t)$" src="svgs/dfaef9f8b0bff868e16efe818c483fc9.svg" align="middle" width="62.793225pt" height="24.65759999999998pt"/>, both as functions of <img alt="$t$" src="svgs/4f4f4e395762a3af4575de74c019ebb5.svg" align="middle" width="5.936155500000004pt" height="20.222069999999988pt"/>. 
@@ -56,7 +58,26 @@ Alternatively, you can start from a config given in any examples above and tweak
 
 ### What are "signs"?
 
-Signs are a series of buttons for determining at which side of the curve the circle should appear. 🔄 is the button for resetting them and **R** is button to reverse all of them. Each time you change settings except for a few (like the parametric equation, t range, etc.), signs are preserved. If you find the curve is strange, please try to use 🔄 to reset signs and rotation directions. In most cases, the default-generated signs are optimal and you only need to use the **R** button rather than changing them individually.
+Signs are a series of buttons for determining at which side of the curve the circle should appear. 🔄 is the button for resetting them and **R** is button to reverse all of them. Each time you change settings except for a few (like the parametric equation, t range, etc.), signs are preserved. If you find the curve is strange, please try to use 🔄 to reset signs and rotation directions. In most cases, the default-generated signs are optimal and you only need to use the **R** button rather than changing them individually. Please check [Mechanism.md](Mechanism.md) for details.
+
+## Development
+
+Make sure you have node.js >= 10.16
+
+Clone this repository and install dependencies
+
+```bash
+git clone https://github.com/hanzhi713/Parametric-Roulette
+npm install
+```
+
+Then, run the file watcher. It basically calls the typescript compiler and a script that removes the import statements from the compiled js file.
+
+```bash
+npm run dev
+```
+
+Finally, open a local static file server, using http-server, python's http.server or any other server of your preference.
 
 ## Implementation notes
 

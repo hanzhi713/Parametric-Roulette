@@ -1,3 +1,6 @@
+/** 
+ * A dirty hack that replaces the first three lines (which contain import statements) with spaces
+*/
 const fs = require('fs');
 const os = require('os')
 const f = fs.readFileSync('parametric.js').toString().split(os.EOL)
