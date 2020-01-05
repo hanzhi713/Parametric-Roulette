@@ -1,6 +1,6 @@
 # Parametric Roulette
 
-**Draw the locus of a point on a circle rolling on an arbitrary parametric function, implemented separately using Geogebra and JavaScript. To use the online drawer, please visit https://hanzhi713.github.io/Parametric-Roulette/index.html**.
+**Draw the locus of a point on a circle rolling on an arbitrary parametric function. To use the online drawer, please visit https://hanzhi713.github.io/Parametric-Roulette/index.html**.
 
 
 ## Mechanism
@@ -58,9 +58,11 @@ Alternatively, you can start from a config given in any examples above and tweak
 
 ### What are "signs"?
 
-Signs are a series of buttons for determining at which side of the curve the circle should appear. 🔄 is the button for resetting them and **R** is button to reverse all of them. Each time you change settings except for a few (like the parametric equation, t range, etc.), signs are preserved. If you find the curve is strange, please try to use 🔄 to reset signs and rotation directions. In most cases, the default-generated signs are optimal and you only need to use the **R** button rather than changing them individually. Please check [Mechanism.md](Mechanism.md) for details.
+Signs are a series of buttons for determining at which side of the curve the circle should appear and the rotation direction of the circle. 🔄 is the button for resetting them and **R** is button to reverse all of them. Each time you change settings except for a few (like the parametric equation, t range, etc.), signs are preserved. If the resulting roulette is strange, please try to use 🔄 to reset signs and rotation directions. In most cases, the default-generated signs are optimal and you only need to use the **R** button rather than changing them individually. Please check [Mechanism.md](Mechanism.md) for details.
 
 ## Development
+
+> Note: no compilers/bundlers other than the typescript compiler are used to keep things simple for this small project
 
 Make sure you have node.js >= 10.16
 
