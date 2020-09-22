@@ -1,8 +1,3 @@
-if (typeof Math.sign !== "function") {
-    Math.sign = x => {
-        return x === 0 ? 0 : x > 0 ? 1 : -1;
-    };
-}
 const topCanvas = document.getElementById("canvas-top");
 const bottomCanvas = document.getElementById("canvas-bottom");
 const funcCanvas = document.getElementById("canvas-func");
@@ -885,12 +880,12 @@ class Ruler {
         bottomCxt.beginPath();
         if (this.showSkeleton)
             bottomCxt.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        topCxt.beginPath();
         for (const dot of this.dots) {
             const radius = (dot.ratio / 100) * this.radius;
             const rad = this.rotSign * this.angle - dot.rotOffset + this.offset;
             const x = this.x + radius * Math.cos(rad);
             const y = this.y + radius * Math.sin(rad);
+            topCxt.beginPath();
             topCxt.fillStyle = dot.color;
             topCxt.arc(x, y, dot.size, 0, 2 * Math.PI);
             topCxt.fill();
