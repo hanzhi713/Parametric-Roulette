@@ -11,29 +11,29 @@ See [here](Mechanism.md)
 
 | Equation                                                                                           | JS-generated GIF                            |
 | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| <img alt="$\left\{ \begin{array}{lr} x=2\cosh{t} &amp; \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi$" src="svgs/0de7166ff457dc0836424fcd0d3f27a8.svg" align="middle" width="229.263705pt" height="47.67147000000001pt"/> | <img src="doc/hyperbola.gif" width="300px"> |
-| Config is available [here](doc/hyperbola.json)                                                     |
+| <img src="svgs/0de7166ff457dc0836424fcd0d3f27a8.svg?invert_in_darkmode" align=middle width=229.263705pt height=47.67147000000001pt/> | <img src="doc/images/hyperbola.gif" width="300px"> |
+| Config is available [here](doc/configs/hyperbola.json)                                                     |
 
 ### Example 2: Rolling on the sine function
 
 | Equation                                                                                         | JS-generated GIF         |
 | ------------------------------------------------------------------------------------------------ | ------------------------ |
-| <img alt="$\left\{ \begin{array}{lr} x= t &amp; \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30$" src="svgs/c44ead285ddd5254746f0b2b031fb3ba.svg" align="middle" width="234.90835499999997pt" height="47.67147000000001pt"/> | <img src="doc/sine.gif"> |
-| Config is available [here](doc/sine.json)                                                        |
+| <img src="svgs/c44ead285ddd5254746f0b2b031fb3ba.svg?invert_in_darkmode" align=middle width=234.90835499999997pt height=47.67147000000001pt/> | <img src="doc/images/sine.gif"> |
+| Config is available [here](doc/configs/sine.json)                                                        |
 
 ### Example 3: Rolling along an ellipse
 
 | Equation                                                                                      | JS-generated GIF            |
 | --------------------------------------------------------------------------------------------- | --------------------------- |
-| <img alt="$\left\{ \begin{array}{lr} x= 10\cos(t) &amp; \\ y= 6\sin(t) \end{array} \right. -\pi&lt; t\leq \pi$" src="svgs/8fde91d584867305280797f81ed79a11.svg" align="middle" width="228.182955pt" height="47.67147000000001pt"/> | <img src="doc/ellipse.gif"> |
-| Config is available [here](doc/ellipse.json)                                                  |
+| <img src="svgs/8fde91d584867305280797f81ed79a11.svg?invert_in_darkmode" align=middle width=228.182955pt height=47.67147000000001pt/> | <img src="doc/images/ellipse.gif"> |
+| Config is available [here](doc/configs/ellipse.json)                                                  |
 
 ### and many others
 
 | Heart                                     | Astroid                                     | Hypocycloid (k=4)                       | Rose (p=3)                                  |
 | ----------------------------------------- | ------------------------------------------- | --------------------------------------- | ------------------------------------------- |
-| <img src="./doc/heart-revolve.gif">       | <img src="./doc/astroid-revolve.gif">       | <img src="./doc/others/five-cusps.gif"> | <img src="./doc/others/rose-3.gif">         |
-| [download config](doc/heart-revolve.json) | [download config](doc/astroid-revolve.json) | [download config](doc/five-cusps.json)  | [download config](doc/others/rose-3.json) |
+| <img src="doc/images/heart-revolve.gif">       | <img src="doc/images/astroid-revolve.gif">       | <img src="doc/images/five-cusps.gif"> | <img src="doc/images/rose-3.gif">         |
+| [download config](doc/configs/heart-revolve.json) | [download config](doc/configs/astroid-revolve.json) | [download config](doc/configs/five-cusps.json)  | [download config](doc/configs/rose-3.json) |
 
 ## How to use
 
@@ -41,8 +41,8 @@ See [here](Mechanism.md)
 
 > Note: most settings have tooltips which explain their function. Hover your mouse over too see the tooltip.
 
-1. On the right side, enter your parametric equation, <img alt="$x(t), y(t)$" src="svgs/dfaef9f8b0bff868e16efe818c483fc9.svg" align="middle" width="62.793225pt" height="24.65759999999998pt"/>, both as functions of <img alt="$t$" src="svgs/4f4f4e395762a3af4575de74c019ebb5.svg" align="middle" width="5.936155500000004pt" height="20.222069999999988pt"/>. 
-2. Enter the lower/upper limit of <img alt="$t$" src="svgs/4f4f4e395762a3af4575de74c019ebb5.svg" align="middle" width="5.936155500000004pt" height="20.222069999999988pt"/>. 
+1. On the right side, enter your parametric equation, <img src="svgs/dfaef9f8b0bff868e16efe818c483fc9.svg?invert_in_darkmode" align=middle width=62.793225pt height=24.65759999999998pt/>, both as functions of <img src="svgs/4f4f4e395762a3af4575de74c019ebb5.svg?invert_in_darkmode" align=middle width=5.936155500000004pt height=20.222069999999988pt/>. 
+2. Enter the lower/upper limit of <img src="svgs/4f4f4e395762a3af4575de74c019ebb5.svg?invert_in_darkmode" align=middle width=5.936155500000004pt height=20.222069999999988pt/>. 
 3. Add some dots, manually or randomly generate
 4. Hit "preview" and then "draw"
 5. while not satisfied:
@@ -54,7 +54,7 @@ See [here](Mechanism.md)
    6. Change other settings
 6. Finally, export your customized parametric roulette by clicking "save", "save to PNG" or "save to GIF" (on the dropdown)
 
-Alternatively, you can start from a config given in any examples above and tweak settings. 
+Alternatively, you can start from a config given in any examples above and tweak settings. To load a config (a JSON file), use the "Load Config" button on the left panel to upload your .json config. 
 
 ### What are "signs"?
 
@@ -79,7 +79,21 @@ Then, run the file watcher. It basically calls the typescript compiler and a scr
 npm run dev
 ```
 
-Finally, open a local static file server, using http-server, python's http.server or any other server of your preference.
+Finally, open a local static file server, using http-server, python's http.server or any other server of your preference. 
+
+### Compiling this README
+
+README.md and Mechanism.md are compiled from README.tex.md and Mechanism.tex.md which contain inline latex formulae. You need to have the package [readme2tex](https://github.com/leegao/readme2tex) installed in order to compile. 
+
+```bash
+pip install readme2tex
+```
+
+Then, you can run the compile script
+
+```bash
+bash build_tex.sh
+```
 
 ## Implementation notes
 

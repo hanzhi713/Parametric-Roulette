@@ -12,28 +12,28 @@ See [here](Mechanism.md)
 | Equation                                                                                           | JS-generated GIF                            |
 | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | $\left\{ \begin{array}{lr} x=2\cosh{t} & \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi$ | <img src="doc/images/hyperbola.gif" width="300px"> |
-| Config is available [here](doc/config/hyperbola.json)                                                     |
+| Config is available [here](doc/configs/hyperbola.json)                                                     |
 
 ### Example 2: Rolling on the sine function
 
 | Equation                                                                                         | JS-generated GIF         |
 | ------------------------------------------------------------------------------------------------ | ------------------------ |
 | $\left\{ \begin{array}{lr} x= t & \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30$ | <img src="doc/images/sine.gif"> |
-| Config is available [here](doc/config/sine.json)                                                        |
+| Config is available [here](doc/configs/sine.json)                                                        |
 
 ### Example 3: Rolling along an ellipse
 
 | Equation                                                                                      | JS-generated GIF            |
 | --------------------------------------------------------------------------------------------- | --------------------------- |
 | $\left\{ \begin{array}{lr} x= 10\cos(t) & \\ y= 6\sin(t) \end{array} \right. -\pi< t\leq \pi$ | <img src="doc/images/ellipse.gif"> |
-| Config is available [here](doc/config/ellipse.json)                                                  |
+| Config is available [here](doc/configs/ellipse.json)                                                  |
 
 ### and many others
 
 | Heart                                     | Astroid                                     | Hypocycloid (k=4)                       | Rose (p=3)                                  |
 | ----------------------------------------- | ------------------------------------------- | --------------------------------------- | ------------------------------------------- |
 | <img src="doc/images/heart-revolve.gif">       | <img src="doc/images/astroid-revolve.gif">       | <img src="doc/images/five-cusps.gif"> | <img src="doc/images/rose-3.gif">         |
-| [download config](doc/config/heart-revolve.json) | [download config](doc/config/astroid-revolve.json) | [download config](doc/config/five-cusps.json)  | [download config](doc/config/rose-3.json) |
+| [download config](doc/configs/heart-revolve.json) | [download config](doc/configs/astroid-revolve.json) | [download config](doc/configs/five-cusps.json)  | [download config](doc/configs/rose-3.json) |
 
 ## How to use
 

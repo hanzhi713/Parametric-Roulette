@@ -103,7 +103,7 @@ The effect is shown in the following table.
 | Heart                                      | Astroid                                      |
 | ------------------------------------------ | -------------------------------------------- |
 | <img src="doc/images/heart.gif">                  | <img src="doc/images/astroid.gif">                  |
-| config is available [here](doc/config/heart.json) | config is available [here](doc/config/astroid.json) |
+| config is available [here](doc/configs/heart.json) | config is available [here](doc/configs/astroid.json) |
 
 Currently, this method cannot perfectly deal with parametric curve with odd number of cusps, because the roulette will always be broken at one cusp.
 
@@ -118,6 +118,6 @@ The roulette is kept consistently inside or outside the parametric curve by swit
 | Heart                                              | Astroid                                              |
 | -------------------------------------------------- | ---------------------------------------------------- |
 | <img src="doc/images/heart-revolve.gif">                  | <img src="doc/images/astroid-revolve.gif">                  |
-| config is available [here](doc/config/heart-revolve.json) | config is available [here](doc/config/astroid-revolve.json) |
+| config is available [here](doc/configs/heart-revolve.json) | config is available [here](doc/configs/astroid-revolve.json) |
 
 The drawback of this method is that the path of revolution and the previous roulette may appear to be not contiguous. This is mainly caused by inaccuracies in floating point arithmetic. Moreover, sometimes cusps may not be detected due to the numerical nature of my method. In such cases, try to decrease the drawing step so better numerical accuracy can be achieved.
