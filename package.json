@@ -20,7 +20,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "(tsc || exit 0) && node rmip.js",
-    "dev": "./node_modules/nodemon/bin/nodemon.js -e ts  --exec \"npm run compile\""
+    "dev": "node node_modules/nodemon/bin/nodemon.js -e ts  --exec \"npm run compile\""
   },
   "repository": {
     "type": "git",

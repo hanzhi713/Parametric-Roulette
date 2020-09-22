@@ -17,11 +17,10 @@
         crossorigin="anonymous"></script>
     <link href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" rel="stylesheet">
 
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.1/nerdamer.core.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.1/Calculus.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.1/Extra.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.1/Algebra.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.1/Solve.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.5/nerdamer.core.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.5/Algebra.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.5/Calculus.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nerdamer@1.1.5/Extra.js"  crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.2/dist/FileSaver.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.min.js"></script>
     <style>
@@ -575,12 +574,12 @@
                     </tr>
                     <tr>
                         <td>
-                            <label for="delay" data-toggle="tooltip" title="Drawing speed">
+                            <label for="delay" data-toggle="tooltip" title="larger number here means faster drawing">
                                 Drawing speed
                             </label>
                         </td>
                         <td>
-                            <input type="number" id="delay" style="width: 90px" value="1" step="1" max="10" min="1">
+                            <input type="number" id="delay" style="width: 90px" value="1" step="1" min="1">
                         </td>
                     </tr>
                 </table>

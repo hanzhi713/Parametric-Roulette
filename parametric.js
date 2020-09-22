@@ -1,6 +1,3 @@
-                                    
-                                     
-                   
 if (typeof Math.sign !== "function") {
     Math.sign = x => {
         return x === 0 ? 0 : x > 0 ? 1 : -1;
@@ -52,6 +49,7 @@ let dots = {};
 let locArray = [];
 let cutPoints = [];
 let cuspPoints = [];
+let stopFlag = false;
 window.onload = () => {
     parseConfigJSON(localStorage.getItem("cache"));
     window.onchange = () => saveConfigToBrowser();
@@ -198,9 +196,7 @@ function postModify() {
     saveConfigToBrowser();
 }
 function stopDrawing() {
-    for (let i = 0; i < currentJobs.length; i++)
-        clearTimeout(currentJobs[i]);
-    currentJobs = [];
+    stopFlag = true;
 }
 function adjustDotRatioCap() { }
 function saveConfigToBrowser() {
@@ -439,7 +435,7 @@ function saveToGIF() {
             else {
                 p = p * 100;
                 progressbar.style.width = p + "%";
-                progressLabel.innerHTML = "Save as GIF: " + p.toFixed(1) + "%";
+                progressLabel.innerHTML = `Save as GIF: ${p.toFixed(1)}%`;
             }
         });
         gif.on("finished", (blob) => {
@@ -530,21 +526,8 @@ function buildNecessaryExpressions(xExp, yExp) {
     const dy = nerdamer.diff(yExp, "t");
     const dx_2 = nerdamer.diff(dx, "t");
     const dy_2 = nerdamer.diff(dy, "t");
-    const curvatureString = "((" +
-        dx.text() +
-        ") * (" +
-        dy_2.text() +
-        ") - (" +
-        dx_2.text() +
-        ") * (" +
-        dy.text() +
-        "))/((" +
-        dx.text() +
-        ")^2 + (" +
-        dy.text() +
-        ")^2)^1.5";
-    const curvatureExp = nerdamer(curvatureString);
-    const arcLengthExp = nerdamer("sqrt((" + dx.text() + ")^2 + (" + dy.text() + ")^2)");
+    const curvatureExp = nerdamer(`((${dx.text()}) * (${dy_2.text()}) - (${dx_2.text()}) * (${dy.text()}))/((${dx.text()})^2 + (${dy.text()})^2)^1.5`);
+    const arcLengthExp = nerdamer(`sqrt((${dx.text()})^2 + (${dy.text()})^2)`);
     return [
         xExp.buildFunction(["t"]),
         yExp.buildFunction(["t"]),
@@ -556,6 +539,7 @@ function buildNecessaryExpressions(xExp, yExp) {
 }
 function calculateLocations() {
     var _a, _b;
+    console.time("calc loc");
     const [xFunc, yFunc, dx, dy, arcLengthExp, curvature] = buildNecessaryExpressions(nerdamer(xParam.value), nerdamer(yParam.value));
     const t1 = +t1Param.value, t2 = +t2Param.value;
     let sign = 1;
@@ -567,9 +551,11 @@ function calculateLocations() {
     // pre-compute the arcLength for every t
     const arcLengths = new Float64Array(Math.ceil((t2 - t1) / step));
     // trapezoidal rule numerical integration
+    // lastV = f(x_{k-1})
     for (let i = 1, sum = arcLengthExp(t1) * 0.5, lastV = 0; i < arcLengths.length; i++) {
         sum += lastV;
-        arcLengths[i] = (sum + arcLengthExp(lastV = arcLengthExp(t1 + i * step)) * 0.5) * step;
+        lastV = arcLengthExp(t1 + i * step);
+        arcLengths[i] = (sum + lastV * 0.5) * step;
     }
     outer: for (let t = t1, i = 0, idx = 0, lastNormal = 0, lastCuspIdx = 1, offset = 0; t < t2; t += step, i++) {
         const normal = -dx(t) / dy(t);
@@ -709,6 +695,7 @@ function calculateLocations() {
     cuspPoints = newCuspPoints.map(x => [x[0], x[3]]);
     $('[data-toggle="tooltip"]').tooltip();
     locArray = locations;
+    console.timeEnd("calc loc");
 }
 /**
  * a template for sign element (the button for changing the sign)
@@ -761,7 +748,7 @@ function createRotElement(index, sign, lower, upper) {
     e.className = "btn btn-outline-dark btn-sm rot-ele";
     e.innerHTML = upper.toFixed(2) + sign;
     e.setAttribute("data-toggle", "tooltip");
-    e.title = "Change the direction of rotation for t between " + lower.toFixed(3) + " and " + upper.toFixed(3);
+    e.title = `Change the direction of rotation for t between ${lower.toFixed(3)} and ${upper.toFixed(3)}`;
     e.disabled = revolve.checked;
     e.onclick = ev => {
         cuspPoints[index][1] = -cuspPoints[index][1];
@@ -786,6 +773,7 @@ function generateRadius() {
  * @param stepAction function to call when drawingStep % stepInterval === 0
  */
 function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { }) {
+    stopFlag = false;
     // storing the reference to global locArray for efficiency
     const _locArray = locArray;
     const _cuspPoints = cuspPoints;
@@ -807,6 +795,7 @@ function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { 
     const progressLabel = document.getElementById('progressLabel');
     const progressbar = document.getElementById('progressbar');
     progressbar.style.width = "0%";
+    console.time("creating tasks");
     const tasks = [];
     for (let i = 0, cut = 0, cusp = 0, sign = _cutPoints[0][0], rot = _cuspPoints[0][0]; i < _locArray.length; i++) {
         if (cut < _cutPoints.length && _locArray[i][5] >= _cutPoints[cut][0])
@@ -831,8 +820,9 @@ function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { 
             if (i % stepInterval === 0) {
                 stepAction();
                 const progress = ((i / _locArray.length) * 100).toFixed(1);
-                progressbar.style.width = progress + "%"; // note: this is actually the slowest line because it causes reflow
-                progressLabel.innerHTML = "Drawing: t = " + _locArray[i][5].toFixed(3) + ", " + progress + "%";
+                // note: this is actually the slowest line because it causes reflow
+                progressbar.style.width = progress + "%";
+                progressLabel.innerHTML = `Drawing: t = ${_locArray[i][5].toFixed(3)}, ${progress}%`;
             }
         });
     }
@@ -841,14 +831,18 @@ function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { 
         progressLabel.innerHTML = "Drawing: Finished";
         doneCallback();
     });
-    const speed = +drawingSpeedParam.value;
-    for (let i = 0; i < tasks.length; i += speed) {
-        currentJobs.push(setTimeout(() => {
+    console.timeEnd("creating tasks");
+    const speed = Math.ceil(+drawingSpeedParam.value);
+    let i = 0;
+    window.requestAnimationFrame(animate);
+    function animate() {
+        if (i < tasks.length && !stopFlag) {
             const bound = Math.min(tasks.length, i + speed);
-            for (let j = i; j < bound; j++) {
+            for (let j = i; j < bound; j++)
                 tasks[j]();
-            }
-        }));
+            i += speed;
+            window.requestAnimationFrame(animate);
+        }
     }
 }
 /**
