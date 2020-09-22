@@ -11,29 +11,29 @@ See [here](Mechanism.md)
 
 | Equation                                                                                           | JS-generated GIF                            |
 | -------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| $\left\{ \begin{array}{lr} x=2\cosh{t} & \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi$ | <img src="doc/hyperbola.gif" width="300px"> |
-| Config is available [here](doc/hyperbola.json)                                                     |
+| $\left\{ \begin{array}{lr} x=2\cosh{t} & \\ y= 1.5\sinh{t} \end{array} \right. -\pi\leq t\leq \pi$ | <img src="doc/images/hyperbola.gif" width="300px"> |
+| Config is available [here](doc/config/hyperbola.json)                                                     |
 
 ### Example 2: Rolling on the sine function
 
 | Equation                                                                                         | JS-generated GIF         |
 | ------------------------------------------------------------------------------------------------ | ------------------------ |
-| $\left\{ \begin{array}{lr} x= t & \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30$ | <img src="doc/sine.gif"> |
-| Config is available [here](doc/sine.json)                                                        |
+| $\left\{ \begin{array}{lr} x= t & \\ y= 5\sin(\frac{t}{5}) \end{array} \right. -30\leq t\leq 30$ | <img src="doc/images/sine.gif"> |
+| Config is available [here](doc/config/sine.json)                                                        |
 
 ### Example 3: Rolling along an ellipse
 
 | Equation                                                                                      | JS-generated GIF            |
 | --------------------------------------------------------------------------------------------- | --------------------------- |
-| $\left\{ \begin{array}{lr} x= 10\cos(t) & \\ y= 6\sin(t) \end{array} \right. -\pi< t\leq \pi$ | <img src="doc/ellipse.gif"> |
-| Config is available [here](doc/ellipse.json)                                                  |
+| $\left\{ \begin{array}{lr} x= 10\cos(t) & \\ y= 6\sin(t) \end{array} \right. -\pi< t\leq \pi$ | <img src="doc/images/ellipse.gif"> |
+| Config is available [here](doc/config/ellipse.json)                                                  |
 
 ### and many others
 
 | Heart                                     | Astroid                                     | Hypocycloid (k=4)                       | Rose (p=3)                                  |
 | ----------------------------------------- | ------------------------------------------- | --------------------------------------- | ------------------------------------------- |
-| <img src="./doc/heart-revolve.gif">       | <img src="./doc/astroid-revolve.gif">       | <img src="./doc/others/five-cusps.gif"> | <img src="./doc/others/rose-3.gif">         |
-| [download config](doc/heart-revolve.json) | [download config](doc/astroid-revolve.json) | [download config](doc/five-cusps.json)  | [download config](doc/others/rose-3.json) |
+| <img src="doc/images/heart-revolve.gif">       | <img src="doc/images/astroid-revolve.gif">       | <img src="doc/images/five-cusps.gif"> | <img src="doc/images/rose-3.gif">         |
+| [download config](doc/config/heart-revolve.json) | [download config](doc/config/astroid-revolve.json) | [download config](doc/config/five-cusps.json)  | [download config](doc/config/rose-3.json) |
 
 ## How to use
 
@@ -54,7 +54,7 @@ See [here](Mechanism.md)
    6. Change other settings
 6. Finally, export your customized parametric roulette by clicking "save", "save to PNG" or "save to GIF" (on the dropdown)
 
-Alternatively, you can start from a config given in any examples above and tweak settings. 
+Alternatively, you can start from a config given in any examples above and tweak settings. To load a config (a JSON file), use the "Load Config" button on the left panel to upload your .json config. 
 
 ### What are "signs"?
 
@@ -79,7 +79,21 @@ Then, run the file watcher. It basically calls the typescript compiler and a scr
 npm run dev
 ```
 
-Finally, open a local static file server, using http-server, python's http.server or any other server of your preference.
+Finally, open a local static file server, using http-server, python's http.server or any other server of your preference. 
+
+### Compiling this README
+
+README.md and Mechanism.md are compiled from README.tex.md and Mechanism.tex.md which contain inline latex formulae. You need to have the package [readme2tex](https://github.com/leegao/readme2tex) installed in order to compile. 
+
+```bash
+pip install readme2tex
+```
+
+Then, you can run the compile script
+
+```bash
+bash build_tex.sh
+```
 
 ## Implementation notes
 

@@ -4,7 +4,7 @@
 
 The rolling circle doesn't have a collision box. It will keep rolling even if there's an overlapping region:
 
-<img src="doc/overlap.svg" width="400px">
+<img src="doc/images/overlap.svg" width="400px">
 
 ## Computation
 
@@ -20,7 +20,7 @@ $$
     a\leq t\leq b
 $$
 
-<img src="doc/demo.svg" width="780px">
+<img src="doc/images/demo.svg" width="780px">
 
 ### Calculation of the radians (angle) rotated:
 
@@ -75,7 +75,7 @@ $$
 
 <br>
 
-<img src="doc/heart.png" width="400px">
+<img src="doc/images/heart.png" width="400px">
 
 This problem could be resolved to some extent by adjusting the sign of $\Delta x$, which could be achieved automatically in my JavaScript drawer (not available in Geogebra implementation though). The sign adjustment methods are described below.
 
@@ -102,12 +102,12 @@ The effect is shown in the following table.
 
 | Heart                                      | Astroid                                      |
 | ------------------------------------------ | -------------------------------------------- |
-| <img src="doc/heart.gif">                  | <img src="doc/astroid.gif">                  |
-| config is available [here](doc/heart.json) | config is available [here](doc/astroid.json) |
+| <img src="doc/images/heart.gif">                  | <img src="doc/images/astroid.gif">                  |
+| config is available [here](doc/config/heart.json) | config is available [here](doc/config/astroid.json) |
 
 Currently, this method cannot perfectly deal with parametric curve with odd number of cusps, because the roulette will always be broken at one cusp.
 
-<img src="doc/three-cusps.png" width="300px"/>
+<img src="doc/images/three-cusps.png" width="300px"/>
 
 ### 2. Revolving around cusps 
 
@@ -117,7 +117,7 @@ The roulette is kept consistently inside or outside the parametric curve by swit
 
 | Heart                                              | Astroid                                              |
 | -------------------------------------------------- | ---------------------------------------------------- |
-| <img src="doc/heart-revolve.gif">                  | <img src="doc/astroid-revolve.gif">                  |
-| config is available [here](doc/heart-revolve.json) | config is available [here](doc/astroid-revolve.json) |
+| <img src="doc/images/heart-revolve.gif">                  | <img src="doc/images/astroid-revolve.gif">                  |
+| config is available [here](doc/config/heart-revolve.json) | config is available [here](doc/config/astroid-revolve.json) |
 
 The drawback of this method is that the path of revolution and the previous roulette may appear to be not contiguous. This is mainly caused by inaccuracies in floating point arithmetic. Moreover, sometimes cusps may not be detected due to the numerical nature of my method. In such cases, try to decrease the drawing step so better numerical accuracy can be achieved.
