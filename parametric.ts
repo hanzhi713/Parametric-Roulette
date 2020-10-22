@@ -46,10 +46,9 @@ const mDotRot = document.getElementById("m-dotRot") as HTMLInputElement;
 const mDotID = document.getElementById("m-dotID") as HTMLInputElement;
 
 const gifSizeParam = document.getElementById("f-size") as HTMLInputElement;
-const gifIntervalParam = document.getElementById("f-interval") as HTMLInputElement;
 const gifTransparentCheck = document.getElementById("f-transparent") as HTMLInputElement;
 const gifBgColorParam = document.getElementById("f-bgcolor") as HTMLInputElement;
-const gifFrameDelayParam = document.getElementById("f-delay") as HTMLInputElement;
+const gifFPSParam = document.getElementById("f-fps") as HTMLInputElement;
 const gifQualityParam = document.getElementById("f-quality") as HTMLInputElement;
 const gifLastFrameDelayParam = document.getElementById("f-lastdelay") as HTMLInputElement;
 
@@ -58,8 +57,8 @@ const pngTransparentCheck = document.getElementById("p-transparent") as HTMLInpu
 const pngBgColorParam = document.getElementById("p-bgcolor") as HTMLInputElement;
 
 const drawButton = document.getElementById("draw") as HTMLButtonElement;
+const drawTime = document.getElementById("d-time") as HTMLSpanElement;
 
-let currentJobs: number[] = [];
 let dots: { [x: string]: Dot } = {};
 let locArray: number[][] = [];
 let cutPoints: readonly [number, number][] = [];
@@ -72,10 +71,9 @@ window.onload = () => {
     window.onchange = () => saveConfigToBrowser();
 
     // parameters that determine the loci. Recalculation of loci is required if they're changed
-    let effectors = [dxParam, dyParam, scaleParam, circleParam, drawingStepParam];
-    for (const i in effectors) {
-        const existingOnchangeHandler = effectors[i].onchange as any;
-        effectors[i].onchange = e => {
+    for (const eff of [dxParam, dyParam, scaleParam, circleParam, drawingStepParam]) {
+        const existingOnchangeHandler = eff.onchange as any;
+        eff.onchange = e => {
             if (typeof existingOnchangeHandler === "function") existingOnchangeHandler(e);
             stopDrawing();
             disableDrawing();
@@ -84,10 +82,9 @@ window.onload = () => {
     }
 
     // changing these things also requires a reset of cut points
-    effectors = [xParam, yParam, t1Param, t2Param];
-    for (const i in effectors) {
-        const existingOnchangeHandler = effectors[i].onchange as any;
-        effectors[i].onchange = e => {
+    for (const eff of [xParam, yParam, t1Param, t2Param]) {
+        const existingOnchangeHandler = eff.onchange as any;
+        eff.onchange = e => {
             if (typeof existingOnchangeHandler === "function") existingOnchangeHandler(e);
             stopDrawing();
             disableDrawing();
@@ -98,8 +95,22 @@ window.onload = () => {
             document.getElementById("rot-adjust")!.innerHTML = "";
         };
     }
+
+    for (const eff of [t1Param, t2Param, drawingStepParam, drawingSpeedParam]) {
+        const existingOnchangeHandler = eff.onchange as any;
+        eff.onchange = e => {
+            if (typeof existingOnchangeHandler === "function") existingOnchangeHandler(e);
+            updateDrawingTime();
+        }
+    }
+
+    updateDrawingTime();
     $('[data-toggle="tooltip"]').tooltip();
 };
+
+function updateDrawingTime() {
+    drawTime.innerHTML =  ((+t2Param.value - +t1Param.value) / (+drawingStepParam.value * +drawingSpeedParam.value * 60)).toFixed(2) + "s";
+}
 
 function disableDrawing() {
     drawButton.disabled = true;
@@ -241,8 +252,6 @@ function stopDrawing() {
     stopFlag = true;
 }
 
-function adjustDotRatioCap() { }
-
 function saveConfigToBrowser() {
     localStorage.setItem("cache", getConfigJSON());
 }
@@ -276,11 +285,10 @@ function getConfigJSON() {
         dotRotMax: +dotRotMaxParam.value,
 
         frameSize: +gifSizeParam.value,
-        frameDelay: +gifFrameDelayParam.value,
+        fps: +gifFPSParam.value,
         frameTransparent: gifTransparentCheck.checked,
         frameBgColor: gifBgColorParam.value,
         frameQuality: +gifQualityParam.value,
-        frameInterval: +gifIntervalParam.value,
         lastFrameDelay: +gifLastFrameDelayParam.value,
 
         pngWidth: +pngWidthParam.value,
@@ -321,14 +329,13 @@ function parseConfigJSON(json?: string | null) {
         dotRotMaxParam.value = obj.dotRotMax === undefined ? 360 : obj.dotRotMax;
 
         gifSizeParam.value = obj.frameSize === undefined ? 320 : obj.frameSize;
-        gifFrameDelayParam.value = obj.frameDelay === undefined ? 25 : obj.frameDelay;
+        gifFPSParam.value = obj.fps === undefined ? 30 : obj.fps;
         gifTransparentCheck.checked = obj.frameTransparent === undefined ? false : obj.frameTransparent;
         gifBgColorParam.value = obj.frameBgColor === undefined ? "#FFFFFF" : obj.frameBgColor;
 
         if (gifTransparentCheck.checked) gifBgColorParam.disabled = true;
 
         gifQualityParam.value = obj.frameQuality === undefined ? 10 : obj.frameQuality;
-        gifIntervalParam.value = obj.frameInterval === undefined ? 40 : obj.frameInterval;
         gifLastFrameDelayParam.value = obj.lastFrameDelay === undefined ? 1000 : obj.lastFrameDelay;
 
         pngWidthParam.value = obj.pngWidth === undefined ? 640 : obj.pngWidth;
@@ -353,7 +360,8 @@ function parseConfigJSON(json?: string | null) {
                 false
             );
         }
-
+        
+        updateDrawingTime();
         previewRuler();
     } catch (e) {
         alert(e);
@@ -474,12 +482,14 @@ function saveToGIF() {
 
     const frameSize = +gifSizeParam.value;
     const transparent = gifTransparentCheck.checked;
-    const frameDelay = +gifFrameDelayParam.value;
+    const fps = +gifFPSParam.value
+    const frameDelay = Math.round(1000 / fps);
     const tempCxt = tempCanvas.getContext("2d")!;
 
-    const [, , , width, height] = getScalingAndTranslation(getRealBounds(), frameSize);
-    tempCanvas.width = width;
-    tempCanvas.height = height;
+    // const [, , , width, height] = getScalingAndTranslation(getRealBounds(), frameSize);
+    // tempCanvas.width = width;
+    // tempCanvas.height = height;
+    const width = frameSize, height = frameSize;
 
     const gif = new GIF({
         workers: 4,
@@ -530,7 +540,7 @@ function saveToGIF() {
 
         gif.render();
 
-    }, +gifIntervalParam.value, () => {
+    }, +drawingSpeedParam.value * (60 / fps), () => {
         if (transparent) tempCxt.clearRect(0, 0, width, height);
         else tempCxt.fillRect(0, 0, width, height);
 
@@ -597,6 +607,7 @@ function drawPreview() {
 
 function previewRuler() {
     stopDrawing();
+    if (xParam.value.length == 0 || yParam.value.length == 0) return;
     calculateLocations();
     drawPreview();
     saveConfigToBrowser();
@@ -626,7 +637,7 @@ function buildNecessaryExpressions(xExp: nerdamer.Expression, yExp: nerdamer.Exp
     const dx_2 = nerdamer.diff(dx, "t");
     const dy_2 = nerdamer.diff(dy, "t");
 
-    const curvatureExp = nerdamer( `((${dx.text()}) * (${dy_2.text()}) - (${dx_2.text()}) * (${dy.text()}))/((${dx.text()})^2 + (${dy.text()})^2)^1.5`);
+    const curvatureExp = nerdamer(`((${dx.text()}) * (${dy_2.text()}) - (${dx_2.text()}) * (${dy.text()}))/((${dx.text()})^2 + (${dy.text()})^2)^1.5`);
     const arcLengthExp = nerdamer(`sqrt((${dx.text()})^2 + (${dy.text()})^2)`);
     return [
         xExp.buildFunction(["t"]),
@@ -967,7 +978,7 @@ function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { 
                 const progress = ((i / _locArray.length) * 100).toFixed(1);
 
                 // note: this is actually the slowest line because it causes reflow
-                progressbar.style.width = progress + "%"; 
+                progressbar.style.width = progress + "%";
                 progressLabel.innerHTML = `Drawing: t = ${_locArray[i][5].toFixed(3)}, ${progress}%`;
             }
         })
@@ -1036,7 +1047,7 @@ class Ruler {
     draw(topCxt: CanvasRenderingContext2D, bottomCxt: CanvasRenderingContext2D) {
         bottomCxt.beginPath();
         if (this.showSkeleton) bottomCxt.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
- 
+
         for (const dot of this.dots) {
             const radius = (dot.ratio / 100) * this.radius;
             const rad = this.rotSign * this.angle - dot.rotOffset + this.offset;

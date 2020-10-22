@@ -29,17 +29,16 @@ const mDotRatio = document.getElementById("m-dotRatio");
 const mDotRot = document.getElementById("m-dotRot");
 const mDotID = document.getElementById("m-dotID");
 const gifSizeParam = document.getElementById("f-size");
-const gifIntervalParam = document.getElementById("f-interval");
 const gifTransparentCheck = document.getElementById("f-transparent");
 const gifBgColorParam = document.getElementById("f-bgcolor");
-const gifFrameDelayParam = document.getElementById("f-delay");
+const gifFPSParam = document.getElementById("f-fps");
 const gifQualityParam = document.getElementById("f-quality");
 const gifLastFrameDelayParam = document.getElementById("f-lastdelay");
 const pngWidthParam = document.getElementById("p-width");
 const pngTransparentCheck = document.getElementById("p-transparent");
 const pngBgColorParam = document.getElementById("p-bgcolor");
 const drawButton = document.getElementById("draw");
-let currentJobs = [];
+const drawTime = document.getElementById("d-time");
 let dots = {};
 let locArray = [];
 let cutPoints = [];
@@ -49,10 +48,9 @@ window.onload = () => {
     parseConfigJSON(localStorage.getItem("cache"));
     window.onchange = () => saveConfigToBrowser();
     // parameters that determine the loci. Recalculation of loci is required if they're changed
-    let effectors = [dxParam, dyParam, scaleParam, circleParam, drawingStepParam];
-    for (const i in effectors) {
-        const existingOnchangeHandler = effectors[i].onchange;
-        effectors[i].onchange = e => {
+    for (const eff of [dxParam, dyParam, scaleParam, circleParam, drawingStepParam]) {
+        const existingOnchangeHandler = eff.onchange;
+        eff.onchange = e => {
             if (typeof existingOnchangeHandler === "function")
                 existingOnchangeHandler(e);
             stopDrawing();
@@ -61,10 +59,9 @@ window.onload = () => {
         };
     }
     // changing these things also requires a reset of cut points
-    effectors = [xParam, yParam, t1Param, t2Param];
-    for (const i in effectors) {
-        const existingOnchangeHandler = effectors[i].onchange;
-        effectors[i].onchange = e => {
+    for (const eff of [xParam, yParam, t1Param, t2Param]) {
+        const existingOnchangeHandler = eff.onchange;
+        eff.onchange = e => {
             if (typeof existingOnchangeHandler === "function")
                 existingOnchangeHandler(e);
             stopDrawing();
@@ -76,8 +73,20 @@ window.onload = () => {
             document.getElementById("rot-adjust").innerHTML = "";
         };
     }
+    for (const eff of [t1Param, t2Param, drawingStepParam, drawingSpeedParam]) {
+        const existingOnchangeHandler = eff.onchange;
+        eff.onchange = e => {
+            if (typeof existingOnchangeHandler === "function")
+                existingOnchangeHandler(e);
+            updateDrawingTime();
+        };
+    }
+    updateDrawingTime();
     $('[data-toggle="tooltip"]').tooltip();
 };
+function updateDrawingTime() {
+    drawTime.innerHTML = ((+t2Param.value - +t1Param.value) / (+drawingStepParam.value * +drawingSpeedParam.value * 60)).toFixed(2) + "s";
+}
 function disableDrawing() {
     drawButton.disabled = true;
     const m = document.getElementById("savepng"), n = document.getElementById("savegif");
@@ -193,7 +202,6 @@ function postModify() {
 function stopDrawing() {
     stopFlag = true;
 }
-function adjustDotRatioCap() { }
 function saveConfigToBrowser() {
     localStorage.setItem("cache", getConfigJSON());
 }
@@ -222,11 +230,10 @@ function getConfigJSON() {
         dotRotMin: +dotRotMinParam.value,
         dotRotMax: +dotRotMaxParam.value,
         frameSize: +gifSizeParam.value,
-        frameDelay: +gifFrameDelayParam.value,
+        fps: +gifFPSParam.value,
         frameTransparent: gifTransparentCheck.checked,
         frameBgColor: gifBgColorParam.value,
         frameQuality: +gifQualityParam.value,
-        frameInterval: +gifIntervalParam.value,
         lastFrameDelay: +gifLastFrameDelayParam.value,
         pngWidth: +pngWidthParam.value,
         pngTransparent: pngTransparentCheck.checked,
@@ -262,13 +269,12 @@ function parseConfigJSON(json) {
         dotRotMinParam.value = obj.dotRotMin === undefined ? 0 : obj.dotRotMin;
         dotRotMaxParam.value = obj.dotRotMax === undefined ? 360 : obj.dotRotMax;
         gifSizeParam.value = obj.frameSize === undefined ? 320 : obj.frameSize;
-        gifFrameDelayParam.value = obj.frameDelay === undefined ? 25 : obj.frameDelay;
+        gifFPSParam.value = obj.fps === undefined ? 30 : obj.fps;
         gifTransparentCheck.checked = obj.frameTransparent === undefined ? false : obj.frameTransparent;
         gifBgColorParam.value = obj.frameBgColor === undefined ? "#FFFFFF" : obj.frameBgColor;
         if (gifTransparentCheck.checked)
             gifBgColorParam.disabled = true;
         gifQualityParam.value = obj.frameQuality === undefined ? 10 : obj.frameQuality;
-        gifIntervalParam.value = obj.frameInterval === undefined ? 40 : obj.frameInterval;
         gifLastFrameDelayParam.value = obj.lastFrameDelay === undefined ? 1000 : obj.lastFrameDelay;
         pngWidthParam.value = obj.pngWidth === undefined ? 640 : obj.pngWidth;
         pngTransparentCheck.checked = obj.pngTransparent === undefined ? false : obj.pngTransparent;
@@ -282,6 +288,7 @@ function parseConfigJSON(json) {
         for (const key in dots) {
             addDotHelper(key, dots[key].size, dots[key].color, dots[key].ratio, Math.round((180 * dots[key].rotOffset) / Math.PI), false);
         }
+        updateDrawingTime();
         previewRuler();
     }
     catch (e) {
@@ -390,11 +397,13 @@ function saveToGIF() {
     stopDrawing();
     const frameSize = +gifSizeParam.value;
     const transparent = gifTransparentCheck.checked;
-    const frameDelay = +gifFrameDelayParam.value;
+    const fps = +gifFPSParam.value;
+    const frameDelay = Math.round(1000 / fps);
     const tempCxt = tempCanvas.getContext("2d");
-    const [, , , width, height] = getScalingAndTranslation(getRealBounds(), frameSize);
-    tempCanvas.width = width;
-    tempCanvas.height = height;
+    // const [, , , width, height] = getScalingAndTranslation(getRealBounds(), frameSize);
+    // tempCanvas.width = width;
+    // tempCanvas.height = height;
+    const width = frameSize, height = frameSize;
     const gif = new GIF({
         workers: 4,
         quality: +gifQualityParam.value,
@@ -437,7 +446,7 @@ function saveToGIF() {
             saveAs(blob, "parametric-roulette.gif");
         });
         gif.render();
-    }, +gifIntervalParam.value, () => {
+    }, +drawingSpeedParam.value * (60 / fps), () => {
         if (transparent)
             tempCxt.clearRect(0, 0, width, height);
         else
@@ -496,6 +505,8 @@ function drawPreview() {
 }
 function previewRuler() {
     stopDrawing();
+    if (xParam.value.length == 0 || yParam.value.length == 0)
+        return;
     calculateLocations();
     drawPreview();
     saveConfigToBrowser();
