@@ -560,7 +560,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <label for="delay" data-toggle="tooltip" title="larger number here means faster drawing">
+                            <label for="delay" data-toggle="tooltip" title="How many steps to draw in each frame. Larger number means faster drawing. If your monitor has 60Hz refresh rate and the drawing speed is 100, that means 60*100 steps will be drawn">
                                 Drawing speed
                             </label>
                         </td>
@@ -583,7 +583,7 @@
                         </td>
                         <td>
                             <button type="button" class="btn btn-info" onclick="previewRuler()"
-                                title="pre-calculate the path of the circle and preview dots and parametric curve"
+                                title="Calculate the path of the circle. Preview drawing dots and the parametric curve"
                                 data-toggle="tooltip">Preview
                             </button>
                         </td>
@@ -601,8 +601,8 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="javascript:clear()">Clear</a>
-                                    <a class="dropdown-item" onclick="clearBottom()">Erase skeleton</a>
-                                    <a class="dropdown-item" onclick="clearFunc()">Erase parametric curve</a>
+                                    <a class="dropdown-item" onclick="clearCxt(bottomCanvas.getContext('2d'))">Erase skeleton</a>
+                                    <a class="dropdown-item" onclick="clearCxt(funcCanvas.getContext('2d'))">Erase parametric curve</a>
                                 </div>
                             </div>
                         </td>

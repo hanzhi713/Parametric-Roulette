@@ -10,6 +10,8 @@ declare global {
     }
 }
 
+// An elegant solution would be using a reactive JS framework. 
+// Considering this is a simple project, I'll probably not adopt it. 
 const topCanvas = document.getElementById("canvas-top") as HTMLCanvasElement;
 const bottomCanvas = document.getElementById("canvas-bottom") as HTMLCanvasElement;
 const funcCanvas = document.getElementById("canvas-func") as HTMLCanvasElement;
@@ -63,7 +65,24 @@ let dots: { [x: string]: Dot } = {};
 let locArray: number[][] = [];
 let cutPoints: readonly [number, number][] = [];
 let cuspPoints: readonly [number, number][] = [];
-let stopFlag = false;
+let SCREEN_FPS = 60;
+let animateID = 0;
+
+// estimate fps of the user's monitor
+function getFPS() {
+    let counter = 0;
+    let initialTime = 0;
+    const numFrames = 16;
+    return new Promise<number>(resolve => {
+        function callback(time: DOMHighResTimeStamp) {
+            if (counter == 0) initialTime = time;
+            else if (counter == numFrames) resolve(1000 / (time - initialTime) * numFrames);
+            counter++;
+            window.requestAnimationFrame(callback);
+        }
+        window.requestAnimationFrame(callback);
+    });
+}
 
 window.onload = () => {
     parseConfigJSON(localStorage.getItem("cache"));
@@ -106,10 +125,15 @@ window.onload = () => {
 
     updateDrawingTime();
     $('[data-toggle="tooltip"]').tooltip();
+
+    setTimeout(() => getFPS().then(fps => {
+        console.log("FPS", fps);
+        SCREEN_FPS = fps;
+    }), 2000);
 };
 
 function updateDrawingTime() {
-    drawTime.innerHTML =  ((+t2Param.value - +t1Param.value) / (+drawingStepParam.value * +drawingSpeedParam.value * 60)).toFixed(2) + "s";
+    drawTime.innerHTML = ((+t2Param.value - +t1Param.value) / (+drawingStepParam.value * +drawingSpeedParam.value * SCREEN_FPS)).toFixed(2) + "s";
 }
 
 function disableDrawing() {
@@ -249,7 +273,7 @@ function postModify() {
 }
 
 function stopDrawing() {
-    stopFlag = true;
+    window.cancelAnimationFrame(animateID);
 }
 
 function saveConfigToBrowser() {
@@ -360,7 +384,7 @@ function parseConfigJSON(json?: string | null) {
                 false
             );
         }
-        
+
         updateDrawingTime();
         previewRuler();
     } catch (e) {
@@ -540,7 +564,7 @@ function saveToGIF() {
 
         gif.render();
 
-    }, +drawingSpeedParam.value * (60 / fps), () => {
+    }, +drawingSpeedParam.value * (SCREEN_FPS / fps), () => {
         if (transparent) tempCxt.clearRect(0, 0, width, height);
         else tempCxt.fillRect(0, 0, width, height);
 
@@ -908,7 +932,7 @@ function generateRadius() {
  * @param stepAction function to call when drawingStep % stepInterval === 0
  */
 function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { }) {
-    stopFlag = false;
+    stepInterval = Math.round(stepInterval);
     // storing the reference to global locArray for efficiency
     const _locArray = locArray;
     const _cuspPoints = cuspPoints;
@@ -993,14 +1017,14 @@ function draw(doneCallback = () => { }, stepInterval = 64, stepAction = () => { 
 
     const speed = Math.ceil(+drawingSpeedParam.value);
     let i = 0;
-    window.requestAnimationFrame(animate);
+    animateID = window.requestAnimationFrame(animate);
     function animate() {
-        if (i < tasks.length && !stopFlag) {
+        if (i < tasks.length) {
             const bound = Math.min(tasks.length, i + speed)
             for (let j = i; j < bound; j++)
                 tasks[j]();
             i += speed;
-            window.requestAnimationFrame(animate);
+            animateID = window.requestAnimationFrame(animate);
         }
     }
 }
